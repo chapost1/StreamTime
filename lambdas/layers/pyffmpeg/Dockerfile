@@ -10,9 +10,6 @@ RUN mv ffmpeg-*/ffprobe ffprobe
 RUN rm -rf ffmpeg-*-static
 RUN rm -rf ffmpeg-release.tar.xz
 
-# install pillow
-RUN python3.8 -m pip install pillow==7.0.0 -t ./
-
 WORKDIR /var/task
 
 # zip

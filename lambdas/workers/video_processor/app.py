@@ -1,11 +1,11 @@
-from typing import Dict
+from typing import Dict, Tuple
 import json
 import subprocess
 import shlex
 import boto3
 import os
 import datetime
-
+# from PIL import Image
 
 # VIDEO_FILE_STATES
 PENDING = 'PENDING'
@@ -21,6 +21,8 @@ NOT_A_VIDEO_TYPE = 'NOT_A_VIDEO_TYPE'
 
 # CONSTANTS
 EXECUTABLES_DIRECTORY = '/opt/var/task/python'
+
+THUMBNAIL_SIZE = (360, 200)
 
 
 s3Client = boto3.client('s3')
@@ -81,13 +83,19 @@ def delete_object(bucket: str, key: str) -> None:
 def get_signed_url(expires_in: int, bucket: str, key: str) -> str:
     return s3Client.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': key}, ExpiresIn=expires_in)
 
+# def resize_image(image_path: str, resized_path: str, size: Tuple[int, int]):
+#   with Image.open(image_path) as image:
+#       image.thumbnail(size)
+#       image.save(resized_path)
+
 def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
     executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
 
     mid_of_video_duration_seconds = duration_seconds / 2
     time_frame_to_extract = str(datetime.timedelta(seconds=mid_of_video_duration_seconds))# hh:mm:ss
+    frame_path = '/tmp/frame.jpg'
 
-    ffmpeg_cmd = f"{executable_path} -i \"" + str(s3_source_signed_url) + f"\" -ss {time_frame_to_extract} -vframes 1 /tmp/output.jpg"
+    ffmpeg_cmd = f"{executable_path} -i \"" + str(s3_source_signed_url) + f"\" -ss {time_frame_to_extract} -vframes 1 {frame_path}"
     print(ffmpeg_cmd)
     try:
         os.system(ffmpeg_cmd)
@@ -95,9 +103,14 @@ def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float
         print('Extract Thumbnail exception')
         print(e)
         raise e
+    
+    # thumbnail_path = '/tmp/thumbnail.jpg'
+    thumbnail_path = frame_path
+
+    # resize_image(frame_path, thumbnail_path, THUMBNAIL_SIZE)
         
     print('Going to upload thumbnail: ' + bucket + '/' + thumbnail_key)
-    with open('/tmp/output.jpg', "rb") as f:
+    with open(thumbnail_path, "rb") as f:
         resp = s3Client.put_object(Body=f, Bucket=bucket, Key=thumbnail_key, ACL='public-read')
         print(resp)
         print('Thumbnail has been uploaded')

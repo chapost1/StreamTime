@@ -175,6 +175,11 @@ resource "aws_s3_bucket_notification" "new_video_upload" {
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "videos/"
   }
+
+  depends_on = [
+    aws_s3_bucket.videos_bucket,
+    aws_lambda_function.video_processor
+  ]
 }
 
 ///// Lambdas
@@ -221,6 +226,14 @@ resource "aws_lambda_layer_version" "ffmpeg_python_lambda_layer" {
   compatible_runtimes = ["python3.8"]
 }
 
+resource "aws_lambda_layer_version" "pillow_python_lambda_layer" {
+  filename            = "${path.module}/../lambdas/layers/pillow/source/python.zip"
+  layer_name          = "pillow_python_lambda_layer"
+  source_code_hash    = filebase64sha256("${path.module}/../lambdas/layers/pillow/source/python.zip")
+
+  compatible_runtimes = ["python3.8"]
+}
+
 resource "aws_lambda_function" "video_processor" {
   function_name    = "video_processor"
   architectures    = ["arm64"]
@@ -231,7 +244,8 @@ resource "aws_lambda_function" "video_processor" {
   runtime          = "python3.8"
   timeout          = 30
   layers           = [
-    aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn
+    aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn,
+    aws_lambda_layer_version.pillow_python_lambda_layer.arn
   ]
 }
 
