@@ -20,6 +20,18 @@ video_types_to_extension = {
     'video/3gpp2': '3g2'
 }
 
+# VIDEO_FILE_STATES
+PENDING = 'PENDING'
+READY = 'READY'
+DELETED = 'DELETED'
+
+# FAILURE_REASONS
+INTERNAL_ERROR_PLEASE_TRY_AGAIN_LATER = 'INTERNAL_ERROR_PLEASE_TRY_AGAIN_LATER'
+MAX_FILE_SIZE_OVERFLOW = 'MAX_FILE_SIZE_OVERFLOW'
+CORRUPTED = 'CORRUPTED'
+NOT_A_VIDEO_TYPE = 'NOT_A_VIDEO_TYPE'
+
+# helpers
 def object_type(obj: Dict) -> str:
     return obj['ResponseMetadata']['HTTPHeaders']['content-type']
     
@@ -41,8 +53,8 @@ def get_extension_by_content_type(content_type) -> str:
 def is_video_type(content_type) -> bool:
     return get_extension_by_content_type(content_type) != None
 
-def mark_as_corrupted(video_id: str) -> None:
-    # todo: mark as corrupted in db
+def mark_as_deleted(video_id: str, reason: str) -> None:
+    # todo: mark as deleted in db
     pass
 
 def delete_object(bucket: str, key: str) -> None:
@@ -99,6 +111,9 @@ def get_video_duration_seconds(s3_source_signed_url: str) -> float:
     return duration
 
 def lambda_handler(event, context):
+    MAX_FILE_SIZE_IN_BYTES: int = 5e+9   # 5GB
+    SIGNED_URL_EXPIRATION: int = 300     # The number of seconds that the Signed URL is valid
+
     s3Ref = event['Records'][0]['s3']
     bucket = s3Ref['bucket']['name']
     key = s3Ref['object']['key']
@@ -110,7 +125,7 @@ def lambda_handler(event, context):
         )
     except Exception as e:
         # internal error
-        print('An exception occurred, internal error')
+        print('An exception occurred, internal error on get_object, can not even delete object yet')
         print(e)
         raise e
     
@@ -119,45 +134,53 @@ def lambda_handler(event, context):
     
     try:
         meta = get_object_meta(obj, video_id)
+        print(meta)
     except Exception as e:
-        mark_as_corrupted(video_id)
         delete_object(bucket, key)
-        print('An exception occurred')
+        mark_as_deleted(video_id, CORRUPTED)
+        print('An exception occurred, failed to get meta')
         print(e)
         return
-   
-    print(meta)
+
+    if MAX_FILE_SIZE_IN_BYTES < meta['size_in_bytes']:
+        delete_object(bucket, key)
+        mark_as_deleted(video_id, MAX_FILE_SIZE_OVERFLOW)
+        return
     
     if not is_video_type(meta['type']):
         print('not a video')
         # not a video, delete file!
         delete_object(bucket, key)
+        mark_as_deleted(video_id, NOT_A_VIDEO_TYPE)
     else:
         print('a video')
         # video
-        SIGNED_URL_EXPIRATION: int = 3000     # The number of seconds that the Signed URL is valid
-        # Generate a signed URL for the uploaded asset
         try:
+            # Generate a signed URL for the uploaded asset
             s3_source_signed_url: str = get_signed_url(SIGNED_URL_EXPIRATION, bucket, key)
         except Exception as e:
+            delete_object(bucket, key)
+            mark_as_deleted(video_id, INTERNAL_ERROR_PLEASE_TRY_AGAIN_LATER)
             print('An exception occurred, internal error')
             print(e)
             raise e
 
         try:
             duration_seconds: float = get_video_duration_seconds(s3_source_signed_url)
-            
+
             thumbnail_key: str = f'thumbnails/{video_id}.jpg'
             upload_frame_as_thumbnail(s3_source_signed_url, duration_seconds, bucket, thumbnail_key)
         except Exception as e:
             print('Video processing exception occurred')
             print(e)
-            mark_as_corrupted(video_id)
-        
-    # todo: get data from meta (by video id) and combine with thumbnail and duration data
+            delete_object(bucket, key)
+            mark_as_deleted(video_id, CORRUPTED)
+
+    # STATES = {PENDING, DELETED, READY}
+    # todo: ON SCRIPT START, get data from meta (and set state as PENDING) (by video id) and combine with thumbnail and duration data
     # todo: create in db
 
-    # todo: remove meta file
+    # todo: remove meta file (also when deletes object)
 
     # call SQS
 
