@@ -7,6 +7,22 @@ import os
 import datetime
 
 
+# VIDEO_FILE_STATES
+PENDING = 'PENDING'
+READY = 'READY'
+DELETED = 'DELETED'
+
+# FAILURE_REASONS
+INTERNAL_ERROR_PLEASE_TRY_AGAIN_LATER = 'INTERNAL_ERROR_PLEASE_TRY_AGAIN_LATER'
+MAX_FILE_SIZE_OVERFLOW = 'MAX_FILE_SIZE_OVERFLOW'
+CORRUPTED = 'CORRUPTED'
+NOT_A_VIDEO_TYPE = 'NOT_A_VIDEO_TYPE'
+
+
+# CONSTANTS
+EXECUTABLES_DIRECTORY = '/opt/var/task/python'
+
+
 s3Client = boto3.client('s3')
 
 video_types_to_extension = {
@@ -19,17 +35,6 @@ video_types_to_extension = {
     'video/3gpp': '3gp',
     'video/3gpp2': '3g2'
 }
-
-# VIDEO_FILE_STATES
-PENDING = 'PENDING'
-READY = 'READY'
-DELETED = 'DELETED'
-
-# FAILURE_REASONS
-INTERNAL_ERROR_PLEASE_TRY_AGAIN_LATER = 'INTERNAL_ERROR_PLEASE_TRY_AGAIN_LATER'
-MAX_FILE_SIZE_OVERFLOW = 'MAX_FILE_SIZE_OVERFLOW'
-CORRUPTED = 'CORRUPTED'
-NOT_A_VIDEO_TYPE = 'NOT_A_VIDEO_TYPE'
 
 # helpers
 def object_type(obj: Dict) -> str:
@@ -77,7 +82,7 @@ def get_signed_url(expires_in: int, bucket: str, key: str) -> str:
     return s3Client.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': key}, ExpiresIn=expires_in)
 
 def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
-    executable_path = '/opt/var/task/python/ffmpeg'
+    executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
 
     mid_of_video_duration_seconds = duration_seconds / 2
     time_frame_to_extract = str(datetime.timedelta(seconds=mid_of_video_duration_seconds))# hh:mm:ss
@@ -95,10 +100,10 @@ def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float
     with open('/tmp/output.jpg', "rb") as f:
         resp = s3Client.put_object(Body=f, Bucket=bucket, Key=thumbnail_key, ACL='public-read')
         print(resp)
-        print('thumbnail has been uploaded')
+        print('Thumbnail has been uploaded')
 
 def get_video_duration_seconds(s3_source_signed_url: str) -> float:
-    executable_path = '/opt/var/task/python/ffprobe'
+    executable_path = f'{EXECUTABLES_DIRECTORY}/ffprobe'
     ffmpeg_cmd = f"{executable_path} \"" + str(s3_source_signed_url) + "\" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1"
     print(ffmpeg_cmd)
     try:

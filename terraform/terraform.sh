@@ -55,4 +55,15 @@ then
     echo "region is not set, default=$region"
 fi
 
+# make sure script workdir is relative to terraform directory
+cd $(dirname "$0")
+
+# necessary builds
+# lambda layars
+../lambdas/layers/build_layers.sh
+
+# packages
+echo "no packages to build yet"
+
+# run command
 terraform $command -var="aws_access_key=$access_key" -var="aws_secret_key=$secret_key" -var="aws_region=$region"
