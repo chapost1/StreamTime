@@ -1,15 +1,15 @@
 variable "aws_access_key" {
-    type = string
+    type        = string
     description = "AWS Access key"
 }
 
 variable "aws_secret_key" {
-    type = string
+    type        = string
     description = "AWS Secret Key"
 }
 
 variable "aws_region" {
-    type = string
+    type        = string
     description = "AWS Region"
 }
 
@@ -31,7 +31,7 @@ locals {
 
 // videos
 resource "aws_s3_bucket" "videos_bucket" {
-  bucket = "svn-videos-bucket"
+  bucket        = "svn-videos-bucket"
   force_destroy = true
 }
 
