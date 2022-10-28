@@ -210,7 +210,7 @@ resource "aws_lambda_permission" "video_processor_lambda_s3_invoke_permission" {
 data "archive_file" "python_video_processor_lambda_package" {  
   type        = "zip"  
   source_file = "${path.module}/../lambdas/workers/video_processor/app.py" 
-  output_path = "python_video_processor.zip"
+  output_path = "${path.module}/../lambdas/workers/video_processor/python_video_processor.zip"
 }
 
 resource "aws_lambda_layer_version" "ffmpeg_python_lambda_layer" {
