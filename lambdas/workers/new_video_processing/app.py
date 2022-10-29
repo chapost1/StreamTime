@@ -22,7 +22,15 @@ NOT_A_VIDEO_TYPE = 'NOT_A_VIDEO_TYPE'
 EXECUTABLES_DIRECTORY = '/opt/var/task/python'
 
 THUMBNAIL_SIZE = (360, 200)
-THUMBNAIL_ACL = 'public-read'
+
+S3_THUMBNAILS_ACL_ENV_NAME = 's3_thumbnails_acl'
+S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME = 's3_max_video_file_size_in_bytes'
+IMAGE_RESIZER_LAMBDA_ARN_ENV_NAME = 'image_resizer_lambda_arn'
+THUMBNAILS_PREFIX_ENV_NAME = 's3_thumbnails_prefix'
+META_PREFIX_ENV_NAME = 's3_meta_prefix'
+COMPLETED_VIDEOS_PREFIX_ENV_NAME = 's3_completed_videos_prefix'
+INTERMEDIATE_VIDEOS_PREFIX_ENV_NAME = 's3_intermediate_videos_prefix'
+
 
 s3Client = boto3.client('s3')
 
@@ -98,11 +106,11 @@ def get_video_duration_seconds(s3_source_signed_url: str) -> float:
 def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
     executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
 
-    mid_of_video_duration_seconds = duration_seconds / 2
-    time_frame_to_extract = str(datetime.timedelta(seconds=mid_of_video_duration_seconds))# hh:mm:ss
-    frame_path = '/tmp/frame.jpg'
-
-    ffmpeg_cmd = f"{executable_path} -i \"" + str(s3_source_signed_url) + f"\" -ss {time_frame_to_extract} -vframes 1 {frame_path}"
+    mid_of_video_duration_seconds = duration_seconds / 4
+    time_frame_to_extract = str(datetime.timedelta(seconds=mid_of_video_duration_seconds)).split('.')[0] # hh:mm:ss
+    frame_path = '/tmp/frame.png'
+    
+    ffmpeg_cmd = f"{executable_path} -y -ss {time_frame_to_extract} -i \"" + str(s3_source_signed_url) + f"\" -frames:v 1 {frame_path}"
     print(ffmpeg_cmd)
     try:
         os.system(ffmpeg_cmd)
@@ -113,7 +121,7 @@ def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float
 
     print('Going to upload thumbnail: ' + bucket + '/' + thumbnail_key)
     with open(frame_path, "rb") as f:
-        resp = s3Client.put_object(Body=f, Bucket=bucket, Key=thumbnail_key, ACL=THUMBNAIL_ACL)
+        resp = s3Client.put_object(Body=f, Bucket=bucket, Key=thumbnail_key, ACL=os.environ[S3_THUMBNAILS_ACL_ENV_NAME])
         print(resp)
         print('Thumbnail has been uploaded')
 
@@ -121,13 +129,13 @@ def resize_thumbnail(bucket: str, thumbnail_key: str, new_size = Tuple[int, int]
     lambdaClient = boto3.client('lambda')
     try:
         response = lambdaClient.invoke(
-            FunctionName=os.environ['image_resizer_lambda_arn'],
+            FunctionName=os.environ[IMAGE_RESIZER_LAMBDA_ARN_ENV_NAME],
             InvocationType='RequestResponse',
             Payload=json.dumps({
                     'file_key': thumbnail_key,
                     'bucket': bucket,
                     'new_size': list(new_size),
-                    'ACL': THUMBNAIL_ACL
+                    'ACL': os.environ[S3_THUMBNAILS_ACL_ENV_NAME]
                 })
         )
         responseFromChild = json.load(response['Payload'])
@@ -137,14 +145,26 @@ def resize_thumbnail(bucket: str, thumbnail_key: str, new_size = Tuple[int, int]
         raise e
     print(responseFromChild)
 
+def assert_necessery_env_are_here() -> None:
+    for env in [IMAGE_RESIZER_LAMBDA_ARN_ENV_NAME, THUMBNAILS_PREFIX_ENV_NAME, META_PREFIX_ENV_NAME,
+                COMPLETED_VIDEOS_PREFIX_ENV_NAME, INTERMEDIATE_VIDEOS_PREFIX_ENV_NAME,
+                S3_THUMBNAILS_ACL_ENV_NAME, S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME
+            ]:
+        if os.environ.get(env, None) is None:
+            raise RuntimeError(f'missing env varialbe: {env}')
 
 def lambda_handler(event, context):
-    MAX_FILE_SIZE_IN_BYTES: int = 5e+9   # 5GB
+    assert_necessery_env_are_here()
+    MAX_FILE_SIZE_IN_BYTES: int = int(float(os.environ[S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME]))   # 5GB
     SIGNED_URL_EXPIRATION: int = 60 * 10     # The number of seconds that the Signed URL is valid
 
     s3Ref = event['Records'][0]['s3']
     bucket = s3Ref['bucket']['name']
     key = s3Ref['object']['key']
+
+    if key.split('/')[0] != os.environ[INTERMEDIATE_VIDEOS_PREFIX_ENV_NAME]:
+        print(f'An invalid s3 prefix, for key: {key}, processing has been stopped')
+        return {'statusCode': 500}
 
     try:
         obj: Dict = s3Client.get_object(
@@ -168,12 +188,12 @@ def lambda_handler(event, context):
         mark_as_deleted(video_id, CORRUPTED)
         print('An exception occurred, failed to get meta')
         print(e)
-        return
+        return {'statusCode': 400}
 
     if MAX_FILE_SIZE_IN_BYTES < meta['size_in_bytes']:
         delete_object(bucket, key)
         mark_as_deleted(video_id, MAX_FILE_SIZE_OVERFLOW)
-        return
+        return {'statusCode': 400}
     
     if not is_video_type(meta['type']):
         print('not a video')
@@ -196,7 +216,7 @@ def lambda_handler(event, context):
         try:
             duration_seconds: float = get_video_duration_seconds(s3_source_signed_url)
 
-            thumbnail_key = f'thumbnails/{video_id}.jpg'
+            thumbnail_key = f'{os.environ[THUMBNAILS_PREFIX_ENV_NAME]}/{video_id}.png'
             upload_frame_as_thumbnail(s3_source_signed_url, duration_seconds, bucket, thumbnail_key)
 
             resize_thumbnail(bucket, thumbnail_key, THUMBNAIL_SIZE)
@@ -205,12 +225,26 @@ def lambda_handler(event, context):
             print(e)
             delete_object(bucket, key)
             mark_as_deleted(video_id, CORRUPTED)
+    
+    try:
+        # move to completed S3 prefix
+        copy_source = {'Bucket': bucket, 'Key': key}
+        new_key = f'{os.environ[COMPLETED_VIDEOS_PREFIX_ENV_NAME]}/{file_name}'
+        s3Client.copy(copy_source, bucket, new_key)
+        delete_object(bucket, key) # not needed anymore
+    except Exception as e:
+        print('Exception, failed to move video into completed prefix')
+        print(e)
+        delete_object(bucket, key)
+        mark_as_deleted(video_id, INTERNAL_ERROR_PLEASE_TRY_AGAIN_LATER)
+
+    # mark as completed in db
 
     # STATES = {PENDING, DELETED, READY}
     # todo: ON SCRIPT START, get data from meta (and set state as PENDING) (by video id) and combine with thumbnail and duration data
     # todo: create in db
 
-    # todo: remove meta file (also when deletes object)
+    # todo: remove meta file (also when deletes object) (use this: os.environ[META_PREFIX_ENV_NAME])
 
     # call SQS
 

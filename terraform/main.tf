@@ -24,7 +24,15 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
+    // sqs
     new_video_on_s3_queue = "new-video-on-s3-queue"
+    // s3
+    s3_completed_videos_prefix = "completed-videos"
+    s3_intermediate_videos_prefix = "intermediate-videos"
+    s3_thumbnails_prefix = "thumbnails"
+    s3_meta_prefix = "meta"
+    s3_thumbnails_acl = "public-read"
+    s3_max_video_file_size_in_bytes = "5e+9" # 5GB
 }
 
 ///// s3 bucket
@@ -69,7 +77,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
 
     filter {
       and {
-        prefix = "meta/"
+        prefix = "${local.s3_meta_prefix}/"
 
         tags = {
           rule      = "videos_meta_data"
@@ -82,18 +90,35 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
   }
 
   rule {
-    id = "videos"
+    id = "intermediate-videos"
 
     expiration {
-      days = 90
+      days = 1
     }
 
     filter {
       and {
-        prefix = "videos/"
+        prefix = "${local.s3_intermediate_videos_prefix}/"
 
         tags = {
-          rule      = "videos"
+          rule      = "intermediate-videos"
+          autoclean = "true"
+        }
+      }
+    }
+
+    status = "Enabled"
+  }
+
+  rule {
+    id = "completed-videos"
+
+    filter {
+      and {
+        prefix = "${local.s3_completed_videos_prefix}/"
+
+        tags = {
+          rule      = "completed-videos"
           autoclean = "true"
         }
       }
@@ -105,6 +130,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
       days          = 30
       storage_class = "STANDARD_IA"
     }
+
+    transition {
+      days = 60
+      storage_class = "INTELLIGENT_TIERING"
+    }
   }
 
   rule {
@@ -112,9 +142,25 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
 
     status = "Enabled"
 
+    filter {
+      and {
+        prefix = "${local.s3_thumbnails_prefix}/"
+
+        tags = {
+          rule      = "thumbnails"
+          autoclean = "true"
+        }
+      }
+    }
+
     transition {
       days          = 30
       storage_class = "STANDARD_IA"
+    }
+
+    transition {
+      days          = 60
+      storage_class = "GLACIER_IR"
     }
   }
 }
@@ -173,7 +219,7 @@ resource "aws_s3_bucket_notification" "new_video_upload" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.new_video_processing.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "videos/"
+    filter_prefix       = "${local.s3_intermediate_videos_prefix}/"
   }
 
   depends_on = [
@@ -253,7 +299,7 @@ resource "aws_lambda_function" "new_video_processing" {
   role             = aws_iam_role.iam_for_new_video_processing_lambda.arn
   handler          = "app.lambda_handler"
   runtime          = "python3.8"
-  timeout          = 30
+  timeout          = 300 # 5m
   layers           = [
     aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn
   ]
@@ -262,7 +308,13 @@ resource "aws_lambda_function" "new_video_processing" {
   ]
   environment {
     variables = {
-      image_resizer_lambda_arn = aws_lambda_function.image_resizer.arn
+      image_resizer_lambda_arn = aws_lambda_function.image_resizer.arn,
+      s3_thumbnails_prefix = local.s3_thumbnails_prefix,
+      s3_meta_prefix = local.s3_meta_prefix,
+      s3_completed_videos_prefix = local.s3_completed_videos_prefix,
+      s3_intermediate_videos_prefix = local.s3_intermediate_videos_prefix,
+      s3_thumbnails_acl = local.s3_thumbnails_acl,
+      s3_max_video_file_size_in_bytes = local.s3_max_video_file_size_in_bytes
     }
   }
 }

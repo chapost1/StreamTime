@@ -1,6 +1,7 @@
 from typing import Tuple
 import json
 import boto3
+import os
 from PIL import Image
 
 s3Client = boto3.client('s3')
@@ -17,11 +18,15 @@ def lambda_handler(event, context):
         file_key = event['file_key']
         file_name = file_key.split('/')[-1]
         temp_file_path = f'/tmp/{file_name}'
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
 
         with open(temp_file_path, 'wb') as f:
             s3Client.download_fileobj(bucket, file_key, f)
 
         new_file_path = f'/tmp/resized_{file_name}'
+        if os.path.exists(new_file_path):
+            os.remove(new_file_path)
 
         resize_image(
             temp_file_path,
