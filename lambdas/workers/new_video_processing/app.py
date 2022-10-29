@@ -14,9 +14,13 @@ THUMBNAIL_SIZE = (360, 200)
 ##########################
 ######## ENV VARS ########
 ##########################
+# PROCESSING EVENTS
+PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME = 'new_video_events_processing_has_been_started'
+PROCESSING_FAILED_EVENT_ENV_NAME = 'new_video_events_processing_failure'
+PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME = 'new_video_events_moved_to_drafts'
 # S3 prefixes
 THUMBNAILS_PREFIX_ENV_NAME = 's3_thumbnails_prefix'
-UNREGISTERED_VIDEOS_PREFIX_ENV_NAME = 's3_unregistered_videos_prefix'
+VIDEOS_PREFIX_ENV_NAME = 's3_videos_prefix'
 UNPROCESSED_VIDEOS_PREFIX_ENV_NAME = 's3_unprocessed_videos_prefix'
 # S3 restrictions
 S3_THUMBNAILS_ACL_ENV_NAME = 's3_thumbnails_acl'
@@ -146,17 +150,18 @@ def resize_thumbnail(bucket: str, thumbnail_key: str, new_size = Tuple[int, int]
 
 def assert_necessery_env_are_here() -> None:
     for env in [IMAGE_RESIZER_LAMBDA_ARN_ENV_NAME, THUMBNAILS_PREFIX_ENV_NAME,
-                UNREGISTERED_VIDEOS_PREFIX_ENV_NAME, UNPROCESSED_VIDEOS_PREFIX_ENV_NAME,
+                VIDEOS_PREFIX_ENV_NAME, UNPROCESSED_VIDEOS_PREFIX_ENV_NAME,
                 S3_THUMBNAILS_ACL_ENV_NAME, S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME,
                 INTERNAL_ERROR_ENV_NAME, MAX_FILE_SIZE_EXCEEDED_ENV_NAME,
                 CORRUPTED_ENV_NAME, UNSUPPORTED_FILE_FORMAT_ENV_NAME,
                 UNPROCESSED_VIDEOS_TABLE_ENV_NAME, DRAFTS_VIDEOS_TABLE_ENV_NAME,
-                PROCESSING_FAILURE_TABLE_ENV_NAME
+                PROCESSING_FAILURE_TABLE_ENV_NAME, PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME,
+                PROCESSING_FAILED_EVENT_ENV_NAME, PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME
             ]:
         if os.environ.get(env, None) is None:
             raise RuntimeError(f'missing env varialbe: {env}')
 
-def send_sns(user_id: str, hash_id: str, db_table_lookup: str) -> None:
+def send_sns(user_id: str, hash_id: str, event: str) -> None:
     pass
 
 def mark_upload_as_unprocessed(user_id: str, hash_id: str, upload_time: str) -> None:
@@ -168,7 +173,7 @@ def mark_upload_as_unprocessed(user_id: str, hash_id: str, upload_time: str) -> 
     }
     print(processing_record)
 
-    send_sns(user_id, hash_id, os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME])
+    send_sns(user_id, hash_id, os.environ[PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME])
     pass
 
 def mark_processing_as_failed(user_id: str, hash_id: str, upload_time: str, failure_reason: str) -> None:
@@ -183,7 +188,7 @@ def mark_processing_as_failed(user_id: str, hash_id: str, upload_time: str, fail
     }
     print(processing_failure_record)
 
-    send_sns(user_id, hash_id, os.environ[PROCESSING_FAILURE_TABLE_ENV_NAME])
+    send_sns(user_id, hash_id, os.environ[PROCESSING_FAILED_EVENT_ENV_NAME])
     pass
 
 def mark_video_as_a_draft(
@@ -210,7 +215,7 @@ def mark_video_as_a_draft(
     }
     print(draft_record)
 
-    send_sns(user_id, hash_id, os.environ[DRAFTS_VIDEOS_TABLE_ENV_NAME])
+    send_sns(user_id, hash_id, os.environ[PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME])
     pass
 
 def lambda_handler(event, context):
@@ -301,27 +306,26 @@ def lambda_handler(event, context):
             raise e
     
     try:
-        # move to unregistered S3 prefix
+        # move to videos S3 prefix
         copy_source = {'Bucket': bucket, 'Key': key}
-        new_key = f'{os.environ[UNREGISTERED_VIDEOS_PREFIX_ENV_NAME]}/{file_name}'
+        new_key = f'{os.environ[VIDEOS_PREFIX_ENV_NAME]}/{file_name}'
         s3Client.copy(copy_source, bucket, new_key)
         delete_object(bucket, key) # not needed anymore
+        mark_video_as_a_draft(# processed successfully
+            user_id=user_id,
+            hash_id=hash_id,
+            video_type=meta['type'],
+            size_in_bytes=meta['size_in_bytes'],
+            duration_seconds=duration_seconds,
+            thumbnail_url=f'https://{bucket}.s3.amazonaws.com/{thumbnail_key}',
+            upload_time=upload_time
+        )
     except Exception as e:
         print('Exception, failed to move video into completed prefix')
         print(e)
         delete_object(bucket, key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
         raise e
-
-    mark_video_as_a_draft(
-        user_id=user_id,
-        hash_id=hash_id,
-        video_type=meta['type'],
-        size_in_bytes=meta['size_in_bytes'],
-        duration_seconds=duration_seconds,
-        thumbnail_url=f'https://{bucket}.s3.amazonaws.com/{thumbnail_key}',
-        upload_time=upload_time
-    )
 
     return {
         'statusCode': 200,

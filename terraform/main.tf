@@ -27,18 +27,21 @@ locals {
     // sqs
     new_video_on_s3_queue = "new-video-on-s3-queue"
     // s3
-    s3_registered_videos_prefix = "registered-videos"
+    s3_videos_prefix = "videos"
     s3_unprocessed_videos_prefix = "unprocessed-videos"
-    s3_unregistered_videos_prefix = "unregistered-videos"
     s3_thumbnails_prefix = "thumbnails"
     s3_tmp_thumbnails_prefix = "tmp-thumbnails"
     s3_thumbnails_acl = "public-read"
     s3_max_video_file_size_in_bytes = "2e+9" # 2GB
-    // new_video_processing_failures
+    // new_video_processing failures
     new_video_processing_failure_internal_error = "Internal Error, please try again later"
     new_video_processing_failure_max_file_size_exceeded = "Maximum file size exceeded"
     new_video_processing_failure_corrupted = "Corrupted/Invalid File"
     new_video_processing_failure_unsupported_video_type = "Unsupported video type"
+    // new_video_processing events
+    new_video_events_processing_has_been_started = "new_video_events_processing_has_been_started"
+    new_video_events_processing_failure = "new_video_events_processing_failure"
+    new_video_events_moved_to_drafts = "new_video_events_moved_to_drafts"
     // dynamoDB tables
     dynamodb_table_unprocessed_videos = "unprocessed_videos"
     dynamodb_table_drafts_videos = "drafts_videos"
@@ -97,36 +100,16 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
 
     status = "Enabled"
   }
+
   rule {
-    id = "unregistered-videos"
-    
-    expiration {
-      days = 1
-    }
+    id = "videos"
 
     filter {
       and {
-        prefix = "${local.s3_unregistered_videos_prefix}/"
+        prefix = "${local.s3_videos_prefix}/"
 
         tags = {
-          rule      = "unregistered-videos"
-          autoclean = "true"
-        }
-      }
-    }
-
-    status = "Enabled"
-  }
-
-  rule {
-    id = "registered-videos"
-
-    filter {
-      and {
-        prefix = "${local.s3_registered_videos_prefix}/"
-
-        tags = {
-          rule      = "registered-videos"
+          rule      = "videos"
           autoclean = "true"
         }
       }
@@ -339,7 +322,7 @@ resource "aws_lambda_function" "new_video_processing" {
     variables = {
       image_resizer_lambda_arn = aws_lambda_function.image_resizer.arn,
       s3_thumbnails_prefix = local.s3_thumbnails_prefix,
-      s3_unregistered_videos_prefix = local.s3_unregistered_videos_prefix,
+      s3_videos_prefix = local.s3_videos_prefix,
       s3_unprocessed_videos_prefix = local.s3_unprocessed_videos_prefix,
       s3_thumbnails_acl = local.s3_thumbnails_acl,
       s3_max_video_file_size_in_bytes = local.s3_max_video_file_size_in_bytes,
@@ -350,6 +333,9 @@ resource "aws_lambda_function" "new_video_processing" {
       dynamodb_table_unprocessed_videos = local.dynamodb_table_unprocessed_videos
       dynamodb_table_drafts_videos = local.dynamodb_table_drafts_videos
       dynamodb_table_processing_has_been_failed_videos = local.dynamodb_table_processing_has_been_failed_videos
+      new_video_events_processing_has_been_started = local.new_video_events_processing_has_been_started
+      new_video_events_processing_failure = local.new_video_events_processing_failure
+      new_video_events_moved_to_drafts = local.new_video_events_moved_to_drafts
     }
   }
 }
