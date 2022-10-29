@@ -28,21 +28,23 @@ locals {
     new_video_on_s3_queue = "new-video-on-s3-queue"
     // s3
     s3_videos_prefix = "videos"
+    s3_uploaded_videos_prefix = "uploaded-videos"
     s3_unprocessed_videos_prefix = "unprocessed-videos"
     s3_thumbnails_prefix = "thumbnails"
     s3_tmp_thumbnails_prefix = "tmp-thumbnails"
     s3_thumbnails_acl = "public-read"
     s3_max_video_file_size_in_bytes = "2e+9" # 2GB
     // new_video_processing failures
-    new_video_processing_failure_internal_error = "Internal Error, please try again later"
+    new_video_processing_failure_internal_error = "Internal error, please try again later"
     new_video_processing_failure_max_file_size_exceeded = "Maximum file size exceeded"
-    new_video_processing_failure_corrupted = "Corrupted/Invalid File"
+    new_video_processing_failure_corrupted = "Corrupted/Invalid file"
     new_video_processing_failure_unsupported_video_type = "Unsupported video type"
     // new_video_processing events
     new_video_events_processing_has_been_started = "new_video_events_processing_has_been_started"
     new_video_events_processing_failure = "new_video_events_processing_failure"
     new_video_events_moved_to_drafts = "new_video_events_moved_to_drafts"
     // dynamoDB tables
+    dynamodb_table_invoked_uploaded_videos = "invoked_uploaded_videos"
     dynamodb_table_unprocessed_videos = "unprocessed_videos"
     dynamodb_table_drafts_videos = "drafts_videos"
     dynamodb_table_processing_has_been_failed_videos = "processing_has_been_failed_videos"
@@ -80,6 +82,26 @@ resource "aws_s3_bucket_acl" "videos_bucket_acl" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
   bucket = aws_s3_bucket.videos_bucket.bucket
+  rule {
+    id = "uploaded-videos"
+    
+    expiration {
+      days = 1
+    }
+
+    filter {
+      and {
+        prefix = "${local.s3_uploaded_videos_prefix}/"
+
+        tags = {
+          rule      = "uploaded-videos"
+          autoclean = "true"
+        }
+      }
+    }
+
+    status = "Enabled"
+  }
   rule {
     id = "unprocessed-videos"
     
@@ -231,7 +253,7 @@ resource "aws_s3_bucket_notification" "new_video_upload" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.new_video_processing.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "${local.s3_unprocessed_videos_prefix}/"
+    filter_prefix       = "${local.s3_uploaded_videos_prefix}/"
   }
 
   depends_on = [
@@ -294,7 +316,7 @@ resource "aws_lambda_layer_version" "ffmpeg_python_lambda_layer" {
   filename                      = "${path.module}/../lambdas/layers/pyffmpeg/source/python.zip"
   layer_name                    = "ffmpeg_python_lambda_layer"
   source_code_hash              = filebase64sha256("${path.module}/../lambdas/layers/pyffmpeg/source/python.zip")
-  cocompatible_architectures    = ["arm64"]
+  compatible_architectures      = ["arm64"]
   compatible_runtimes           = ["python3.8"]
 }
 
@@ -323,6 +345,7 @@ resource "aws_lambda_function" "new_video_processing" {
       image_resizer_lambda_arn = aws_lambda_function.image_resizer.arn,
       s3_thumbnails_prefix = local.s3_thumbnails_prefix,
       s3_videos_prefix = local.s3_videos_prefix,
+      s3_uploaded_videos_prefix = local.s3_uploaded_videos_prefix
       s3_unprocessed_videos_prefix = local.s3_unprocessed_videos_prefix,
       s3_thumbnails_acl = local.s3_thumbnails_acl,
       s3_max_video_file_size_in_bytes = local.s3_max_video_file_size_in_bytes,
@@ -330,6 +353,7 @@ resource "aws_lambda_function" "new_video_processing" {
       new_video_processing_failure_max_file_size_exceeded = local.new_video_processing_failure_max_file_size_exceeded
       new_video_processing_failure_corrupted = local.new_video_processing_failure_corrupted
       new_video_processing_failure_unsupported_video_type = local.new_video_processing_failure_unsupported_video_type
+      dynamodb_table_invoked_uploaded_videos = local.dynamodb_table_invoked_uploaded_videos
       dynamodb_table_unprocessed_videos = local.dynamodb_table_unprocessed_videos
       dynamodb_table_drafts_videos = local.dynamodb_table_drafts_videos
       dynamodb_table_processing_has_been_failed_videos = local.dynamodb_table_processing_has_been_failed_videos

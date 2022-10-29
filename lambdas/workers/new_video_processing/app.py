@@ -21,6 +21,7 @@ PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME = 'new_video_events_moved_to_draf
 # S3 prefixes
 THUMBNAILS_PREFIX_ENV_NAME = 's3_thumbnails_prefix'
 VIDEOS_PREFIX_ENV_NAME = 's3_videos_prefix'
+UPLOADED_VIDEOS_PREFIX_ENV_NAME = 's3_uploaded_videos_prefix'
 UNPROCESSED_VIDEOS_PREFIX_ENV_NAME = 's3_unprocessed_videos_prefix'
 # S3 restrictions
 S3_THUMBNAILS_ACL_ENV_NAME = 's3_thumbnails_acl'
@@ -31,6 +32,7 @@ MAX_FILE_SIZE_EXCEEDED_ENV_NAME = 'new_video_processing_failure_max_file_size_ex
 CORRUPTED_ENV_NAME = 'new_video_processing_failure_corrupted'
 UNSUPPORTED_FILE_FORMAT_ENV_NAME = 'new_video_processing_failure_unsupported_video_type'
 # DB tables names
+INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_invoked_uploaded_videos'
 UNPROCESSED_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_unprocessed_videos'
 DRAFTS_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_drafts_videos'
 PROCESSING_FAILURE_TABLE_ENV_NAME = 'dynamodb_table_processing_has_been_failed_videos'
@@ -151,15 +153,28 @@ def resize_thumbnail(bucket: str, thumbnail_key: str, new_size = Tuple[int, int]
 def assert_necessery_env_are_here() -> None:
     for env in [IMAGE_RESIZER_LAMBDA_ARN_ENV_NAME, THUMBNAILS_PREFIX_ENV_NAME,
                 VIDEOS_PREFIX_ENV_NAME, UNPROCESSED_VIDEOS_PREFIX_ENV_NAME,
-                S3_THUMBNAILS_ACL_ENV_NAME, S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME,
-                INTERNAL_ERROR_ENV_NAME, MAX_FILE_SIZE_EXCEEDED_ENV_NAME,
-                CORRUPTED_ENV_NAME, UNSUPPORTED_FILE_FORMAT_ENV_NAME,
-                UNPROCESSED_VIDEOS_TABLE_ENV_NAME, DRAFTS_VIDEOS_TABLE_ENV_NAME,
+                UPLOADED_VIDEOS_PREFIX_ENV_NAME, S3_THUMBNAILS_ACL_ENV_NAME,
+                S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME, INTERNAL_ERROR_ENV_NAME,
+                MAX_FILE_SIZE_EXCEEDED_ENV_NAME, CORRUPTED_ENV_NAME, 
+                UNSUPPORTED_FILE_FORMAT_ENV_NAME, UNPROCESSED_VIDEOS_TABLE_ENV_NAME,
+                DRAFTS_VIDEOS_TABLE_ENV_NAME, INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME,
                 PROCESSING_FAILURE_TABLE_ENV_NAME, PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME,
                 PROCESSING_FAILED_EVENT_ENV_NAME, PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME
             ]:
         if os.environ.get(env, None) is None:
             raise RuntimeError(f'missing env varialbe: {env}')
+
+def mark_as_invoked(user_id: str, hash_id: str) -> None: # make it with TTL of 2 days or something
+    # todo get item from os.environ[INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME] FILTER BY EXPIRATION DATE
+    # if exists: raise Exception!
+    # toto: putItem in os.environ[INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME]
+    record = {
+        'hash_id': hash_id,
+        'user_id': user_id
+    }
+    print(record)
+
+    pass
 
 def send_sns(user_id: str, hash_id: str, event: str) -> None:
     pass
@@ -224,18 +239,17 @@ def lambda_handler(event, context):
     SIGNED_URL_EXPIRATION: int = 60 * 10     # The number of seconds that the Signed URL is valid
     upload_time: str = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
 
-    s3Ref = event['Records'][0]['s3']
-    bucket = s3Ref['bucket']['name']
-    key = s3Ref['object']['key']
+    bucket = event['Records'][0]['s3']['bucket']['name']
+    current_file_key = event['Records'][0]['s3']['object']['key']
 
-    if key.split('/')[0] != os.environ[UNPROCESSED_VIDEOS_PREFIX_ENV_NAME]:
-        print(f'An invalid s3 prefix, for key: {key}, processing has been stopped before being able to get hash_id due to infrastructure failure')
+    if current_file_key.split('/')[0] != os.environ[UPLOADED_VIDEOS_PREFIX_ENV_NAME]:
+        print(f'An invalid s3 prefix, for key: {current_file_key}, processing has been stopped before being able to get hash_id due to infrastructure failure')
         return {'statusCode': 500}
 
     try:
         obj: Dict = s3Client.get_object(
             Bucket=bucket,
-            Key=key
+            Key=current_file_key
         )
     except Exception as e:
         # internal error
@@ -243,10 +257,10 @@ def lambda_handler(event, context):
         print(e)
         raise e
     
-    key_levels = key.split('/')
-    if len(key_levels) < 2:
+    key_levels = current_file_key.split('/')
+    if len(key_levels) < 3:
         # internal error
-        print(f'An exception occurred, infrastructure failure, key is not in valid format: {key}')
+        print(f'An exception occurred, infrastructure failure, key is not in valid format: {current_file_key}')
         print(e)
         raise e
 
@@ -254,9 +268,27 @@ def lambda_handler(event, context):
     user_id: str = key_levels[-2]
     hash_id: str = file_name.split('.')[0]
 
+    # prevent abuse of presigned url, i.e: uploading file multiple times before expiration time
+    mark_as_invoked(user_id, hash_id)
+
     # all set
-    # mark as processing
-    mark_upload_as_unprocessed(user_id=user_id, hash_id=hash_id, upload_time=upload_time)
+    # move to videos S3 prefix
+    try:
+        copy_source = {'Bucket': bucket, 'Key': current_file_key}
+        unprocessed_key_levels = key_levels.copy()
+        unprocessed_key_levels[0] = os.environ[UNPROCESSED_VIDEOS_PREFIX_ENV_NAME]
+        unprocessed_file_key = '/'.join(unprocessed_key_levels)
+        s3Client.copy(copy_source, bucket, unprocessed_file_key)
+        delete_object(bucket, current_file_key) # not needed anymore
+        current_file_key = unprocessed_file_key
+        # mark as processing
+        mark_upload_as_unprocessed(user_id=user_id, hash_id=hash_id, upload_time=upload_time)
+    except Exception as e:
+        print('An exception occurred, failed to mark as unprocessed')
+        print(e)
+        delete_object(bucket, current_file_key),
+        mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
+        return {'statusCode': 500}
     
     try:
         meta = get_object_meta(obj)
@@ -264,28 +296,28 @@ def lambda_handler(event, context):
     except Exception as e:
         print('An exception occurred, failed to get meta')
         print(e)
-        delete_object(bucket, key),
+        delete_object(bucket, current_file_key),
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
         return {'statusCode': 400}
 
     if MAX_FILE_SIZE_IN_BYTES < meta['size_in_bytes']:
-        delete_object(bucket, key)
+        delete_object(bucket, current_file_key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[MAX_FILE_SIZE_EXCEEDED_ENV_NAME])
         return {'statusCode': 400}
     
     if not is_supported_video_type(meta['type']):
         print('not a video')
         # not a video, delete file!
-        delete_object(bucket, key)
+        delete_object(bucket, current_file_key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[UNSUPPORTED_FILE_FORMAT_ENV_NAME])
     else:
         print('a video')
         # video
         try:
             # Generate a signed URL for the uploaded asset
-            s3_source_signed_url: str = get_signed_url(SIGNED_URL_EXPIRATION, bucket, key)
+            s3_source_signed_url: str = get_signed_url(SIGNED_URL_EXPIRATION, bucket, current_file_key)
         except Exception as e:
-            delete_object(bucket, key)
+            delete_object(bucket, current_file_key)
             mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
             print('An exception occurred, internal error')
             print(e)
@@ -294,23 +326,26 @@ def lambda_handler(event, context):
         try:
             duration_seconds: float = get_video_duration_seconds(s3_source_signed_url)
 
-            thumbnail_key = f'{os.environ[THUMBNAILS_PREFIX_ENV_NAME]}/{hash_id}.png'
+            thumbnail_key = f'{os.environ[THUMBNAILS_PREFIX_ENV_NAME]}/{user_id}/{hash_id}.png'
             upload_frame_as_thumbnail(s3_source_signed_url, duration_seconds, bucket, thumbnail_key)
 
             resize_thumbnail(bucket, thumbnail_key, THUMBNAIL_SIZE)
         except Exception as e:
             print('Video processing exception occurred')
             print(e)
-            delete_object(bucket, key)
+            delete_object(bucket, current_file_key)
             mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
             raise e
     
     try:
         # move to videos S3 prefix
-        copy_source = {'Bucket': bucket, 'Key': key}
-        new_key = f'{os.environ[VIDEOS_PREFIX_ENV_NAME]}/{file_name}'
-        s3Client.copy(copy_source, bucket, new_key)
-        delete_object(bucket, key) # not needed anymore
+        copy_source = {'Bucket': bucket, 'Key': current_file_key}
+        videos_key_levels = key_levels.copy()
+        videos_key_levels[0] = os.environ[VIDEOS_PREFIX_ENV_NAME]
+        video_key = '/'.join(videos_key_levels)
+        s3Client.copy(copy_source, bucket, video_key)
+        delete_object(bucket, current_file_key) # not needed anymore
+        current_file_key = video_key
         mark_video_as_a_draft(# processed successfully
             user_id=user_id,
             hash_id=hash_id,
@@ -323,7 +358,7 @@ def lambda_handler(event, context):
     except Exception as e:
         print('Exception, failed to move video into completed prefix')
         print(e)
-        delete_object(bucket, key)
+        delete_object(bucket, current_file_key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
         raise e
 
