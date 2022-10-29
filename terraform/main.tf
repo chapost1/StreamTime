@@ -171,21 +171,41 @@ resource "aws_s3_bucket_notification" "new_video_upload" {
   bucket = aws_s3_bucket.videos_bucket.id
 
   lambda_function {
-    lambda_function_arn = aws_lambda_function.video_processor.arn
+    lambda_function_arn = aws_lambda_function.new_video_processing.arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "videos/"
   }
 
   depends_on = [
     aws_s3_bucket.videos_bucket,
-    aws_lambda_function.video_processor
+    aws_lambda_function.new_video_processing
   ]
 }
 
 ///// Lambdas
 
-resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda"
+resource "aws_iam_role" "iam_for_new_video_processing_lambda" {
+  name = "iam_for_new_video_processing_lambda"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "iam_for_image_resizer_lambda" {
+  name = "iam_for_image_resizer_lambda"
 
   assume_role_policy = <<EOF
 {
@@ -207,15 +227,9 @@ EOF
 resource "aws_lambda_permission" "video_processor_lambda_s3_invoke_permission" {
   statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.video_processor.function_name
+  function_name = aws_lambda_function.new_video_processing.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = "arn:aws:s3:::${aws_s3_bucket.videos_bucket.id}"
-}
-
-data "archive_file" "python_video_processor_lambda_package" {  
-  type        = "zip"  
-  source_file = "${path.module}/../lambdas/workers/video_processor/app.py" 
-  output_path = "${path.module}/../lambdas/workers/video_processor/python_video_processor.zip"
 }
 
 resource "aws_lambda_layer_version" "ffmpeg_python_lambda_layer" {
@@ -226,27 +240,77 @@ resource "aws_lambda_layer_version" "ffmpeg_python_lambda_layer" {
   compatible_runtimes = ["python3.8"]
 }
 
-resource "aws_lambda_layer_version" "pillow_python_lambda_layer" {
-  filename            = "${path.module}/../lambdas/layers/pillow/source/python.zip"
-  layer_name          = "pillow_python_lambda_layer"
-  source_code_hash    = filebase64sha256("${path.module}/../lambdas/layers/pillow/source/python.zip")
-
-  compatible_runtimes = ["python3.8"]
+data "archive_file" "python_new_video_processing_lambda_package" {  
+  type        = "zip"  
+  source_file = "${path.module}/../lambdas/workers/new_video_processing/app.py" 
+  output_path = "${path.module}/../lambdas/workers/new_video_processing/python.zip"
 }
-
-resource "aws_lambda_function" "video_processor" {
-  function_name    = "video_processor"
+resource "aws_lambda_function" "new_video_processing" {
+  function_name    = "new_video_processing"
   architectures    = ["arm64"]
-  filename         = data.archive_file.python_video_processor_lambda_package.output_path
-  source_code_hash = data.archive_file.python_video_processor_lambda_package.output_base64sha256
-  role             = aws_iam_role.iam_for_lambda.arn
+  filename         = data.archive_file.python_new_video_processing_lambda_package.output_path
+  source_code_hash = data.archive_file.python_new_video_processing_lambda_package.output_base64sha256
+  role             = aws_iam_role.iam_for_new_video_processing_lambda.arn
   handler          = "app.lambda_handler"
   runtime          = "python3.8"
   timeout          = 30
   layers           = [
-    aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn,
-    aws_lambda_layer_version.pillow_python_lambda_layer.arn
+    aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn
   ]
+  depends_on = [
+    aws_lambda_function.image_resizer
+  ]
+  environment {
+    variables = {
+      image_resizer_lambda_arn = aws_lambda_function.image_resizer.arn
+    }
+  }
+}
+data "archive_file" "python_image_resizer_lambda_package" {  
+  type        = "zip"  
+  source_file = "${path.module}/../lambdas/workers/image_resizer/app.py" 
+  output_path = "${path.module}/../lambdas/workers/image_resizer/python.zip"
+}
+resource "aws_lambda_function" "image_resizer" {
+  function_name    = "image_resizer"
+  architectures    = ["x86_64"]
+  filename         = data.archive_file.python_image_resizer_lambda_package.output_path
+  source_code_hash = data.archive_file.python_image_resizer_lambda_package.output_base64sha256
+  role             = aws_iam_role.iam_for_image_resizer_lambda.arn
+  handler          = "app.lambda_handler"
+  runtime          = "python3.8"
+  timeout          = 15
+  layers           = [
+    # PILLOW, source: https://github.com/keithrozario/Klayers/tree/master/deployments/python3.8
+    "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:4"
+  ]
+}
+
+# lambda invoke lambda permissions
+
+resource "aws_iam_policy" "invoke_image_resizer_lambda_policy" {
+  name        = "invoke_image_resizer_lambda_policy"
+  path        = "/"
+  description = "IAM policy to invoke video thumbnail lambda"
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+            "lambda:InvokeFunction",
+            "lambda:InvokeAsync"
+        ]
+        "Resource": "${aws_lambda_function.image_resizer.arn}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_invoke_lambda_policy" {
+  role       = aws_iam_role.iam_for_new_video_processing_lambda.name
+  policy_arn = aws_iam_policy.invoke_image_resizer_lambda_policy.arn
 }
 
 # lambda s3 premissions
@@ -271,8 +335,13 @@ resource "aws_iam_policy" "lambda_s3" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_s3" {
-  role       = aws_iam_role.iam_for_lambda.name
+resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_s3" {
+  role       = aws_iam_role.iam_for_new_video_processing_lambda.name
+  policy_arn = aws_iam_policy.lambda_s3.arn
+}
+
+resource "aws_iam_role_policy_attachment" "image_resizer_lambda_s3" {
+  role       = aws_iam_role.iam_for_image_resizer_lambda.name
   policy_arn = aws_iam_policy.lambda_s3.arn
 }
 
@@ -280,7 +349,7 @@ resource "aws_iam_role_policy_attachment" "lambda_s3" {
 # This is to optionally manage the CloudWatch Log Group for the Lambda Function.
 # If skipping this resource configuration, also add "logs:CreateLogGroup" to the IAM policy below.
 resource "aws_cloudwatch_log_group" "example" {
-  name              = "/aws/lambda/${aws_lambda_function.video_processor.function_name}"
+  name              = "/aws/lambda/${aws_lambda_function.new_video_processing.function_name}"
   retention_in_days = 14
 }
 
@@ -309,6 +378,6 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
-  role       = aws_iam_role.iam_for_lambda.name
+  role       = aws_iam_role.iam_for_new_video_processing_lambda.name
   policy_arn = aws_iam_policy.lambda_logging.arn
 }

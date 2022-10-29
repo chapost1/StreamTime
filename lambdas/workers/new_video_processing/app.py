@@ -5,7 +5,6 @@ import shlex
 import boto3
 import os
 import datetime
-# from PIL import Image
 
 # VIDEO_FILE_STATES
 PENDING = 'PENDING'
@@ -23,7 +22,7 @@ NOT_A_VIDEO_TYPE = 'NOT_A_VIDEO_TYPE'
 EXECUTABLES_DIRECTORY = '/opt/var/task/python'
 
 THUMBNAIL_SIZE = (360, 200)
-
+THUMBNAIL_ACL = 'public-read'
 
 s3Client = boto3.client('s3')
 
@@ -83,10 +82,18 @@ def delete_object(bucket: str, key: str) -> None:
 def get_signed_url(expires_in: int, bucket: str, key: str) -> str:
     return s3Client.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': key}, ExpiresIn=expires_in)
 
-# def resize_image(image_path: str, resized_path: str, size: Tuple[int, int]):
-#   with Image.open(image_path) as image:
-#       image.thumbnail(size)
-#       image.save(resized_path)
+def get_video_duration_seconds(s3_source_signed_url: str) -> float:
+    executable_path = f'{EXECUTABLES_DIRECTORY}/ffprobe'
+    ffmpeg_cmd = f"{executable_path} \"" + str(s3_source_signed_url) + "\" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1"
+    print(ffmpeg_cmd)
+    try:
+        result = subprocess.run(shlex.split(ffmpeg_cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        duration = float(result.stdout)
+    except Exception as e:
+        print('Extract Duration exception')
+        print(e)
+        raise e
+    return duration
 
 def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
     executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
@@ -103,34 +110,37 @@ def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float
         print('Extract Thumbnail exception')
         print(e)
         raise e
-    
-    # thumbnail_path = '/tmp/thumbnail.jpg'
-    thumbnail_path = frame_path
 
-    # resize_image(frame_path, thumbnail_path, THUMBNAIL_SIZE)
-        
     print('Going to upload thumbnail: ' + bucket + '/' + thumbnail_key)
-    with open(thumbnail_path, "rb") as f:
-        resp = s3Client.put_object(Body=f, Bucket=bucket, Key=thumbnail_key, ACL='public-read')
+    with open(frame_path, "rb") as f:
+        resp = s3Client.put_object(Body=f, Bucket=bucket, Key=thumbnail_key, ACL=THUMBNAIL_ACL)
         print(resp)
         print('Thumbnail has been uploaded')
 
-def get_video_duration_seconds(s3_source_signed_url: str) -> float:
-    executable_path = f'{EXECUTABLES_DIRECTORY}/ffprobe'
-    ffmpeg_cmd = f"{executable_path} \"" + str(s3_source_signed_url) + "\" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1"
-    print(ffmpeg_cmd)
+def resize_thumbnail(bucket: str, thumbnail_key: str, new_size = Tuple[int, int]) -> None:
+    lambdaClient = boto3.client('lambda')
     try:
-        result = subprocess.run(shlex.split(ffmpeg_cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        duration = float(result.stdout)
+        response = lambdaClient.invoke(
+            FunctionName=os.environ['image_resizer_lambda_arn'],
+            InvocationType='RequestResponse',
+            Payload=json.dumps({
+                    'file_key': thumbnail_key,
+                    'bucket': bucket,
+                    'new_size': list(new_size),
+                    'ACL': THUMBNAIL_ACL
+                })
+        )
+        responseFromChild = json.load(response['Payload'])
     except Exception as e:
-        print('Extract Duration exception')
+        print('Error during waiting for response from child')
         print(e)
         raise e
-    return duration
+    print(responseFromChild)
+
 
 def lambda_handler(event, context):
     MAX_FILE_SIZE_IN_BYTES: int = 5e+9   # 5GB
-    SIGNED_URL_EXPIRATION: int = 300     # The number of seconds that the Signed URL is valid
+    SIGNED_URL_EXPIRATION: int = 60 * 10     # The number of seconds that the Signed URL is valid
 
     s3Ref = event['Records'][0]['s3']
     bucket = s3Ref['bucket']['name']
@@ -186,8 +196,10 @@ def lambda_handler(event, context):
         try:
             duration_seconds: float = get_video_duration_seconds(s3_source_signed_url)
 
-            thumbnail_key: str = f'thumbnails/{video_id}.jpg'
+            thumbnail_key = f'thumbnails/{video_id}.jpg'
             upload_frame_as_thumbnail(s3_source_signed_url, duration_seconds, bucket, thumbnail_key)
+
+            resize_thumbnail(bucket, thumbnail_key, THUMBNAIL_SIZE)
         except Exception as e:
             print('Video processing exception occurred')
             print(e)
@@ -201,6 +213,7 @@ def lambda_handler(event, context):
     # todo: remove meta file (also when deletes object)
 
     # call SQS
+
 
     return {
         'statusCode': 200,
