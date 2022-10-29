@@ -34,6 +34,15 @@ locals {
     s3_tmp_thumbnails_prefix = "tmp-thumbnails"
     s3_thumbnails_acl = "public-read"
     s3_max_video_file_size_in_bytes = "2e+9" # 2GB
+    // new_video_processing_failures
+    new_video_processing_failure_internal_error = "Internal Error, please try again later"
+    new_video_processing_failure_max_file_size_exceeded = "Maximum file size exceeded"
+    new_video_processing_failure_corrupted = "Corrupted/Invalid File"
+    new_video_processing_failure_unsupported_video_type = "Unsupported video type"
+    // dynamoDB tables
+    dynamodb_table_unprocessed_videos = "unprocessed_videos"
+    dynamodb_table_drafts_videos = "drafts_videos"
+    dynamodb_table_processing_has_been_failed_videos = "processing_has_been_failed_videos"
 }
 
 ///// s3 bucket
@@ -57,7 +66,7 @@ resource "aws_s3_bucket_cors_configuration" "videos_bucket_cors_rule" {
 
   cors_rule {
     allowed_methods = ["GET"]
-    allowed_origins = ["*"]
+    allowed_origins = ["*"] # todo: mark app as allowed when ui exists (instead of wildcard)
   }
 }
 
@@ -333,7 +342,14 @@ resource "aws_lambda_function" "new_video_processing" {
       s3_unregistered_videos_prefix = local.s3_unregistered_videos_prefix,
       s3_unprocessed_videos_prefix = local.s3_unprocessed_videos_prefix,
       s3_thumbnails_acl = local.s3_thumbnails_acl,
-      s3_max_video_file_size_in_bytes = local.s3_max_video_file_size_in_bytes
+      s3_max_video_file_size_in_bytes = local.s3_max_video_file_size_in_bytes,
+      new_video_processing_failure_internal_error = local.new_video_processing_failure_internal_error
+      new_video_processing_failure_max_file_size_exceeded = local.new_video_processing_failure_max_file_size_exceeded
+      new_video_processing_failure_corrupted = local.new_video_processing_failure_corrupted
+      new_video_processing_failure_unsupported_video_type = local.new_video_processing_failure_unsupported_video_type
+      dynamodb_table_unprocessed_videos = local.dynamodb_table_unprocessed_videos
+      dynamodb_table_drafts_videos = local.dynamodb_table_drafts_videos
+      dynamodb_table_processing_has_been_failed_videos = local.dynamodb_table_processing_has_been_failed_videos
     }
   }
 }
