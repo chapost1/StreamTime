@@ -225,6 +225,7 @@ def lambda_handler(event, context):
             print(e)
             delete_object(bucket, key)
             mark_as_deleted(video_id, CORRUPTED)
+            raise e
     
     try:
         # move to completed S3 prefix
