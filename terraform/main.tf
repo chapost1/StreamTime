@@ -299,11 +299,11 @@ resource "aws_lambda_permission" "video_processor_lambda_s3_invoke_permission" {
 }
 
 resource "aws_lambda_layer_version" "ffmpeg_python_lambda_layer" {
-  filename            = "${path.module}/../lambdas/layers/pyffmpeg/source/python.zip"
-  layer_name          = "ffmpeg_python_lambda_layer"
-  source_code_hash    = filebase64sha256("${path.module}/../lambdas/layers/pyffmpeg/source/python.zip")
-
-  compatible_runtimes = ["python3.8"]
+  filename                      = "${path.module}/../lambdas/layers/pyffmpeg/source/python.zip"
+  layer_name                    = "ffmpeg_python_lambda_layer"
+  source_code_hash              = filebase64sha256("${path.module}/../lambdas/layers/pyffmpeg/source/python.zip")
+  cocompatible_architectures    = ["arm64"]
+  compatible_runtimes           = ["python3.8"]
 }
 
 data "archive_file" "python_new_video_processing_lambda_package" {  
