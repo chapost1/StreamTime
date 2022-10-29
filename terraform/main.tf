@@ -27,12 +27,13 @@ locals {
     // sqs
     new_video_on_s3_queue = "new-video-on-s3-queue"
     // s3
-    s3_completed_videos_prefix = "completed-videos"
-    s3_intermediate_videos_prefix = "intermediate-videos"
+    s3_registered_videos_prefix = "registered-videos"
+    s3_unprocessed_videos_prefix = "unprocessed-videos"
+    s3_unregistered_videos_prefix = "unregistered-videos"
     s3_thumbnails_prefix = "thumbnails"
-    s3_meta_prefix = "meta"
+    s3_tmp_thumbnails_prefix = "tmp-thumbnails"
     s3_thumbnails_acl = "public-read"
-    s3_max_video_file_size_in_bytes = "5e+9" # 5GB
+    s3_max_video_file_size_in_bytes = "2e+9" # 2GB
 }
 
 ///// s3 bucket
@@ -67,41 +68,39 @@ resource "aws_s3_bucket_acl" "videos_bucket_acl" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
   bucket = aws_s3_bucket.videos_bucket.bucket
-
   rule {
-    id = "videos_meta_data"
-
-    expiration {
-      days = 2
-    }
-
-    filter {
-      and {
-        prefix = "${local.s3_meta_prefix}/"
-
-        tags = {
-          rule      = "videos_meta_data"
-          autoclean = "true"
-        }
-      }
-    }
-
-    status = "Enabled"
-  }
-
-  rule {
-    id = "intermediate-videos"
-
+    id = "unprocessed-videos"
+    
     expiration {
       days = 1
     }
 
     filter {
       and {
-        prefix = "${local.s3_intermediate_videos_prefix}/"
+        prefix = "${local.s3_unprocessed_videos_prefix}/"
 
         tags = {
-          rule      = "intermediate-videos"
+          rule      = "unprocessed-videos"
+          autoclean = "true"
+        }
+      }
+    }
+
+    status = "Enabled"
+  }
+  rule {
+    id = "unregistered-videos"
+    
+    expiration {
+      days = 1
+    }
+
+    filter {
+      and {
+        prefix = "${local.s3_unregistered_videos_prefix}/"
+
+        tags = {
+          rule      = "unregistered-videos"
           autoclean = "true"
         }
       }
@@ -111,14 +110,14 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
   }
 
   rule {
-    id = "completed-videos"
+    id = "registered-videos"
 
     filter {
       and {
-        prefix = "${local.s3_completed_videos_prefix}/"
+        prefix = "${local.s3_registered_videos_prefix}/"
 
         tags = {
-          rule      = "completed-videos"
+          rule      = "registered-videos"
           autoclean = "true"
         }
       }
@@ -135,6 +134,27 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
       days = 60
       storage_class = "INTELLIGENT_TIERING"
     }
+  }
+
+  rule {
+    id = "tmp-thumbnails"
+
+    expiration {
+      days = 1
+    }
+
+    filter {
+      and {
+        prefix = "${local.s3_tmp_thumbnails_prefix}/"
+
+        tags = {
+          rule      = "tmp-thumbnails"
+          autoclean = "true"
+        }
+      }
+    }
+
+    status = "Enabled"
   }
 
   rule {
@@ -219,7 +239,7 @@ resource "aws_s3_bucket_notification" "new_video_upload" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.new_video_processing.arn
     events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "${local.s3_intermediate_videos_prefix}/"
+    filter_prefix       = "${local.s3_unprocessed_videos_prefix}/"
   }
 
   depends_on = [
@@ -310,14 +330,14 @@ resource "aws_lambda_function" "new_video_processing" {
     variables = {
       image_resizer_lambda_arn = aws_lambda_function.image_resizer.arn,
       s3_thumbnails_prefix = local.s3_thumbnails_prefix,
-      s3_meta_prefix = local.s3_meta_prefix,
-      s3_completed_videos_prefix = local.s3_completed_videos_prefix,
-      s3_intermediate_videos_prefix = local.s3_intermediate_videos_prefix,
+      s3_unregistered_videos_prefix = local.s3_unregistered_videos_prefix,
+      s3_unprocessed_videos_prefix = local.s3_unprocessed_videos_prefix,
       s3_thumbnails_acl = local.s3_thumbnails_acl,
       s3_max_video_file_size_in_bytes = local.s3_max_video_file_size_in_bytes
     }
   }
 }
+
 data "archive_file" "python_image_resizer_lambda_package" {  
   type        = "zip"  
   source_file = "${path.module}/../lambdas/workers/image_resizer/app.py" 

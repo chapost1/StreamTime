@@ -14,15 +14,17 @@ def resize_image(image_path: str, resized_path: str, size: Tuple[int, int]):
 def lambda_handler(event, context):
     try:
         ACL = event.get('ACL', 'private')
-        bucket = event['bucket']
-        file_key = event['file_key']
-        file_name = file_key.split('/')[-1]
+        source_bucket = event['source_bucket']
+        dest_bucket = event['dest_bucket']
+        source_file_key = event['source_file_key']
+        dest_file_key = event['dest_file_key']
+        file_name = source_file_key.split('/')[-1]
         temp_file_path = f'/tmp/{file_name}'
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
 
         with open(temp_file_path, 'wb') as f:
-            s3Client.download_fileobj(bucket, file_key, f)
+            s3Client.download_fileobj(source_bucket, source_file_key, f)
 
         new_file_path = f'/tmp/resized_{file_name}'
         if os.path.exists(new_file_path):
@@ -34,9 +36,9 @@ def lambda_handler(event, context):
             tuple(event['new_size'])
         )
 
-        print('Going to upload resized image: ' + bucket + '/' + file_key)
+        print('Going to upload resized image: ' + dest_bucket + '/' + dest_file_key)
         with open(new_file_path, "rb") as f:
-            resp = s3Client.put_object(Body=f, Bucket=bucket, Key=file_key, ACL=ACL)
+            resp = s3Client.put_object(Body=f, Bucket=dest_bucket, Key=dest_file_key, ACL=ACL)
             print(resp)
             print('Resized imaged has been uploaded')
 
