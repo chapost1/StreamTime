@@ -42,15 +42,12 @@ IMAGE_RESIZER_LAMBDA_ARN_ENV_NAME = 'image_resizer_lambda_arn'
 
 s3Client = boto3.client('s3')
 
+# relies on HTML5 supported formats
 video_types_to_extension = {
-    'video/x-msvideo': 'avi',
-    'video/mp4': 'mp4',
-    'video/mpeg': 'mpeg',
     'video/ogg': 'ogv',
-    'video/mp2t': 'ts',
+    'video/mp4': 'mp4',
     'video/webm': 'webm',
-    'video/3gpp': '3gp',
-    'video/3gpp2': '3g2'
+    'video/mpeg': 'mpeg',
 }
 
 # helpers
