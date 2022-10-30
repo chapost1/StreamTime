@@ -14,6 +14,15 @@ Help() {
    exit 1;
 }
 
+is_valid_command() {
+    local valid=( destroy apply plan )
+    local value=$1
+    for elem in "${valid[@]}"; do
+        [[ $value == $elem ]] && return 0
+    done
+    return 1
+}
+
 while getopts ":hc:a:s:r" option; do
    case $option in
       h) # display Help
@@ -58,12 +67,23 @@ fi
 # make sure script workdir is relative to terraform directory
 cd $(dirname "$0")
 
-# necessary builds
-# lambda layars
-../lambdas/layers/build_layers.sh
+if is_valid_command "$command"; then
+   if [ $command = "destroy" ]; then
+       echo "no builds are necessary for destroy command."
+   else
+      echo "checking for necessery builds..."
+      # run necessary builds
 
-# packages
-echo "no packages to build yet"
+      # lambda layars
+      ../lambdas/layers/build_layers.sh
 
-# run command
-terraform $command -var="aws_access_key=$access_key" -var="aws_secret_key=$secret_key" -var="aws_region=$region"
+      # packages
+      echo "no packages to build yet"
+   fi
+
+   # run command
+   terraform $command -var="aws_access_key=$access_key" -var="aws_secret_key=$secret_key" -var="aws_region=$region"
+else
+   echo "invalid command"
+   Help
+fi
