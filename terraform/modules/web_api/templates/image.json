@@ -1,0 +1,53 @@
+[
+    {
+        "name": "${env_name}",
+        "image": "${env_image}",
+        "cpu": ${env_cpu},
+        "memory": ${env_memory},
+        "networkMode": "awsvpc",
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "${env_logs_group}",
+                "awslogs-region": "${env_aws_region}",
+                "awslogs-stream-prefix": "${env_logs_stream_prefix}"
+            }
+        },
+        "portMappings": [
+            {
+                "containerPort": ${env_app_port},
+                "hostPort": ${env_app_port}
+            }
+        ],
+        "environment": [
+            {
+                "name": "health_check_path",
+                "value": "${env_health_check_path}"
+            },
+            {
+                "name": "rds_address",
+                "value": "${env_rds_address}"
+            },
+            {
+                "name": "rds_password",
+                "value": "${env_rds_password}"
+            },
+            {
+                "name": "rds_username",
+                "value": "${env_rds_username}"
+            },
+            {
+                "name": "rds_port",
+                "value": "${env_rds_port}"
+            },
+            {
+                "name": "rds_db",
+                "value": "${env_rds_db}"
+            },
+            {
+                "name": "image_hash",
+                "value": "${env_image_hash}"
+            }
+        ]
+    }
+]
