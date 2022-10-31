@@ -16,13 +16,13 @@ class AbstractConnectionRepo(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def list_all(self) -> Iterator[str]:
+    def list_all_user_connections(self, user_id: str) -> Iterator[str]:
         """
         Returns all of the connections. These should all be active but not guaranteed.
         """
 
     @abstractmethod
-    def save(self, connection_id: str):
+    def save(self, user_id: str, connection_id: str):
         """
         Saves a `connection_id` to the store
         """

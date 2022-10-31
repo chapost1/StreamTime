@@ -24,25 +24,43 @@ class S3ConnectionRepo(AbstractConnectionRepo):
 
         self.bucket = s3_resource.Bucket(bucket_name)
         self.prefix = prefix
+        self.users_connections = f"{self.prefix}/users_connections"
+        self.user_by_connection = f"{self.prefix}/user_by_connection"
+
+    def _prefix(self, user_id: str) -> str:
+        return f"{self.users_connections}/{user_id}"
 
     def delete(self, connection_id: str):
         """
         Removes a `connection_id` from the store by deleting the S3 Object with that key. Don't throw, this should act
         as desired state. If it's already gone, fair enough.
         """
-        self.bucket.delete_objects(
-            Delete={"Objects": [{"Key": f"{self.prefix}/{connection_id}"}]})
+        connection_prefix = f"{self.user_by_connection}/{connection_id}"
+        objects = []
+        for s3_obj_summary in self.bucket.objects.filter(Prefix=connection_prefix):
+            user_id = s3_obj_summary.key[len(connection_prefix) + 1:]
+            # delete connection by id level
+            objects.append({"Key": f"{self._prefix(user_id)}/{connection_id}"})
+            objects.append({"Key": s3_obj_summary.key})# delete also the reversed matcher
 
-    def list_all(self) -> Iterator[str]:
+        self.bucket.delete_objects(
+            Delete={"Objects": objects})
+
+    def list_all_user_connections(self, user_id: str) -> Iterator[str]:
         """
         Returns all of the connections by listing all of the objects in this store. These should all be active but not
         guaranteed.
         """
-        for s3_obj_summary in self.bucket.objects.filter(Prefix=self.prefix):
-            yield s3_obj_summary.key[len(self.prefix) + 1:]
+        for s3_obj_summary in self.bucket.objects.filter(Prefix=self._prefix(user_id)):
+            yield s3_obj_summary.key[len(self._prefix(user_id)) + 1:]
 
-    def save(self, connection_id: str):
+    def save(self, user_id: str, connection_id: str):
         """
         Saves a `connection_id` to S3 by creating an empty object with that ID as the key
         """
-        self.bucket.put_object(Key=f"{self.prefix}/{connection_id}", Body=b"")
+        # find connections by user_id
+        self.bucket.put_object(
+            Key=f"{self._prefix(user_id)}/{connection_id}", Body=b"")
+        # find user by connection_id for disconnect event handling (delete file)
+        self.bucket.put_object(
+            Key=f"{self.user_by_connection}/{connection_id}/{user_id}", Body=b"")
