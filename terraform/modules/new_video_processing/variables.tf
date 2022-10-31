@@ -2,7 +2,15 @@ variable "app_name" {
   type = string
 }
 
+variable "image_resizer_arn" {
+  type = string
+}
+
 variable "s3_videos_bucket_id" {
+  type = string
+}
+
+variable "s3_videos_bucket_arn" {
   type = string
 }
 

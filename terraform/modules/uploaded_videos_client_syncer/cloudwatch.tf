@@ -5,6 +5,6 @@ resource "aws_cloudwatch_log_group" "videos_sync_api_gw" {
 }
 
 resource "aws_cloudwatch_log_group" "videos_sync_lambda_main" {
-  name              = "/aws/lambda/${var.app_name}-uploaded-videos-client-sync-lambda"
+  name              = "/aws/lambda/${aws_lambda_function.websocket_messages_lambda_processor.function_name}"
   retention_in_days = 7
 }

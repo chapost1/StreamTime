@@ -48,14 +48,8 @@ locals {
   uploaded_video_feedback_event                         = "uploaded_video_feedback"
 }
 
-resource "random_string" "videos_rds_password" {
-  length  = 16
-  special = false
-}
-
-///// s3 bucket
-module "s3" {
-  source                    = "./modules/s3"
+module "videos_bucket" {
+  source                    = "./modules/videos_bucket"
   app_name                  = local.app_name
   uploaded_videos_prefix    = local.s3_uploaded_videos_prefix
   unprocessed_videos_prefix = local.s3_unprocessed_videos_prefix
@@ -64,15 +58,57 @@ module "s3" {
   tmp_thumbnails_prefix     = local.s3_tmp_thumbnails_prefix
 }
 
-# ///// sqs
-# module "sqs" {
-#   source                     = "./modules/sqs"
-#   new_video_on_s3_queue_name = local.new_video_on_s3_queue_name
-#   s3_videos_bucket_arn       = module.s3.videos_bucket.arn
-#   s3_videos_bucket_id        = module.s3.videos_bucket.id
-#   aws_region_name            = data.aws_region.current.name
-#   aws_account_id             = data.aws_caller_identity.current.account_id
-# }
+module "uploaded_videos_client_syncer" {
+  source = "./modules/uploaded_videos_client_syncer"
+
+  app_name                      = local.app_name
+  connection_store_prefix       = local.uploaded_videos_client_syncer_connection_store_prefix
+  uploaded_video_feedback_event = local.uploaded_video_feedback_event
+}
+
+module "image_resizer" {
+  source   = "./modules/image_resizer"
+  app_name = local.app_name
+  depends_on = [
+    module.videos_bucket
+  ]
+}
+
+module "new_video_processing" {
+  source = "./modules/new_video_processing"
+
+  app_name          = local.app_name
+  image_resizer_arn = module.image_resizer.arn
+
+  s3_videos_bucket_id                                 = module.videos_bucket.videos_bucket.id
+  s3_videos_bucket_arn                                = module.videos_bucket.videos_bucket.arn
+  s3_thumbnails_prefix                                = local.s3_thumbnails_prefix
+  s3_videos_prefix                                    = local.s3_videos_prefix
+  s3_uploaded_videos_prefix                           = local.s3_uploaded_videos_prefix
+  s3_unprocessed_videos_prefix                        = local.s3_unprocessed_videos_prefix
+  s3_thumbnails_acl                                   = local.s3_thumbnails_acl
+  s3_max_video_file_size_in_bytes                     = local.s3_max_video_file_size_in_bytes
+  new_video_processing_failure_internal_error         = local.new_video_processing_failure_internal_error
+  new_video_processing_failure_max_file_size_exceeded = local.new_video_processing_failure_max_file_size_exceeded
+  new_video_processing_failure_corrupted              = local.new_video_processing_failure_corrupted
+  new_video_processing_failure_unsupported_video_type = local.new_video_processing_failure_unsupported_video_type
+  dynamodb_table_invoked_uploaded_videos              = local.dynamodb_table_invoked_uploaded_videos
+  dynamodb_table_unprocessed_videos                   = local.dynamodb_table_unprocessed_videos
+  dynamodb_table_drafts_videos                        = local.dynamodb_table_drafts_videos
+  dynamodb_table_processing_has_been_failed_videos    = local.dynamodb_table_processing_has_been_failed_videos
+  new_video_events_processing_has_been_started        = local.new_video_events_processing_has_been_started
+  new_video_events_processing_failure                 = local.new_video_events_processing_failure
+  new_video_events_moved_to_drafts                    = local.new_video_events_moved_to_drafts
+
+  uploaded_videos_client_sync_sns_topic_arn = module.uploaded_videos_client_syncer.input_sns_topic_arn
+  uploaded_video_feedback_event             = local.uploaded_video_feedback_event
+
+  depends_on = [
+    module.videos_bucket.videos_bucket,
+    module.image_resizer.image_resizer_arn,
+    module.uploaded_videos_client_syncer.input_sns_topic_arn
+  ]
+}
 
 module "vpc" {
   source = "./modules/vpc"
@@ -81,14 +117,6 @@ module "vpc" {
 
   cidr_block = "172.16.0.0/16"
   az_count   = 2
-}
-
-module "uploaded_videos_client_syncer" {
-  source = "./modules/uploaded_videos_client_syncer"
-
-  app_name                      = local.app_name
-  connection_store_prefix       = local.uploaded_videos_client_syncer_connection_store_prefix
-  uploaded_video_feedback_event = local.uploaded_video_feedback_event
 }
 
 module "web_api" {
@@ -120,36 +148,5 @@ module "web_api" {
   depends_on = [
     module.uploaded_videos_client_syncer.ws_url,
     module.uploaded_videos_client_syncer.input_sns_topic_arn
-  ]
-}
-
-///// lambda
-module "lambda" {
-  source                                              = "./modules/lambda"
-  app_name                                            = local.app_name
-  s3_videos_bucket_id                                 = module.s3.videos_bucket.id
-  s3_thumbnails_prefix                                = local.s3_thumbnails_prefix
-  s3_videos_prefix                                    = local.s3_videos_prefix
-  s3_uploaded_videos_prefix                           = local.s3_uploaded_videos_prefix
-  s3_unprocessed_videos_prefix                        = local.s3_unprocessed_videos_prefix
-  s3_thumbnails_acl                                   = local.s3_thumbnails_acl
-  s3_max_video_file_size_in_bytes                     = local.s3_max_video_file_size_in_bytes
-  new_video_processing_failure_internal_error         = local.new_video_processing_failure_internal_error
-  new_video_processing_failure_max_file_size_exceeded = local.new_video_processing_failure_max_file_size_exceeded
-  new_video_processing_failure_corrupted              = local.new_video_processing_failure_corrupted
-  new_video_processing_failure_unsupported_video_type = local.new_video_processing_failure_unsupported_video_type
-  dynamodb_table_invoked_uploaded_videos              = local.dynamodb_table_invoked_uploaded_videos
-  dynamodb_table_unprocessed_videos                   = local.dynamodb_table_unprocessed_videos
-  dynamodb_table_drafts_videos                        = local.dynamodb_table_drafts_videos
-  dynamodb_table_processing_has_been_failed_videos    = local.dynamodb_table_processing_has_been_failed_videos
-  new_video_events_processing_has_been_started        = local.new_video_events_processing_has_been_started
-  new_video_events_processing_failure                 = local.new_video_events_processing_failure
-  new_video_events_moved_to_drafts                    = local.new_video_events_moved_to_drafts
-
-  uploaded_videos_client_sync_sns_topic_arn = module.uploaded_videos_client_syncer.input_sns_topic_arn
-  uploaded_video_feedback_event             = local.uploaded_video_feedback_event
-
-  depends_on = [
-    module.s3.videos_bucket
   ]
 }
