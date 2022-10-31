@@ -96,6 +96,10 @@ resource "aws_lambda_function" "new_video_processing" {
       new_video_events_moved_to_drafts = var.new_video_events_moved_to_drafts
     }
   }
+
+  tags = {
+    Name = "${var.app_name}-new-video-processing-lambda"
+  }
 }
 
 // invoke
@@ -131,6 +135,10 @@ resource "aws_lambda_function" "image_resizer" {
     # PILLOW, source: https://github.com/keithrozario/Klayers/tree/master/deployments/python3.8
     "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:4"
   ]
+
+  tags = {
+    Name = "${var.app_name}-image-resizer-lambda-layer"
+  }
 }
 
 # lambda invoke lambda permissions

@@ -2,8 +2,11 @@
 
 // videos
 resource "aws_s3_bucket" "videos_bucket" {
-  bucket        = var.videos_bucket_name
+  bucket        = "${var.app_name}-bucket"
   force_destroy = true
+  tags = {
+    Name = "${var.app_name}-s3-bucket"
+  }
 }
 
 resource "aws_s3_bucket_cors_configuration" "videos_bucket_cors_rule" {
@@ -32,7 +35,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
   bucket = aws_s3_bucket.videos_bucket.bucket
   rule {
     id = "uploaded-videos"
-    
+
     expiration {
       days = 1
     }
@@ -52,7 +55,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
   }
   rule {
     id = "unprocessed-videos"
-    
+
     expiration {
       days = 1
     }
@@ -93,7 +96,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "videos_bucket_config" {
     }
 
     transition {
-      days = 60
+      days          = 60
       storage_class = "INTELLIGENT_TIERING"
     }
   }
