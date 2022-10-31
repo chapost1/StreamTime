@@ -71,3 +71,7 @@ variable "rds_port" {
 variable "rds_db" {
   type = string
 }
+
+variable "uploaded_videos_client_sync_ws_url" {
+  type = string
+}

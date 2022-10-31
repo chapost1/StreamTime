@@ -62,3 +62,11 @@ variable "new_video_events_processing_failure" {
 variable "new_video_events_moved_to_drafts" {
   type = string
 }
+
+variable "uploaded_videos_client_sync_sns_topic_arn" {
+  type = string
+}
+
+variable "uploaded_video_feedback_event" {
+  type = string
+}

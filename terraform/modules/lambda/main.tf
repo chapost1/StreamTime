@@ -47,16 +47,16 @@ resource "aws_lambda_permission" "video_processor_lambda_s3_invoke_permission" {
 }
 
 resource "aws_lambda_layer_version" "ffmpeg_python_lambda_layer" {
-  filename                      = "${path.module}/../../../lambdas/layers/pyffmpeg/source/python.zip"
-  layer_name                    = "ffmpeg_python_lambda_layer"
-  source_code_hash              = filebase64sha256("${path.module}/../../../lambdas/layers/pyffmpeg/source/python.zip")
-  compatible_architectures      = ["arm64"]
-  compatible_runtimes           = ["python3.8"]
+  filename                 = "${path.module}/../../../lambdas/layers/pyffmpeg/source/python.zip"
+  layer_name               = "ffmpeg_python_lambda_layer"
+  source_code_hash         = filebase64sha256("${path.module}/../../../lambdas/layers/pyffmpeg/source/python.zip")
+  compatible_architectures = ["arm64"]
+  compatible_runtimes      = ["python3.8"]
 }
 
-data "archive_file" "python_new_video_processing_lambda_package" {  
-  type        = "zip"  
-  source_file = "${path.module}/../../../lambdas/workers/new_video_processing/app.py" 
+data "archive_file" "python_new_video_processing_lambda_package" {
+  type        = "zip"
+  source_file = "${path.module}/../../../lambdas/workers/new_video_processing/app.py"
   output_path = "${path.module}/../../../lambdas/workers/new_video_processing/python.zip"
 }
 resource "aws_lambda_function" "new_video_processing" {
@@ -68,7 +68,7 @@ resource "aws_lambda_function" "new_video_processing" {
   handler          = "app.lambda_handler"
   runtime          = "python3.8"
   timeout          = 300 # 5m
-  layers           = [
+  layers = [
     aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn
   ]
   depends_on = [
@@ -76,24 +76,26 @@ resource "aws_lambda_function" "new_video_processing" {
   ]
   environment {
     variables = {
-      image_resizer_lambda_arn = aws_lambda_function.image_resizer.arn,
-      s3_thumbnails_prefix = var.s3_thumbnails_prefix,
-      s3_videos_prefix = var.s3_videos_prefix,
-      s3_uploaded_videos_prefix = var.s3_uploaded_videos_prefix,
-      s3_unprocessed_videos_prefix = var.s3_unprocessed_videos_prefix,
-      s3_thumbnails_acl = var.s3_thumbnails_acl,
-      s3_max_video_file_size_in_bytes = var.s3_max_video_file_size_in_bytes,
-      new_video_processing_failure_internal_error = var.new_video_processing_failure_internal_error
+      image_resizer_lambda_arn                            = aws_lambda_function.image_resizer.arn,
+      s3_thumbnails_prefix                                = var.s3_thumbnails_prefix,
+      s3_videos_prefix                                    = var.s3_videos_prefix,
+      s3_uploaded_videos_prefix                           = var.s3_uploaded_videos_prefix,
+      s3_unprocessed_videos_prefix                        = var.s3_unprocessed_videos_prefix,
+      s3_thumbnails_acl                                   = var.s3_thumbnails_acl,
+      s3_max_video_file_size_in_bytes                     = var.s3_max_video_file_size_in_bytes,
+      new_video_processing_failure_internal_error         = var.new_video_processing_failure_internal_error
       new_video_processing_failure_max_file_size_exceeded = var.new_video_processing_failure_max_file_size_exceeded
-      new_video_processing_failure_corrupted = var.new_video_processing_failure_corrupted
+      new_video_processing_failure_corrupted              = var.new_video_processing_failure_corrupted
       new_video_processing_failure_unsupported_video_type = var.new_video_processing_failure_unsupported_video_type
-      dynamodb_table_invoked_uploaded_videos = var.dynamodb_table_invoked_uploaded_videos
-      dynamodb_table_unprocessed_videos = var.dynamodb_table_unprocessed_videos
-      dynamodb_table_drafts_videos = var.dynamodb_table_drafts_videos
-      dynamodb_table_processing_has_been_failed_videos = var.dynamodb_table_processing_has_been_failed_videos
-      new_video_events_processing_has_been_started = var.new_video_events_processing_has_been_started
-      new_video_events_processing_failure = var.new_video_events_processing_failure
-      new_video_events_moved_to_drafts = var.new_video_events_moved_to_drafts
+      dynamodb_table_invoked_uploaded_videos              = var.dynamodb_table_invoked_uploaded_videos
+      dynamodb_table_unprocessed_videos                   = var.dynamodb_table_unprocessed_videos
+      dynamodb_table_drafts_videos                        = var.dynamodb_table_drafts_videos
+      dynamodb_table_processing_has_been_failed_videos    = var.dynamodb_table_processing_has_been_failed_videos
+      new_video_events_processing_has_been_started        = var.new_video_events_processing_has_been_started
+      new_video_events_processing_failure                 = var.new_video_events_processing_failure
+      new_video_events_moved_to_drafts                    = var.new_video_events_moved_to_drafts
+      uploaded_videos_client_sync_sns_topic_arn           = var.uploaded_videos_client_sync_sns_topic_arn
+      uploaded_video_feedback_event                       = var.uploaded_video_feedback_event
     }
   }
 
@@ -117,9 +119,9 @@ resource "aws_s3_bucket_notification" "new_video_upload" {
   ]
 }
 
-data "archive_file" "python_image_resizer_lambda_package" {  
-  type        = "zip"  
-  source_file = "${path.module}/../../../lambdas/workers/image_resizer/app.py" 
+data "archive_file" "python_image_resizer_lambda_package" {
+  type        = "zip"
+  source_file = "${path.module}/../../../lambdas/workers/image_resizer/app.py"
   output_path = "${path.module}/../../../lambdas/workers/image_resizer/python.zip"
 }
 resource "aws_lambda_function" "image_resizer" {
@@ -131,7 +133,7 @@ resource "aws_lambda_function" "image_resizer" {
   handler          = "app.lambda_handler"
   runtime          = "python3.8"
   timeout          = 15
-  layers           = [
+  layers = [
     # PILLOW, source: https://github.com/keithrozario/Klayers/tree/master/deployments/python3.8
     "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:4"
   ]
@@ -149,15 +151,15 @@ resource "aws_iam_policy" "invoke_image_resizer_lambda_policy" {
   description = "IAM policy to invoke video thumbnail lambda"
 
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": [
-            "lambda:InvokeFunction",
-            "lambda:InvokeAsync"
+        "Effect" : "Allow",
+        "Action" : [
+          "lambda:InvokeFunction",
+          "lambda:InvokeAsync"
         ]
-        "Resource": "${aws_lambda_function.image_resizer.arn}"
+        "Resource" : "${aws_lambda_function.image_resizer.arn}"
       }
     ]
   })
@@ -195,9 +197,38 @@ resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_s3" {
   policy_arn = aws_iam_policy.lambda_s3.arn
 }
 
+
 resource "aws_iam_role_policy_attachment" "image_resizer_lambda_s3" {
   role       = aws_iam_role.iam_for_image_resizer_lambda.name
   policy_arn = aws_iam_policy.lambda_s3.arn
+}
+
+// lambda sns premissions
+
+resource "aws_iam_policy" "lambda_sns" {
+  name        = "lambda_sns"
+  path        = "/"
+  description = "IAM policy for sns operations from a lambda"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+            "SNS:Publish"
+      ],
+      "Resource": "${var.uploaded_videos_client_sync_sns_topic_arn}",
+      "Effect": "Allow"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_sns" {
+  role       = aws_iam_role.iam_for_new_video_processing_lambda.name
+  policy_arn = aws_iam_policy.lambda_sns.arn
 }
 
 # Lambda <-> Cloudwatch

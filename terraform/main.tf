@@ -43,6 +43,9 @@ locals {
   web_api_port              = 80
   web_api_health_check_path = "/health_check"
   web_api_app_count         = 2
+  // videos sync websocket
+  uploaded_videos_client_syncer_connection_store_prefix = "active-connections"
+  uploaded_video_feedback_event                         = "uploaded_video_feedback"
 }
 
 resource "random_string" "videos_rds_password" {
@@ -80,6 +83,14 @@ module "vpc" {
   az_count   = 2
 }
 
+module "uploaded_videos_client_syncer" {
+  source = "./modules/uploaded_videos_client_syncer"
+
+  app_name                      = local.app_name
+  connection_store_prefix       = local.uploaded_videos_client_syncer_connection_store_prefix
+  uploaded_video_feedback_event = local.uploaded_video_feedback_event
+}
+
 module "web_api" {
   source = "./modules/web_api"
 
@@ -103,6 +114,13 @@ module "web_api" {
   rds_username = var.pg_user
   rds_port     = var.pg_port
   rds_db       = var.pg_db
+
+  uploaded_videos_client_sync_ws_url = module.uploaded_videos_client_syncer.ws_url
+
+  depends_on = [
+    module.uploaded_videos_client_syncer.ws_url,
+    module.uploaded_videos_client_syncer.input_sns_topic_arn
+  ]
 }
 
 ///// lambda
@@ -127,6 +145,9 @@ module "lambda" {
   new_video_events_processing_has_been_started        = local.new_video_events_processing_has_been_started
   new_video_events_processing_failure                 = local.new_video_events_processing_failure
   new_video_events_moved_to_drafts                    = local.new_video_events_moved_to_drafts
+
+  uploaded_videos_client_sync_sns_topic_arn = module.uploaded_videos_client_syncer.input_sns_topic_arn
+  uploaded_video_feedback_event             = local.uploaded_video_feedback_event
 
   depends_on = [
     module.s3.videos_bucket
