@@ -23,6 +23,30 @@
             {
                 "name": "health_check_path",
                 "value": "${env_health_check_path}"
+            },
+            {
+                "name": "rds_address",
+                "value": "${env_rds_address}"
+            },
+            {
+                "name": "rds_password",
+                "value": "${env_rds_password}"
+            },
+            {
+                "name": "rds_username",
+                "value": "${env_rds_username}"
+            },
+            {
+                "name": "rds_port",
+                "value": "${env_rds_port}"
+            },
+            {
+                "name": "rds_db",
+                "value": "${env_rds_db}"
+            },
+            {
+                "name": "image_hash",
+                "value": "${env_image_hash}"
             }
         ]
     }

@@ -12,6 +12,14 @@ data "template_file" "web_api" {
 
   vars = {
     env_health_check_path = "${var.health_check_path}"
+    env_rds_address       = var.rds_address
+    env_rds_password      = var.rds_password
+    env_rds_username      = var.rds_username
+    env_rds_port          = var.rds_port
+    env_rds_db            = var.rds_db
+
+    env_image_hash = random_id.ecr_image_hash.hex
+
     env_app_port           = tostring(var.app_port)
     env_aws_region         = var.aws_region
     env_logs_stream_prefix = "${aws_cloudwatch_log_group.web_api_log_group.name}"
@@ -38,11 +46,12 @@ resource "aws_ecs_task_definition" "web_api_def" {
 }
 
 resource "aws_ecs_service" "web_api_service" {
-  name            = "${var.app_name}-web-api-service"
-  cluster         = aws_ecs_cluster.web_api_cluster.id
-  task_definition = aws_ecs_task_definition.web_api_def.arn
-  desired_count   = var.app_count
-  launch_type     = "FARGATE"
+  name                 = "${var.app_name}-web-api-service"
+  cluster              = aws_ecs_cluster.web_api_cluster.id
+  task_definition      = aws_ecs_task_definition.web_api_def.arn
+  desired_count        = var.app_count
+  launch_type          = "FARGATE"
+  force_new_deployment = true
 
   network_configuration {
     security_groups  = [aws_security_group.web_api_ecs_sg.id]

@@ -51,3 +51,23 @@ variable "repository_name" {
 variable "image_tag" {
   type = string
 }
+
+variable "rds_address" {
+  type = string
+}
+
+variable "rds_username" {
+  type = string
+}
+
+variable "rds_password" {
+  type = string
+}
+
+variable "rds_port" {
+  type = string
+}
+
+variable "rds_db" {
+  type = string
+}

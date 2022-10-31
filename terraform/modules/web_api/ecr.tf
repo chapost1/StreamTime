@@ -1,5 +1,4 @@
 # web_api
-
 resource "aws_ecr_repository" "web_api_aws_ecr" {
   name = var.repository_name
   tags = {
@@ -10,8 +9,16 @@ resource "aws_ecr_repository" "web_api_aws_ecr" {
 
 data "archive_file" "archive_web_api_dir" {
   type        = "zip"
-  source_dir  = "${path.module}/../../../packages/api/"
+  source_dir  = "${path.module}/../../../packages/api/source"
   output_path = "${path.module}/../../../packages/api/web_api.zip"
+}
+
+resource "random_id" "ecr_image_hash" {
+  keepers = {
+    source_code_hash = data.archive_file.archive_web_api_dir.output_sha
+  }
+
+  byte_length = 8
 }
 
 resource "null_resource" "web_api_ecr_image" {
@@ -22,7 +29,7 @@ resource "null_resource" "web_api_ecr_image" {
   provisioner "local-exec" {
     command = <<EOF
            docker login ${var.ecr_token_proxy_endpoint} -u AWS -p ${var.ecr_token_password}
-           cd ${path.module}/../../../packages/api
+           cd ${path.module}/../../../packages/api/source
            docker build -t ${aws_ecr_repository.web_api_aws_ecr.repository_url}:${var.image_tag} .
            docker push ${aws_ecr_repository.web_api_aws_ecr.repository_url}:${var.image_tag}
        EOF
