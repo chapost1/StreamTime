@@ -1,17 +1,19 @@
 output "vpc" {
-    value = aws_vpc.aws-vpc
+  value = aws_vpc._
 }
 
 output "private_subnet" {
-    value = aws_subnet.private
+  value = aws_subnet.private
 }
 
 
 output "public_subnet" {
-    value = aws_subnet.public
+  value = aws_subnet.public
 }
 
-
 output "cidr_block" {
-    value = "10.10.0.0/16"
+  value = var.cidr_block
+}
+output "az_count" {
+  value = var.az_count
 }

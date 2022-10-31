@@ -1,10 +1,10 @@
-import os
+from .environment import environment
 from fastapi import FastAPI
+
 
 app = FastAPI()
 
-print(os.environ)
 
-@app.get("/health_check")
+@app.get(environment.HEALTH_CHECK_PATH)
 def root():
     return {"message": "Hello World"}

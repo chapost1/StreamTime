@@ -43,8 +43,9 @@ locals {
   videos_rds_username = "admin"
   videos_rds_port     = "3306"
   // web_api
-  web_api_port         = 8080
-  web_api_health_check = "health_check"
+  web_api_port              = 80
+  web_api_health_check_path = "/health_check"
+  web_api_app_count         = 2
 }
 
 resource "random_string" "videos_rds_password" {
@@ -105,47 +106,70 @@ module "vpc" {
   source = "./modules/vpc"
 
   app_name = local.app_name
+
+  cidr_block = "172.16.0.0/16"
+  az_count   = 2
 }
 
-module "rds" {
-  source            = "./modules/rds"
-  app_name          = local.app_name
-  engine            = "mysql"
-  engine_version    = "8.0.30"
-  instance_class    = "db.t2.small"
-  allocated_storage = 10
-  storage_encrypted = true
-  db_name           = "svnDB"
-  username          = local.videos_rds_username
-  password          = random_string.videos_rds_password.result
+module "web_api" {
+  source = "./modules/web_api"
 
-  vpc_id                  = module.vpc.vpc.id
-  vpc_private_subnet      = module.vpc.private_subnet
-  port                    = local.videos_rds_port
-  maintenance_window      = "Mon:03:00-Mon:05:00"
-  backup_window           = "01:30-02:00"
-  backup_retention_period = 1
-  publicly_accessible     = false
-
-  auto_minor_version_upgrade = false
-
-  final_snapshot_identifier = "videos-rds-db-snapshots" # name of the final snapshot after deletion
-  snapshot_identifier       = null                      # used to recover from a snapshot
-  skip_final_snapshot       = false
-
-  performance_insights_enabled = false
-}
-
-module "ecs" {
-  source                   = "./modules/ecs"
   app_name                 = local.app_name
   aws_region               = local.aws_region
-  web_api_port             = local.web_api_port
-  vpc_id                   = module.vpc.vpc.id
-  web_api_private_subnet   = module.vpc.private_subnet
-  web_api_public_subnet    = module.vpc.public_subnet
-  web_api_health_check     = local.web_api_health_check
   ecr_token_proxy_endpoint = data.aws_ecr_authorization_token.token.proxy_endpoint
   ecr_token_password       = data.aws_ecr_authorization_token.token.password
   ecr_authorization_token  = data.aws_ecr_authorization_token.token
+  vpc                      = module.vpc.vpc
+  public_subnet            = module.vpc.public_subnet
+  private_subnet           = module.vpc.private_subnet
+  az_count                 = module.vpc.az_count
+  app_port                 = local.web_api_port
+  health_check_path        = local.web_api_health_check_path
+  app_count                = local.web_api_app_count
+  repository_name          = "${local.app_name}-web-api"
+  image_tag                = "latest"
 }
+
+
+# module "rds" {
+#   source            = "./modules/rds"
+#   app_name          = local.app_name
+#   engine            = "mysql"
+#   engine_version    = "8.0.30"
+#   instance_class    = "db.t2.small"
+#   allocated_storage = 10
+#   storage_encrypted = true
+#   db_name           = "svnDB"
+#   username          = local.videos_rds_username
+#   password          = random_string.videos_rds_password.result
+
+#   vpc_id                  = module.vpc.vpc.id
+#   vpc_private_subnet      = module.vpc.private_subnet
+#   port                    = local.videos_rds_port
+#   maintenance_window      = "Mon:03:00-Mon:05:00"
+#   backup_window           = "01:30-02:00"
+#   backup_retention_period = 1
+#   publicly_accessible     = false
+
+#   auto_minor_version_upgrade = false
+
+#   final_snapshot_identifier = "videos-rds-db-snapshots" # name of the final snapshot after deletion
+#   snapshot_identifier       = null                      # used to recover from a snapshot
+#   skip_final_snapshot       = false
+
+#   performance_insights_enabled = false
+# }
+
+# module "ecs" {
+#   source                   = "./modules/ecs"
+#   app_name                 = local.app_name
+#   aws_region               = local.aws_region
+#   web_api_port             = local.web_api_port
+#   vpc_id                   = module.vpc.vpc.id
+#   web_api_private_subnet   = module.vpc.private_subnet
+#   web_api_public_subnet    = module.vpc.public_subnet
+#   web_api_health_check     = local.web_api_health_check
+#   ecr_token_proxy_endpoint = data.aws_ecr_authorization_token.token.proxy_endpoint
+#   ecr_token_password       = data.aws_ecr_authorization_token.token.password
+#   ecr_authorization_token  = data.aws_ecr_authorization_token.token
+# }

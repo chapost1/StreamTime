@@ -1,0 +1,29 @@
+[
+    {
+        "name": "${env_name}",
+        "image": "${env_image}",
+        "cpu": ${env_cpu},
+        "memory": ${env_memory},
+        "networkMode": "awsvpc",
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "${env_logs_group}",
+                "awslogs-region": "${env_aws_region}",
+                "awslogs-stream-prefix": "${env_logs_stream_prefix}"
+            }
+        },
+        "portMappings": [
+            {
+                "containerPort": ${env_app_port},
+                "hostPort": ${env_app_port}
+            }
+        ],
+        "environment": [
+            {
+                "name": "health_check_path",
+                "value": "${env_health_check_path}"
+            }
+        ]
+    }
+]
