@@ -64,7 +64,7 @@ resource "aws_iam_policy" "lambda_s3_videos_bucket" {
       "Action": [
             "s3:*"
       ],
-      "Resource": ${var.s3_videos_bucket_arn},
+      "Resource": "${var.s3_videos_bucket_arn}",
       "Effect": "Allow"
     }
   ]

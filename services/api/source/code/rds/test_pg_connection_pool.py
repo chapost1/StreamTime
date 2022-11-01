@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2 import pool
 from .db_connection_config import config
 
+
 def run_test():
     try:
         postgreSQL_pool = pool.SimpleConnectionPool(2, 20, **config)

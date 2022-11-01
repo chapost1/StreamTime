@@ -15,8 +15,6 @@ locals {
   aws_region = "us-east-1"
   // general
   app_name = "svn-videos"
-  // sqs
-  new_video_on_s3_queue_name = "new-video-on-s3-queue"
   // s3
   s3_videos_prefix                = "videos"
   s3_uploaded_videos_prefix       = "uploaded-videos"
@@ -119,6 +117,23 @@ module "vpc" {
   az_count   = 2
 }
 
+module "rds" {
+  source     = "./modules/rds"
+  app_name   = local.app_name
+  identifier = "videos-rds-db"
+  db_name    = "svnDB"
+  port       = "5432"
+
+  aws_region            = local.aws_region
+  vpc_id                = module.vpc.vpc.id
+  vpc_private_subnet    = module.vpc.private_subnet
+  allow_security_groups = [module.web_api.web_api_ecs_sg]
+
+  depends_on = [
+    module.vpc.vpc
+  ]
+}
+
 module "web_api" {
   source = "./modules/web_api"
 
@@ -137,11 +152,16 @@ module "web_api" {
   repository_name          = "${local.app_name}-web-api"
   image_tag                = "latest"
 
-  rds_address  = var.pg_host
-  rds_password = var.pg_pass
-  rds_username = var.pg_user
-  rds_port     = var.pg_port
-  rds_db       = var.pg_db
+  # rds_address  = var.pg_host
+  # rds_password = var.pg_pass
+  # rds_username = var.pg_user
+  # rds_port     = var.pg_port
+  # rds_db       = var.pg_db
+  rds_address  = module.rds.rds_endpoint
+  rds_password = module.rds.rds_password
+  rds_username = module.rds.rds_username
+  rds_port     = module.rds.rds_port
+  rds_db       = module.rds.db_name
 
   uploaded_videos_client_sync_ws_url = module.uploaded_videos_client_syncer.ws_url
 

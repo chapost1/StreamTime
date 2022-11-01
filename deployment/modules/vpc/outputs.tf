@@ -6,7 +6,6 @@ output "private_subnet" {
   value = aws_subnet.private
 }
 
-
 output "public_subnet" {
   value = aws_subnet.public
 }
@@ -14,6 +13,7 @@ output "public_subnet" {
 output "cidr_block" {
   value = var.cidr_block
 }
+
 output "az_count" {
   value = var.az_count
 }
