@@ -25,18 +25,18 @@ https://aws.amazon.com/cli/
 
 For the first time, navigate to the deployment folder and run:
 
-```sh
+```bash
 # will download necessary plugins
-terraform init
+foo@bar:~ (main) $ terraform init
 ```
 
 Next, from the root directory, to deploy:
 
-```sh
- # on future deployments of an existing cluster, \
- # you may want to use patch db_mode (or none), \
- # and populate the ddl file with relevant sql commands
-./deployment/terraform.sh --command apply \
+```bash
+# During future deployments of an existing cluster,
+# You can use the db_mode patch (or none),
+# And fill the dll file with the relevant SQL commands.
+foo@bar:~ (main) $ ./deployment/terraform.sh --command apply \
 --aws_access_key <AWS_ACCESS_KEY> \
 --aws_secret_key <AWS_SECRET_KEY> \
 --db_mode init
