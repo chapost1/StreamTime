@@ -33,10 +33,9 @@ locals {
   new_video_events_processing_failure          = "new_video_events_processing_failure"
   new_video_events_moved_to_drafts             = "new_video_events_moved_to_drafts"
   // dynamoDB tables
-  dynamodb_table_invoked_uploaded_videos           = "invoked_uploaded_videos"
-  dynamodb_table_unprocessed_videos                = "unprocessed_videos"
-  dynamodb_table_drafts_videos                     = "drafts_videos"
-  dynamodb_table_processing_has_been_failed_videos = "processing_has_been_failed_videos"
+  dynamodb_table_invoked_uploaded_videos = "${local.app_name}-invoked-event"
+  dynamodb_table_unprocessed_videos      = "${local.app_name}-unprocessed-videos"
+  dynamodb_table_drafts_videos           = "${local.app_name}-drafts-videos"
   // web_api
   web_api_port              = 80
   web_api_health_check_path = "/health_check"
@@ -54,6 +53,14 @@ module "videos_bucket" {
   videos_prefix             = local.s3_videos_prefix
   thumbnails_prefix         = local.s3_thumbnails_prefix
   tmp_thumbnails_prefix     = local.s3_tmp_thumbnails_prefix
+}
+
+module "dynamodb" {
+  source = "./modules/dynamoDB"
+
+  invoked_event_table_name      = local.dynamodb_table_invoked_uploaded_videos
+  unprocessed_videos_table_name = local.dynamodb_table_unprocessed_videos
+  drafts_videos_table_name      = local.dynamodb_table_drafts_videos
 }
 
 module "uploaded_videos_client_syncer" {
@@ -90,21 +97,30 @@ module "new_video_processing" {
   new_video_processing_failure_max_file_size_exceeded = local.new_video_processing_failure_max_file_size_exceeded
   new_video_processing_failure_corrupted              = local.new_video_processing_failure_corrupted
   new_video_processing_failure_unsupported_video_type = local.new_video_processing_failure_unsupported_video_type
-  dynamodb_table_invoked_uploaded_videos              = local.dynamodb_table_invoked_uploaded_videos
-  dynamodb_table_unprocessed_videos                   = local.dynamodb_table_unprocessed_videos
-  dynamodb_table_drafts_videos                        = local.dynamodb_table_drafts_videos
-  dynamodb_table_processing_has_been_failed_videos    = local.dynamodb_table_processing_has_been_failed_videos
-  new_video_events_processing_has_been_started        = local.new_video_events_processing_has_been_started
-  new_video_events_processing_failure                 = local.new_video_events_processing_failure
-  new_video_events_moved_to_drafts                    = local.new_video_events_moved_to_drafts
+
+  new_video_events_processing_has_been_started = local.new_video_events_processing_has_been_started
+  new_video_events_processing_failure          = local.new_video_events_processing_failure
+  new_video_events_moved_to_drafts             = local.new_video_events_moved_to_drafts
 
   uploaded_videos_client_sync_sns_topic_arn = module.uploaded_videos_client_syncer.input_sns_topic_arn
   uploaded_video_feedback_event             = local.uploaded_video_feedback_event
 
+
+  dynamodb_table_invoked_uploaded_videos = local.dynamodb_table_invoked_uploaded_videos
+  dynamodb_table_unprocessed_videos      = local.dynamodb_table_unprocessed_videos
+  dynamodb_table_drafts_videos           = local.dynamodb_table_drafts_videos
+
+  drafts_videos_dynamodb_table_arn      = module.dynamodb.drafts_videos_dynamodb_table_arn
+  unprocessed_videos_dynamodb_table_arn = module.dynamodb.unprocessed_videos_dynamodb_table_arn
+  invoked_events_dynamodb_table_arn     = module.dynamodb.invoked_events_dynamodb_table_arn
+
   depends_on = [
     module.videos_bucket.videos_bucket,
     module.image_resizer.image_resizer_arn,
-    module.uploaded_videos_client_syncer.input_sns_topic_arn
+    module.uploaded_videos_client_syncer.input_sns_topic_arn,
+    module.dynamodb.drafts_videos_dynamodb_table_arn,
+    module.dynamodb.unprocessed_videos_dynamodb_table_arn,
+    module.dynamodb.invoked_events_dynamodb_table_arn
   ]
 }
 

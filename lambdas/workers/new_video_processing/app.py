@@ -8,7 +8,6 @@ import datetime
 
 # CONSTANTS
 EXECUTABLES_DIRECTORY = '/opt/var/task/python'
-DRAFT_TITLE = 'Draft'
 THUMBNAIL_SIZE = (360, 200)
 
 ##########################
@@ -35,7 +34,6 @@ UNSUPPORTED_FILE_FORMAT_ENV_NAME = 'new_video_processing_failure_unsupported_vid
 INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_invoked_uploaded_videos'
 UNPROCESSED_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_unprocessed_videos'
 DRAFTS_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_drafts_videos'
-PROCESSING_FAILURE_TABLE_ENV_NAME = 'dynamodb_table_processing_has_been_failed_videos'
 # uploaded_video_feedback_event
 UPLOADED_VIDEO_FEEDBACK_EVENT = 'uploaded_video_feedback_event'
 # ARNs
@@ -44,6 +42,8 @@ NOTIFY_CLIENT_SNS_TOPIC = 'uploaded_videos_client_sync_sns_topic_arn'
 
 
 s3Client = boto3.client('s3')
+dynamodb = boto3.client('dynamodb')
+sns = boto3.client('sns')
 
 # relies on HTML5 supported formats
 video_types_to_extension = {
@@ -54,6 +54,10 @@ video_types_to_extension = {
 }
 
 # helpers
+
+
+def get_utc_timestamp_of_the_next_n_hours(hours: int = 0) -> int:
+    return int(datetime.datetime.utcnow().timestamp()) + hours * 3600
 
 
 def object_type(obj: Dict) -> str:
@@ -174,9 +178,9 @@ def assert_necessery_env_are_here() -> None:
                 MAX_FILE_SIZE_EXCEEDED_ENV_NAME, CORRUPTED_ENV_NAME,
                 UNSUPPORTED_FILE_FORMAT_ENV_NAME, UNPROCESSED_VIDEOS_TABLE_ENV_NAME,
                 DRAFTS_VIDEOS_TABLE_ENV_NAME, INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME,
-                PROCESSING_FAILURE_TABLE_ENV_NAME, PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME,
+                PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME, NOTIFY_CLIENT_SNS_TOPIC,
                 PROCESSING_FAILED_EVENT_ENV_NAME, PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME,
-                NOTIFY_CLIENT_SNS_TOPIC
+                UPLOADED_VIDEO_FEEDBACK_EVENT
                 ]:
         if os.environ.get(env, None) is None:
             raise RuntimeError(f'missing env varialbe: {env}')
@@ -184,16 +188,32 @@ def assert_necessery_env_are_here() -> None:
 
 # make it with TTL of 2 days or something
 def mark_as_invoked(user_id: str, hash_id: str) -> None:
-    # todo get item from os.environ[INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME] FILTER BY EXPIRATION DATE
-    # if exists: raise Exception!
-    # toto: putItem in os.environ[INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME]
+    print('mark_as_invoked')
+    now = get_utc_timestamp_of_the_next_n_hours(0)
+    user_id_hash_id = f'{user_id}_{hash_id}'
+    response = dynamodb.get_item(
+        TableName=os.environ[INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME],
+        Key={
+            'user_id_hash_id': {'S': user_id_hash_id}
+        }
+    )
+    item = response.get('Item', None)
+    print(item)
+    if item is not None and now < int(item.get('time_to_exist', {}).get('N', -1)):
+        # item already exists/logically not expired yet
+        raise Exception('invoked marker is already exists, exit...')
+
+    next_12_hours_ttl_timestamp = get_utc_timestamp_of_the_next_n_hours(12)
     record = {
-        'hash_id': hash_id,
-        'user_id': user_id
+        'user_id_hash_id': {'S': user_id_hash_id},
+        'time_to_exist': {'N': str(next_12_hours_ttl_timestamp)}
     }
     print(record)
-
-    pass
+    response = dynamodb.put_item(
+        TableName=os.environ[INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME],
+        Item=record
+    )
+    print('response')
 
 
 def send_sns(user_id: str, hash_id: str, event: str) -> None:
@@ -202,15 +222,14 @@ def send_sns(user_id: str, hash_id: str, event: str) -> None:
             'user_id': user_id,
             'hash_id': hash_id,
             'event': event,
-            'trigger': UPLOADED_VIDEO_FEEDBACK_EVENT
+            'trigger': os.environ[UPLOADED_VIDEO_FEEDBACK_EVENT]
         })
     }
-    sns = boto3.client('sns')
     try:
         response = sns.publish(
-            TargetArn = os.environ[NOTIFY_CLIENT_SNS_TOPIC],
-            Message = json.dumps(message),
-            MessageStructure = 'json'
+            TargetArn=os.environ[NOTIFY_CLIENT_SNS_TOPIC],
+            Message=json.dumps(message),
+            MessageStructure='json'
         )
         print('send sns response')
         print(response)
@@ -222,29 +241,48 @@ def send_sns(user_id: str, hash_id: str, event: str) -> None:
 
 
 def mark_upload_as_unprocessed(user_id: str, hash_id: str, upload_time: str) -> None:
-    # toto: putItem in os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]
-    processing_record = {
-        'hash_id': hash_id,
-        'upload_time': upload_time,
-        'user_id': user_id,
+    print('mark_upload_as_unprocessed')
+    next_48_hours_ttl_timestamp = get_utc_timestamp_of_the_next_n_hours(24*2)
+    record = {
+        'hash_id': {'S': hash_id},
+        'user_id': {'S': user_id},
+        'upload_time': {'S': upload_time},
+        'time_to_exist': {'N': str(next_48_hours_ttl_timestamp)}
     }
-    print(processing_record)
+    print(record)
+    response = dynamodb.put_item(
+        TableName=os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME],
+        Item=record
+    )
+    print(response)
 
     send_sns(user_id, hash_id,
              os.environ[PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME])
 
 
 def mark_processing_as_failed(user_id: str, hash_id: str, upload_time: str, failure_reason: str) -> None:
-    # todo: deleteItem from os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]
-
-    # toto: putItem in os.environ[PROCESSING_FAILURE_TABLE_ENV_NAME]
-    processing_failure_record = {
-        'hash_id': hash_id,
-        'upload_time': upload_time,
-        'user_id': user_id,
-        'failure_reason': failure_reason
-    }
-    print(processing_failure_record)
+    print('mark_processing_as_failed')
+    print(f'failure reason: {failure_reason}')
+    response = dynamodb.update_item(
+        TableName=os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME],
+        Key={
+            'user_id': {
+                'S': user_id
+            },
+            'upload_time': {
+                'S': upload_time
+            }
+        },
+        UpdateExpression='SET failure_reason = :val',
+        ExpressionAttributeValues={
+            ':val': {
+                'S': failure_reason
+            }
+        },
+        # update only if the item exists in the database
+        ConditionExpression='attribute_exists(user_id)'
+    )
+    print(response)
 
     send_sns(user_id, hash_id, os.environ[PROCESSING_FAILED_EVENT_ENV_NAME])
 
@@ -259,19 +297,37 @@ def mark_video_as_a_draft(
     upload_time: str
 ) -> None:
     # todo: deleteItem from os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]
-
-    # toto: putItem in os.environ[DRAFTS_VIDEOS_TABLE_ENV_NAME]
+    print('mark_video_as_a_draft')
     draft_record = {
-        'hash_id': hash_id,
-        'video_type': video_type,
-        'size_in_bytes': size_in_bytes,
-        'duration_seconds': duration_seconds,
-        'thumbnail_url': thumbnail_url,
-        'user_id': user_id,
-        'upload_time': upload_time,
-        'title': DRAFT_TITLE
+        'hash_id': {'S': hash_id},
+        'user_id': {'S': user_id},
+        'upload_time': {'S': upload_time},
+        'thumbnail_url': {'S': thumbnail_url},
+        'duration_seconds': {'N': str(duration_seconds)},
+        'size_in_bytes': {'N': str(size_in_bytes)},
+        'video_type': {'S': video_type}
     }
     print(draft_record)
+    response = dynamodb.transact_write_items(
+        TransactItems=[
+            {
+                'Delete': {
+                    'TableName': os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME],
+                    'Key': {
+                        'user_id': {'S': user_id},
+                        'upload_time': {'S': upload_time}
+                    }
+                }
+            },
+            {
+                'Put': {
+                    'TableName': os.environ[DRAFTS_VIDEOS_TABLE_ENV_NAME],
+                    'Item': draft_record
+                }
+            }
+        ]
+    )
+    print(response)
 
     send_sns(user_id, hash_id,
              os.environ[PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME])
@@ -301,7 +357,8 @@ def lambda_handler(event, context):
         )
     except Exception as e:
         # internal error
-        print('An exception occurred, internal error on get_object, processing has been stopped before being able to get hash_id, infrastructure failure')
+        print(
+            f'An exception occurred, internal error on get_object, processing has been stopped before being able to get hash_id, infrastructure failure, bucket={bucket}, key={current_file_key}')
         print(e)
         raise e
 
@@ -337,8 +394,8 @@ def lambda_handler(event, context):
         print('An exception occurred, failed to mark as unprocessed')
         print(e)
         delete_object(bucket, current_file_key),
-        mark_processing_as_failed(user_id=user_id, hash_id=hash_id,
-                                  upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
+        mark_processing_as_failed(
+            user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
         return {'statusCode': 500}
 
     try:
@@ -348,8 +405,8 @@ def lambda_handler(event, context):
         print('An exception occurred, failed to get meta')
         print(e)
         delete_object(bucket, current_file_key),
-        mark_processing_as_failed(user_id=user_id, hash_id=hash_id,
-                                  upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
+        mark_processing_as_failed(
+            user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
         return {'statusCode': 400}
 
     if MAX_FILE_SIZE_IN_BYTES < meta['size_in_bytes']:
@@ -392,8 +449,8 @@ def lambda_handler(event, context):
             print('Video processing exception occurred')
             print(e)
             delete_object(bucket, current_file_key)
-            mark_processing_as_failed(user_id=user_id, hash_id=hash_id,
-                                      upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
+            mark_processing_as_failed(
+                user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
             raise e
 
     try:

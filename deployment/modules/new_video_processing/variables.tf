@@ -58,9 +58,7 @@ variable "dynamodb_table_unprocessed_videos" {
 variable "dynamodb_table_drafts_videos" {
   type = string
 }
-variable "dynamodb_table_processing_has_been_failed_videos" {
-  type = string
-}
+
 variable "new_video_events_processing_has_been_started" {
   type = string
 }
@@ -76,5 +74,17 @@ variable "uploaded_videos_client_sync_sns_topic_arn" {
 }
 
 variable "uploaded_video_feedback_event" {
+  type = string
+}
+
+variable "invoked_events_dynamodb_table_arn" {
+  type = string
+}
+
+variable "unprocessed_videos_dynamodb_table_arn" {
+  type = string
+}
+
+variable "drafts_videos_dynamodb_table_arn" {
   type = string
 }

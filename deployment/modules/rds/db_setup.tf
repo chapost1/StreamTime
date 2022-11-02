@@ -27,7 +27,7 @@ resource "null_resource" "db_setup" {
 # used when mode is db_op=patch
 resource "null_resource" "db_patching" {
   triggers = {
-    file = filesha1("${path.module}/ddl/patch_id.sql")
+    file = filesha1("${path.module}/ddl/patch_id.txt")
   }
   provisioner "local-exec" {
     command = <<-EOF

@@ -40,7 +40,6 @@ resource "aws_lambda_function" "new_video_processing" {
       dynamodb_table_invoked_uploaded_videos              = var.dynamodb_table_invoked_uploaded_videos
       dynamodb_table_unprocessed_videos                   = var.dynamodb_table_unprocessed_videos
       dynamodb_table_drafts_videos                        = var.dynamodb_table_drafts_videos
-      dynamodb_table_processing_has_been_failed_videos    = var.dynamodb_table_processing_has_been_failed_videos
       new_video_events_processing_has_been_started        = var.new_video_events_processing_has_been_started
       new_video_events_processing_failure                 = var.new_video_events_processing_failure
       new_video_events_moved_to_drafts                    = var.new_video_events_moved_to_drafts

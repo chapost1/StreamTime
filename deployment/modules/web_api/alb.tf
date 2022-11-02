@@ -1,5 +1,5 @@
 resource "aws_alb" "web_api_alb" {
-  name            = "${var.app_name}-web-api-load-balancer"
+  name            = "${var.app_name}-web-api-alb"
   subnets         = var.public_subnet.*.id
   security_groups = [aws_security_group.web_api_alb_sg.id]
 }
