@@ -1,4 +1,7 @@
-# StreamTime
+![Termux Logo](./assets/logo/streamtime-logo-white-colorful.png#gh-dark-mode-only)
+![Termux Logo](./assets/logo/streamtime-logo-black-colorful.png#gh-light-mode-only)
+
+<hr>
 
 AWS based solution of simple video drive.
 
