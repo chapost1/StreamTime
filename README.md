@@ -1,4 +1,4 @@
-# SVN - Stream Video Now
+# StreamTime
 
 AWS based solution of simple video drive.
 

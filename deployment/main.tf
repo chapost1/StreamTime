@@ -14,7 +14,7 @@ locals {
   // provider
   aws_region = "us-east-1"
   // general
-  app_name = "svn-videos"
+  app_name = "stream-time-videos"
   // s3
   s3_videos_prefix                = "videos"
   s3_uploaded_videos_prefix       = "uploaded-videos"
@@ -121,7 +121,7 @@ module "rds" {
   source     = "./modules/rds"
   app_name   = local.app_name
   identifier = "videos-rds-db"
-  db_name    = "svnDB"
+  db_name    = "stream-time-db"
   port       = "5432"
 
   aws_region            = local.aws_region
