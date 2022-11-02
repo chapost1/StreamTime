@@ -25,11 +25,11 @@ For the first time, go into deployment directory and execute:
 terraform init # will download necessary plugins
 ```
 
-And then, to deploy:
+And then, from root directory, to deploy:
 
 ```sh
 ./deployment/terraform.sh --command apply \
---aws_access_key  <AWS_ACCESS_KEY> \
+--aws_access_key <AWS_ACCESS_KEY> \
 --aws_secret_key <AWS_SECRET_KEY> \
 --db_mode init
  # on future deployments of an existing cluster, you may use patch mode (or none), and populate the ddl file with relevant sql commands
