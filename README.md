@@ -1,4 +1,4 @@
-# SVN - Strem Video Now
+# SVN - Stream Video Now
 
 AWS based solution of simple video drive.
 
@@ -10,22 +10,23 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
 ## Prerequisites
 
-please make sure you install the following:
+Ensure the following are installed:
 
-- <strong>Terraform</strong> is being used for provisioning.
+- <strong>Terraform</strong> - is being used for provisioning.
 https://registry.terraform.io/
 
-- <strong>AWS CLI</strong> is required for PG Schema creation as part of deployment.
+- <strong>AWS CLI</strong> - is required for PG Schema creation as part of deployment.
 https://aws.amazon.com/cli/
 
 ### Example Deployment Usage
 
-For the first time, go into deployment directory and execute:
+For the first time, navigate to the deployment folder and run:
+
 ```sh
 terraform init # will download necessary plugins
 ```
 
-And then, from root directory, to deploy:
+Next, from the root directory, to deploy:
 
 ```sh
 ./deployment/terraform.sh --command apply \
@@ -37,4 +38,4 @@ And then, from root directory, to deploy:
  # and populate the ddl file with relevant sql commands
 ```
 
-> Note: provisining Resources on AWS using this command may lead to financial expenses.
+> Note: Provision of resources on AWS with this command can result in invoicing.
