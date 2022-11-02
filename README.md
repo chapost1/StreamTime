@@ -29,13 +29,13 @@ terraform init # will download necessary plugins
 Next, from the root directory, to deploy:
 
 ```sh
+ # on future deployments of an existing cluster, \
+ # you may use patch mode (or none), \
+ # and populate the ddl file with relevant sql commands
 ./deployment/terraform.sh --command apply \
 --aws_access_key <AWS_ACCESS_KEY> \
 --aws_secret_key <AWS_SECRET_KEY> \
 --db_mode init
- # on future deployments of an existing cluster, \
- # you may use patch mode (or none), \
- # and populate the ddl file with relevant sql commands
 ```
 
 > Note: Provision of resources on AWS with this command can result in invoicing.
