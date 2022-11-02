@@ -1,5 +1,6 @@
 # private
 .env
+*secrets.json
 .terraform/
 terraform.tfstate*
 .terraform*

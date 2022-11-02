@@ -69,4 +69,8 @@ resource "aws_rds_cluster" "cluster" {
   scaling_configuration {
     min_capacity = 2.0
   }
+
+  tags = {
+    Name = "${var.identifier}"
+  }
 }
