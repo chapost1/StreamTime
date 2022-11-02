@@ -23,7 +23,7 @@ https://aws.amazon.com/cli/
 
 ### Example Deployment Usage
 
-For the first time, navigate to the deployment folder and run:
+First, navigate to the deployment directory and run:
 
 ```bash
 # will download necessary plugins
