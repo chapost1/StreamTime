@@ -5,7 +5,7 @@ Help() {
    echo "Syntax: ./terraform.sh [OPTIONS...]"
    echo
    echo "Options:"
-   echo "-h | --help               Print this Help."
+   echo "-h | --help              Print this Help."
    echo "--command                (plan|apply|destroy)           (required)"
    echo "--aws_access_key         AWS ACCESS_KEY                 (required)"
    echo "--aws_secret_key         AWS SECRET_KEY                 (required)"
@@ -36,7 +36,7 @@ else
     exit 1;
 fi
 
-# validate user has aws
+# validate user has aws cli
 if hash aws 2>/dev/null; then
     echo "aws cli seems to be installed, proceeding..."
 else
