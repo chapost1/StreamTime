@@ -8,17 +8,15 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
 ![Architecture Diagram](./assets/architecture_diagram.jpg)
 
-<br>
-
 ## Prerequisites
+
+please make sure you install the following:
 
 - <strong>Terraform</strong> is being used for provisioning.
 https://registry.terraform.io/
 
 - <strong>AWS CLI</strong> is required for PG Schema creation as part of deployment.
 https://aws.amazon.com/cli/
-
-<br>
 
 ### Example Deployment Usage
 
