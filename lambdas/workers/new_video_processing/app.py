@@ -259,7 +259,6 @@ def mark_video_as_a_draft(
     thumbnail_url: str,
     upload_time: str
 ) -> None:
-    # todo: deleteItem from os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]
     print('mark_video_as_a_draft')
     draft_record = {
         'hash_id': {'S': hash_id},
