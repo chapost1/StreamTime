@@ -49,9 +49,6 @@ variable "new_video_processing_failure_unsupported_video_type" {
   type = string
 }
 
-variable "dynamodb_table_invoked_uploaded_videos" {
-  type = string
-}
 variable "dynamodb_table_unprocessed_videos" {
   type = string
 }
@@ -74,10 +71,6 @@ variable "uploaded_videos_client_sync_sns_topic_arn" {
 }
 
 variable "uploaded_video_feedback_event" {
-  type = string
-}
-
-variable "invoked_events_dynamodb_table_arn" {
   type = string
 }
 

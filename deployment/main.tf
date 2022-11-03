@@ -33,7 +33,6 @@ locals {
   new_video_events_processing_failure          = "new_video_events_processing_failure"
   new_video_events_moved_to_drafts             = "new_video_events_moved_to_drafts"
   // dynamoDB tables
-  dynamodb_table_invoked_uploaded_videos = "${local.app_name}-invoked-event"
   dynamodb_table_unprocessed_videos      = "${local.app_name}-unprocessed-videos"
   dynamodb_table_drafts_videos           = "${local.app_name}-drafts-videos"
   // web_api
@@ -58,7 +57,6 @@ module "videos_bucket" {
 module "dynamodb" {
   source = "./modules/dynamoDB"
 
-  invoked_event_table_name      = local.dynamodb_table_invoked_uploaded_videos
   unprocessed_videos_table_name = local.dynamodb_table_unprocessed_videos
   drafts_videos_table_name      = local.dynamodb_table_drafts_videos
 }
@@ -106,13 +104,11 @@ module "new_video_processing" {
   uploaded_video_feedback_event             = local.uploaded_video_feedback_event
 
 
-  dynamodb_table_invoked_uploaded_videos = local.dynamodb_table_invoked_uploaded_videos
   dynamodb_table_unprocessed_videos      = local.dynamodb_table_unprocessed_videos
   dynamodb_table_drafts_videos           = local.dynamodb_table_drafts_videos
 
   drafts_videos_dynamodb_table_arn      = module.dynamodb.drafts_videos_dynamodb_table_arn
   unprocessed_videos_dynamodb_table_arn = module.dynamodb.unprocessed_videos_dynamodb_table_arn
-  invoked_events_dynamodb_table_arn     = module.dynamodb.invoked_events_dynamodb_table_arn
 
   depends_on = [
     module.videos_bucket.videos_bucket,

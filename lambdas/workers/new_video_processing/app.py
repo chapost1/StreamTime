@@ -31,7 +31,6 @@ MAX_FILE_SIZE_EXCEEDED_ENV_NAME = 'new_video_processing_failure_max_file_size_ex
 CORRUPTED_ENV_NAME = 'new_video_processing_failure_corrupted'
 UNSUPPORTED_FILE_FORMAT_ENV_NAME = 'new_video_processing_failure_unsupported_video_type'
 # DB tables names
-INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_invoked_uploaded_videos'
 UNPROCESSED_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_unprocessed_videos'
 DRAFTS_VIDEOS_TABLE_ENV_NAME = 'dynamodb_table_drafts_videos'
 # uploaded_video_feedback_event
@@ -177,43 +176,12 @@ def assert_necessery_env_are_here() -> None:
                 S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME, INTERNAL_ERROR_ENV_NAME,
                 MAX_FILE_SIZE_EXCEEDED_ENV_NAME, CORRUPTED_ENV_NAME,
                 UNSUPPORTED_FILE_FORMAT_ENV_NAME, UNPROCESSED_VIDEOS_TABLE_ENV_NAME,
-                DRAFTS_VIDEOS_TABLE_ENV_NAME, INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME,
+                DRAFTS_VIDEOS_TABLE_ENV_NAME, UPLOADED_VIDEO_FEEDBACK_EVENT,
                 PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME, NOTIFY_CLIENT_SNS_TOPIC,
-                PROCESSING_FAILED_EVENT_ENV_NAME, PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME,
-                UPLOADED_VIDEO_FEEDBACK_EVENT
+                PROCESSING_FAILED_EVENT_ENV_NAME, PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME
                 ]:
         if os.environ.get(env, None) is None:
             raise RuntimeError(f'missing env varialbe: {env}')
-
-
-# make it with TTL of 2 days or something
-def mark_as_invoked(user_id: str, hash_id: str) -> None:
-    print('mark_as_invoked')
-    now = get_utc_timestamp_of_the_next_n_hours(0)
-    user_id_hash_id = f'{user_id}_{hash_id}'
-    response = dynamodb.get_item(
-        TableName=os.environ[INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME],
-        Key={
-            'user_id_hash_id': {'S': user_id_hash_id}
-        }
-    )
-    item = response.get('Item', None)
-    print(item)
-    if item is not None and now < int(item.get('time_to_exist', {}).get('N', -1)):
-        # item already exists/logically not expired yet
-        raise Exception('invoked marker is already exists, exit...')
-
-    next_12_hours_ttl_timestamp = get_utc_timestamp_of_the_next_n_hours(12)
-    record = {
-        'user_id_hash_id': {'S': user_id_hash_id},
-        'time_to_exist': {'N': str(next_12_hours_ttl_timestamp)}
-    }
-    print(record)
-    response = dynamodb.put_item(
-        TableName=os.environ[INVOKED_UPLOADED_VIDEOS_TABLE_ENV_NAME],
-        Item=record
-    )
-    print('response')
 
 
 def send_sns(user_id: str, hash_id: str, event: str) -> None:
@@ -263,24 +231,19 @@ def mark_upload_as_unprocessed(user_id: str, hash_id: str, upload_time: str) -> 
 def mark_processing_as_failed(user_id: str, hash_id: str, upload_time: str, failure_reason: str) -> None:
     print('mark_processing_as_failed')
     print(f'failure reason: {failure_reason}')
+    next_48_hours_ttl_timestamp = get_utc_timestamp_of_the_next_n_hours(24*2)
     response = dynamodb.update_item(
         TableName=os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME],
         Key={
-            'user_id': {
-                'S': user_id
-            },
-            'upload_time': {
-                'S': upload_time
-            }
+            'user_id': {'S': user_id},
+            'upload_time': {'S': upload_time}
         },
-        UpdateExpression='SET failure_reason = :val',
+        UpdateExpression='SET failure_reason = :fr, hash_id = :hash_id, time_to_exist = :tte',
         ExpressionAttributeValues={
-            ':val': {
-                'S': failure_reason
-            }
-        },
-        # update only if the item exists in the database
-        ConditionExpression='attribute_exists(user_id)'
+            ':fr': {'S': failure_reason},
+            ':hash_id': {'S': hash_id},
+            ':tte': {'N': str(next_48_hours_ttl_timestamp)}
+        }
     )
     print(response)
 
@@ -373,11 +336,26 @@ def lambda_handler(event, context):
     file_name: str = key_levels[-1]
     user_id: str = key_levels[-2]
     hash_id: str = file_name.split('.')[0]
+    if hash_id is None or len(hash_id) < 1:
+        # internal error
+        print(
+            f'An exception occurred, infrastructure failure, key is not in valid format: {current_file_key}')
+        print(e)
+        raise e
 
-    # prevent abuse of presigned url, i.e: uploading file multiple times before expiration time
-    mark_as_invoked(user_id, hash_id)
+    # mark as processing
+    try:
+        # mark as processing
+        mark_upload_as_unprocessed(
+            user_id=user_id, hash_id=hash_id, upload_time=upload_time)
+    except Exception as e:
+        print('An exception occurred, failed to mark as unprocessed')
+        print(e)
+        delete_object(bucket, current_file_key),
+        mark_processing_as_failed(
+            user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
+        return {'statusCode': 500}
 
-    # all set
     # move to videos S3 prefix
     try:
         copy_source = {'Bucket': bucket, 'Key': current_file_key}
@@ -387,11 +365,8 @@ def lambda_handler(event, context):
         s3Client.copy(copy_source, bucket, unprocessed_file_key)
         delete_object(bucket, current_file_key)  # not needed anymore
         current_file_key = unprocessed_file_key
-        # mark as processing
-        mark_upload_as_unprocessed(
-            user_id=user_id, hash_id=hash_id, upload_time=upload_time)
     except Exception as e:
-        print('An exception occurred, failed to mark as unprocessed')
+        print('An exception occurred, failed to move uploaded file to unprocessed prefix')
         print(e)
         delete_object(bucket, current_file_key),
         mark_processing_as_failed(

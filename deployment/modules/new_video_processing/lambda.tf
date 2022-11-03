@@ -37,7 +37,6 @@ resource "aws_lambda_function" "new_video_processing" {
       new_video_processing_failure_max_file_size_exceeded = var.new_video_processing_failure_max_file_size_exceeded
       new_video_processing_failure_corrupted              = var.new_video_processing_failure_corrupted
       new_video_processing_failure_unsupported_video_type = var.new_video_processing_failure_unsupported_video_type
-      dynamodb_table_invoked_uploaded_videos              = var.dynamodb_table_invoked_uploaded_videos
       dynamodb_table_unprocessed_videos                   = var.dynamodb_table_unprocessed_videos
       dynamodb_table_drafts_videos                        = var.dynamodb_table_drafts_videos
       new_video_events_processing_has_been_started        = var.new_video_events_processing_has_been_started

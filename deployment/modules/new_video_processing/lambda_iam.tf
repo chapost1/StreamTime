@@ -122,8 +122,7 @@ resource "aws_iam_policy" "new_video_processing_lambda_dynamodb" {
       ],
       "Resource": [
         "${var.drafts_videos_dynamodb_table_arn}",
-        "${var.unprocessed_videos_dynamodb_table_arn}",
-        "${var.invoked_events_dynamodb_table_arn}"
+        "${var.unprocessed_videos_dynamodb_table_arn}"
       ],
       "Effect": "Allow"
     }
