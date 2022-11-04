@@ -19,8 +19,9 @@ fi
 BUILD=false
 # check if md5 identical
 if cmp --silent -- code_md5sum.txt.new code_md5sum.txt; then
-    echo "ui code md5 is identical"
+    echo "ui source code md5 is identical"
 else
+    echo "ui source code has been changed"
     BUILD=true
 fi
 mv code_md5sum.txt.new code_md5sum.txt
@@ -32,7 +33,7 @@ fi
 # detect no dist folder
 if [ ! -d "$(pwd)/dist" ] 
 then
-    echo "dist folder is missing" 
+    echo "ui dist folder is missing" 
     BUILD=true
 fi
 
