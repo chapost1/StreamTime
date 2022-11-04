@@ -137,8 +137,8 @@ if is_valid_command "$command"; then
 
             # lambda layars
             ../lambdas/layers/build_layers.sh
-            # packages
-            echo "no packages to build yet"
+            # services
+            ../services/build_services.sh
         fi
 
         aws configure set aws_access_key_id $aws_access_key
