@@ -15,6 +15,9 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
 Ensure the following are installed:
 
+- <strong>Docker</strong> - is needed to build images.
+https://www.docker.com/
+
 - <strong>Terraform</strong> - is being used for provisioning.
 https://registry.terraform.io/
 

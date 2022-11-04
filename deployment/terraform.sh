@@ -37,6 +37,14 @@ error() {
     exit 1
 }
 
+# validate user has docker
+if hash docker 2>/dev/null; then
+    echo "docker seems to be installed, proceeding..."
+else
+    echo "docker is not installed, exiting..."
+    exit 1
+fi
+
 # validate user has terraform
 if hash terraform 2>/dev/null; then
     echo "terraform seems to be installed, proceeding..."
