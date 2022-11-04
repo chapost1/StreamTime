@@ -311,3 +311,4 @@ dist
 .angular
 .vscode
 code_md5sum.txt
+dockerfile_md5sum.txt
