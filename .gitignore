@@ -307,3 +307,6 @@ dist
 /dist/
 /bazel-out
 /integration/bazel/bazel-*
+
+.angular
+.vscode
