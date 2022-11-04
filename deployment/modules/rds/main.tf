@@ -15,6 +15,7 @@ resource "random_string" "videos_rds_username" {
   length  = 4
   lower   = true
   special = false
+  numeric = false
 }
 
 resource "random_string" "videos_rds_password" {

@@ -11,11 +11,11 @@ resource "random_id" "LB" {
     vpc_id      = var.vpc.id
     target_type = "ip"
   }
-  byte_length = 4
+  byte_length = 2
 }
 
 resource "aws_alb_target_group" "web_api_tg" {
-  name        = "${var.app_name}-web-api-tg-${random_id.LB.hex}"
+  name        = "${var.app_name}-api-tg-${random_id.LB.hex}"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"

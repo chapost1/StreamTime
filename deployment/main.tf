@@ -12,7 +12,7 @@ data "aws_ecr_authorization_token" "token" {}
 
 locals {
   // provider
-  aws_region = "us-east-1"
+  aws_region = "eu-west-1"
   // general
   app_name = "stream-time-videos"
   // s3
@@ -133,7 +133,7 @@ module "rds" {
   source     = "./modules/rds"
   app_name   = local.app_name
   identifier = "videos-rds-db"
-  db_name    = "stream-time-db"
+  db_name    = "streamTimeDB"
   port       = "5432"
 
   aws_region            = local.aws_region

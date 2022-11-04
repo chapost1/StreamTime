@@ -15,7 +15,7 @@ resource "aws_lambda_function" "image_resizer" {
   timeout          = 15
   layers = [
     # PILLOW, source: https://github.com/keithrozario/Klayers/tree/master/deployments/python3.8
-    "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p38-Pillow:4"
+    "arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-p38-Pillow:5"
   ]
 
   tags = {

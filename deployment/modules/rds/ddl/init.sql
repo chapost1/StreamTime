@@ -13,7 +13,6 @@ CREATE TABLE users (
 DROP TABLE IF EXISTS videos;
 
 CREATE TABLE videos (
-    -- video
     hash_id uuid NOT NULL,
     user_id uuid NOT NULL,
     title varchar(128) NOT NULL,
@@ -22,7 +21,7 @@ CREATE TABLE videos (
     duration_seconds int NOT NULL DEFAULT 0,
     thumbnail_url varchar(255) NOT NULL,
     upload_time timestamptz NOT NULL,
-    FOREIGN_KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_user_video_user_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE (user_id, hash_id)
 );
 
