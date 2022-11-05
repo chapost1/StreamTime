@@ -129,10 +129,14 @@ fi
 # make sure script workdir is relative to terraform directory
 cd $(dirname "$0")
 
+# normalize app_name (no special/whitespcaes)
+# snake case for easier next step transform to camel case for db name
+snake_case_app_name=$($(pwd)/../common/non_alpha_to_underscore.sh "$app_name")
+# most of resources requires dash in name (and not underscore), thus, normalize snake case to use dashse
+normalized_app_name=$($(pwd)/../common/underscore_to_hypen.sh "$snake_case_app_name")
+
 # create DB name
-camel_case_app_name=$($(pwd)/../common/camel_case.sh "$app_name")
-db_name=$camel_case_app_name
-db_name+=DB
+db_name=$($(pwd)/../common/snake_to_camel_case.sh "$snake_case_app_name")DB
 
 if is_valid_command "$command"; then
     if is_valid_db_mode "$db_mode"; then
@@ -177,7 +181,7 @@ if is_valid_command "$command"; then
         aws configure set aws_secret_access_key $aws_secret_key
         # run command
         terraform $command -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" \
-            -var="app_name=$app_name" -var="domain=$domain" -var="db_name=$db_name"
+            -var="app_name=$normalized_app_name" -var="domain=$domain" -var="db_name=$db_name"
     else
         echo "invalid db_mode"
         Help

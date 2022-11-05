@@ -1,11 +1,6 @@
 #!/bin/bash
 
-non_alpha_to_underscores() {
-    IFS= read -r -d $'\0' str
-    echo $str | sed -E 's/[^[:alnum:][:space:]]+/_/g'
-}
-
-snake_to_upper() {
+snake_to_camel() {
     IFS= read -r -d $'\0' str
     if hash perl 2>/dev/null; then
         echo $str | perl -nE 'say lcfirst join "", map {ucfirst lc} split /[^[:alnum:]]+/'
@@ -14,4 +9,4 @@ snake_to_upper() {
     fi
 }
 
-echo "$1" | non_alpha_to_underscores | snake_to_upper
+echo "$1" | snake_to_camel
