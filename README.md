@@ -13,7 +13,7 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
 ## Prerequisites
 
-Ensure the following are installed:
+#### Ensure the following are installed:
 
 - <strong>Docker</strong> - is needed to build images.
 
@@ -27,7 +27,11 @@ https://registry.terraform.io/
 
 https://aws.amazon.com/cli/
 
-- <strong>Route53 Domain</strong> - deployment step is going to provision an https loadbalancer which will rely on certificate, thus to create & approve this certificate automatically, first, a valid domain should be registered.
+#### Ensure the following are already exist:
+
+- <strong>AWS Account</strong> - deployment is going to request for cloud resources from AWS and therefore, an account is required.
+
+- <strong>AWS Route53 Domain</strong> - deployment step is going to provision an https loadbalancer which will rely on certificate, thus to create & approve this certificate automatically, first, a valid domain should be registered.
 
     Route53 Domain registration step-by-step guide:
 
