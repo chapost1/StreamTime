@@ -12,38 +12,32 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 ![Architecture Diagram](./assets/architecture_diagram.jpg)
 
 ## Prerequisites
-<hr>
 
-### Ensure the following are installed:
+#### Ensure the following are installed:
 
-- <b>Docker</b> - is needed to build images.
+- <strong>Docker</strong> - is needed to build images.
 
-    https://www.docker.com/
+https://www.docker.com/
 
-- <b>Terraform</b> - is being used for provisioning.
+- <strong>Terraform</strong> - is being used for provisioning.
 
-    https://registry.terraform.io/
+https://registry.terraform.io/
 
-- <b>AWS CLI</b> - is required for RDS Schema creation as part of deployment.
+- <strong>AWS CLI</strong> - is required for RDS Schema creation as part of deployment.
 
-    https://aws.amazon.com/cli/
+https://aws.amazon.com/cli/
 
-<br>
+#### Ensure the following are already exist:
 
-### Ensure the following are already exist:
+- <strong>AWS Account</strong> - deployment is going to request for cloud resources from AWS and therefore, an account is required.
 
-- <b>AWS Account</b> - deployment is going to request for cloud resources from AWS and therefore, an account is required.
-
-    https://aws.amazon.com/
-
-- <b>AWS Route53 Domain</b> - deployment step is going to provision an https loadbalancer which will rely on certificate, thus to create & approve this certificate automatically, first, a valid domain should be registered.
+- <strong>AWS Route53 Domain</strong> - deployment step is going to provision an https loadbalancer which will rely on certificate, thus to create & approve this certificate automatically, first, a valid domain should be registered.
 
     Route53 Domain registration step-by-step guide:
 
     https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html
 
 ## Deployment
-<hr>
 
 First, navigate to the deployment directory and run:
 
