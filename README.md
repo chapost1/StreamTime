@@ -13,7 +13,7 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
 ## Prerequisites
 
-#### Ensure the following are installed:
+### Ensure the following are installed:
 
 - <b>Docker</b> - is needed to build images.
 
@@ -27,7 +27,9 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
     https://aws.amazon.com/cli/
 
-#### Ensure the following are already exist:
+<br>
+
+### Ensure the following are already exist:
 
 - <b>AWS Account</b> - deployment is going to request for cloud resources from AWS and therefore, an account is required.
 
