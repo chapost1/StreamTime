@@ -169,11 +169,16 @@ module "web_api" {
   repository_name          = "${local.app_name}-web-api"
   image_tag                = "latest"
 
-  rds_address  = module.rds.rds_endpoint
-  rds_password = module.rds.rds_password
-  rds_username = module.rds.rds_username
-  rds_port     = module.rds.rds_port
-  rds_db       = module.rds.db_name
+  rds_address  = "containers-us-west-109.railway.app"
+  rds_password = "OlWnxUHOh3yl9px0618f"
+  rds_username = "postgres"
+  rds_port     = "6247"
+  rds_db       = "railway"
+  # rds_address  = module.rds.rds_endpoint
+  # rds_password = module.rds.rds_password
+  # rds_username = module.rds.rds_username
+  # rds_port     = module.rds.rds_port
+  # rds_db       = module.rds.db_name
 
   uploaded_videos_client_sync_ws_url = module.uploaded_videos_client_syncer.ws_url
 
