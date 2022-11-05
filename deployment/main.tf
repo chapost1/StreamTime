@@ -14,7 +14,9 @@ locals {
   // provider
   aws_region = "eu-west-1"
   // general
-  app_name = "stream-time-videos"
+  app_name = var.app_name
+  // registered domain
+  domain = var.domain
   // s3
   s3_videos_prefix                = "videos"
   s3_uploaded_videos_prefix       = "uploaded-videos"
@@ -33,8 +35,8 @@ locals {
   new_video_events_processing_failure          = "new_video_events_processing_failure"
   new_video_events_moved_to_drafts             = "new_video_events_moved_to_drafts"
   // dynamoDB tables
-  dynamodb_table_unprocessed_videos      = "${local.app_name}-unprocessed-videos"
-  dynamodb_table_drafts_videos           = "${local.app_name}-drafts-videos"
+  dynamodb_table_unprocessed_videos = "${local.app_name}-unprocessed-videos"
+  dynamodb_table_drafts_videos      = "${local.app_name}-drafts-videos"
   // web_api
   web_api_port              = 80
   web_api_health_check_path = "/health_check"
@@ -104,8 +106,8 @@ module "new_video_processing" {
   uploaded_video_feedback_event             = local.uploaded_video_feedback_event
 
 
-  dynamodb_table_unprocessed_videos      = local.dynamodb_table_unprocessed_videos
-  dynamodb_table_drafts_videos           = local.dynamodb_table_drafts_videos
+  dynamodb_table_unprocessed_videos = local.dynamodb_table_unprocessed_videos
+  dynamodb_table_drafts_videos      = local.dynamodb_table_drafts_videos
 
   drafts_videos_dynamodb_table_arn      = module.dynamodb.drafts_videos_dynamodb_table_arn
   unprocessed_videos_dynamodb_table_arn = module.dynamodb.unprocessed_videos_dynamodb_table_arn
@@ -150,6 +152,8 @@ module "web_api" {
   source = "./modules/web_api"
 
   app_name                 = local.app_name
+  zone_domain              = local.domain
+  domain                   = "web-api.${local.domain}"
   aws_region               = local.aws_region
   ecr_token_proxy_endpoint = data.aws_ecr_authorization_token.token.proxy_endpoint
   ecr_token_password       = data.aws_ecr_authorization_token.token.password
@@ -164,11 +168,6 @@ module "web_api" {
   repository_name          = "${local.app_name}-web-api"
   image_tag                = "latest"
 
-  # rds_address  = var.pg_host
-  # rds_password = var.pg_pass
-  # rds_username = var.pg_user
-  # rds_port     = var.pg_port
-  # rds_db       = var.pg_db
   rds_address  = module.rds.rds_endpoint
   rds_password = module.rds.rds_password
   rds_username = module.rds.rds_username

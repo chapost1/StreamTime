@@ -1,5 +1,5 @@
-output "web_api_alb_hostname" {
-  value = aws_alb.web_api_alb.dns_name
+output "web_api_hostname" {
+  value = "https://${aws_route53_record.web_api.fqdn}"
 }
 
 output "web_api_ecs_sg" {

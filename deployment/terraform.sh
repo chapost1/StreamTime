@@ -9,6 +9,8 @@ Help() {
     echo "--command                Resources provisioning         (plan|apply|destroy)         (required)"
     echo "--aws_access_key         AWS ACCESS_KEY                 (AWS ACCESS_KEY)             (required)"
     echo "--aws_secret_key         AWS SECRET_KEY                 (AWS SECRET_KEY)             (required)"
+    echo "--app_name               App Name                       (any unique name)            (required)"
+    echo "--domain                 Registered Route53 Domain      (any approved domain)        (required)"
     echo "--db_mode                DDL operation on RDS           (init|patch|none)            (default is none)"
     echo
     exit 1
@@ -77,6 +79,14 @@ while test $# -gt 0; do
         aws_secret_key=$2
         shift
         ;;
+    --app_name)
+        app_name=$2
+        shift
+        ;;
+    --domain)
+        domain=$2
+        shift
+        ;;
     --db_mode)
         db_mode=$2
         shift
@@ -101,6 +111,15 @@ if [ -z "$aws_secret_key" ]; then
     echo "aws_secret_key option is required"
     Help
 fi
+if [ -z "$app_name" ]; then
+    echo "app_name option is required"
+    Help
+fi
+if [ -z "$domain" ]; then
+    echo "domain option is required"
+    Help
+fi
+
 # has default
 if [ -z "$db_mode" ]; then
     echo "db_mode is none"
@@ -152,7 +171,8 @@ if is_valid_command "$command"; then
         aws configure set aws_access_key_id $aws_access_key
         aws configure set aws_secret_access_key $aws_secret_key
         # run command
-        terraform $command -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key"
+        terraform $command -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" \
+            -var="app_name=$app_name" -var="domain=$domain"
     else
         echo "invalid db_mode"
         Help
