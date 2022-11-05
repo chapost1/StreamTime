@@ -41,6 +41,7 @@ locals {
   web_api_port              = 80
   web_api_health_check_path = "/health_check"
   web_api_app_count         = 2
+  web_api_domain            = "web-api.${local.domain}"
   // videos sync websocket
   uploaded_videos_client_syncer_connection_store_prefix = "active-connections"
   uploaded_video_feedback_event                         = "uploaded_video_feedback"
@@ -135,7 +136,7 @@ module "rds" {
   source     = "./modules/rds"
   app_name   = local.app_name
   identifier = "videos-rds-db"
-  db_name    = "streamTimeDB"
+  db_name    = var.db_name
   port       = "5432"
 
   aws_region            = local.aws_region
@@ -153,7 +154,7 @@ module "web_api" {
 
   app_name                 = local.app_name
   zone_domain              = local.domain
-  domain                   = "web-api.${local.domain}"
+  domain                   = local.web_api_domain
   aws_region               = local.aws_region
   ecr_token_proxy_endpoint = data.aws_ecr_authorization_token.token.proxy_endpoint
   ecr_token_password       = data.aws_ecr_authorization_token.token.password

@@ -129,6 +129,11 @@ fi
 # make sure script workdir is relative to terraform directory
 cd $(dirname "$0")
 
+# create DB name
+camel_case_app_name=$($(pwd)/../common/camel_case.sh "$app_name")
+db_name=$camel_case_app_name
+db_name+=DB
+
 if is_valid_command "$command"; then
     if is_valid_db_mode "$db_mode"; then
         # handle db_init cache buster
@@ -172,7 +177,7 @@ if is_valid_command "$command"; then
         aws configure set aws_secret_access_key $aws_secret_key
         # run command
         terraform $command -var="aws_access_key=$aws_access_key" -var="aws_secret_key=$aws_secret_key" \
-            -var="app_name=$app_name" -var="domain=$domain"
+            -var="app_name=$app_name" -var="domain=$domain" -var="db_name=$db_name"
     else
         echo "invalid db_mode"
         Help

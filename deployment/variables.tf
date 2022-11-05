@@ -17,3 +17,8 @@ variable "domain" {
   type        = string
   description = "Registered Route53 Domain Name"
 }
+
+variable "db_name" {
+  type        = string
+  description = "RDS Database Name"
+}

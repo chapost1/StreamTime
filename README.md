@@ -23,7 +23,7 @@ https://www.docker.com/
 
 https://registry.terraform.io/
 
-- <strong>AWS CLI</strong> - is required for PG Schema creation as part of deployment.
+- <strong>AWS CLI</strong> - is required for RDS Schema creation as part of deployment.
 
 https://aws.amazon.com/cli/
 
