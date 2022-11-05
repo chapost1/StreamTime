@@ -41,7 +41,7 @@ locals {
   web_api_port              = 80
   web_api_health_check_path = "/health_check"
   web_api_app_count         = 2
-  web_api_domain            = "web-api.${local.domain}"
+  web_api_domain            = "${local.app_name}-web-api.${local.domain}"
   // videos sync websocket
   uploaded_videos_client_syncer_connection_store_prefix = "active-connections"
   uploaded_video_feedback_event                         = "uploaded_video_feedback"
