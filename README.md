@@ -12,7 +12,6 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 ![Architecture Diagram](./assets/architecture_diagram.jpg)
 
 ## Prerequisites
-<hr>
 
 ### Ensure the following are installed:
 
@@ -43,7 +42,6 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
     https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html
 
 ## Deployment
-<hr>
 
 First, navigate to the deployment directory and run:
 
