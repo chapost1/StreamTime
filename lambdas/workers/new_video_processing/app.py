@@ -1,6 +1,4 @@
-from typing import Dict, Tuple, Any, List
-import psycopg2
-from psycopg2.extensions import connection as pg_connection
+from typing import Dict, Tuple
 import json
 import subprocess
 import shlex
@@ -32,19 +30,11 @@ INTERNAL_ERROR_ENV_NAME = 'new_video_processing_failure_internal_error'
 MAX_FILE_SIZE_EXCEEDED_ENV_NAME = 'new_video_processing_failure_max_file_size_exceeded'
 CORRUPTED_ENV_NAME = 'new_video_processing_failure_corrupted'
 UNSUPPORTED_FILE_FORMAT_ENV_NAME = 'new_video_processing_failure_unsupported_video_type'
-# RDS Connection
-RDS_HOST_ENV_NAME = 'rds_host'
-RDS_PORT_ENV_NAME = 'rds_port'
-RDS_USER_ENV_NAME = 'rds_user'
-RDS_PASSWORD_ENV_NAME = 'rds_password'
-RDS_DB_NAME_ENV_NAME = 'rds_db_name'
-# DB tables names
-UNPROCESSED_VIDEOS_TABLE_ENV_NAME = 'rds_table_uprocessed_videos'
-VIDEOS_TABLE_ENV_NAME = 'rds_table_videos'
 # uploaded_video_feedback_event
 UPLOADED_VIDEO_FEEDBACK_EVENT = 'uploaded_video_feedback_event'
 # ARNs
 IMAGE_RESIZER_LAMBDA_ARN_ENV_NAME = 'image_resizer_lambda_arn'
+VIDEOS_RDS_UPDATE_LAMBDA_ARN_ENV_NAME = 'videos_rds_update_arn'
 NOTIFY_CLIENT_SNS_TOPIC = 'uploaded_videos_client_sync_sns_topic_arn'
 
 
@@ -180,10 +170,10 @@ def assert_necessery_env_are_here() -> None:
                 UPLOADED_VIDEOS_PREFIX_ENV_NAME, S3_THUMBNAILS_ACL_ENV_NAME,
                 S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME, INTERNAL_ERROR_ENV_NAME,
                 MAX_FILE_SIZE_EXCEEDED_ENV_NAME, CORRUPTED_ENV_NAME,
-                UNSUPPORTED_FILE_FORMAT_ENV_NAME, UNPROCESSED_VIDEOS_TABLE_ENV_NAME,
-                VIDEOS_TABLE_ENV_NAME, UPLOADED_VIDEO_FEEDBACK_EVENT,
-                PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME, NOTIFY_CLIENT_SNS_TOPIC,
-                PROCESSING_FAILED_EVENT_ENV_NAME, PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME
+                UNSUPPORTED_FILE_FORMAT_ENV_NAME, VIDEOS_RDS_UPDATE_LAMBDA_ARN_ENV_NAME,
+                UPLOADED_VIDEO_FEEDBACK_EVENT, NOTIFY_CLIENT_SNS_TOPIC,
+                PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME, PROCESSING_FAILED_EVENT_ENV_NAME,
+                PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME
                 ]:
         if os.environ.get(env, None) is None:
             raise RuntimeError(f'missing env varialbe: {env}')
@@ -213,31 +203,34 @@ def send_sns(user_id: str, hash_id: str, event: str) -> None:
         raise e
 
 
-def sql_executor(transaction_steps: List[Tuple[str, Tuple[Any]]]) -> None:
-    rds_connection: pg_connection = psycopg2.connect(
-        host=os.environ[RDS_HOST_ENV_NAME],
-        port=os.environ[RDS_PORT_ENV_NAME],
-        user=os.environ[RDS_USER_ENV_NAME],
-        password=os.environ[RDS_PASSWORD_ENV_NAME],
-        database=os.environ[RDS_DB_NAME_ENV_NAME],
-        connect_timeout=5
-    )
-    cursor = rds_connection.cursor()
-    for sql, params in transaction_steps:
-        cursor.execute(sql, params)
-    
-    rds_connection.commit()
-    rds_connection.close()
-
+def update_rds(record: Dict, trigger: str) -> None:
+    lambdaClient = boto3.client('lambda')
+    try:
+        response = lambdaClient.invoke(
+            FunctionName=os.environ[VIDEOS_RDS_UPDATE_LAMBDA_ARN_ENV_NAME],
+            InvocationType='RequestResponse',
+            Payload=json.dumps({
+                'trigger': trigger,
+                'record': record
+            })
+        )
+        responseFromChild = json.load(response['Payload'])
+        if responseFromChild.get('errorMessage', None) is not None:
+            raise Exception(responseFromChild['errorMessage'])
+    except Exception as e:
+        print('Error during waiting for response from child')
+        print(e)
+        raise e
+    print(responseFromChild)
 
 
 def mark_upload_as_unprocessed(user_id: str, hash_id: str, upload_time: str) -> None:
     print('mark_upload_as_unprocessed')
-    sql = f'INSERT INTO {os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, upload_time) VALUES(%s, %s, %s)'
-    params = (user_id, hash_id, upload_time)
-    sql_executor(
-        transaction_steps=[(sql, params)]
-    )
+    update_rds({
+        'user_id': user_id,
+        'hash_id': hash_id,
+        'upload_time': upload_time,
+    }, os.environ[PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME])
 
     send_sns(user_id, hash_id,
              os.environ[PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME])
@@ -246,16 +239,12 @@ def mark_upload_as_unprocessed(user_id: str, hash_id: str, upload_time: str) -> 
 def mark_processing_as_failed(user_id: str, hash_id: str, upload_time: str, failure_reason: str) -> None:
     print('mark_processing_as_failed')
     print(f'failure reason: {failure_reason}')
-    sql = \
-        f"""INSERT INTO {os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, upload_time, failure_reason)
-        VALUES(%s, %s, %s, %s)
-        ON CONFLICT (user_id, hash_id)
-        DO
-        UPDATE SET failure_reason = %s;"""
-    params = (user_id, hash_id, upload_time, failure_reason, failure_reason)
-    sql_executor(
-        transaction_steps=[(sql, params)]
-    )
+    update_rds({
+        'user_id': user_id,
+        'hash_id': hash_id,
+        'upload_time': upload_time,
+        'failure_reason': failure_reason
+    }, os.environ[PROCESSING_FAILED_EVENT_ENV_NAME])
 
     send_sns(user_id, hash_id, os.environ[PROCESSING_FAILED_EVENT_ENV_NAME])
 
@@ -270,22 +259,15 @@ def mark_video_as_a_draft(
     upload_time: str
 ) -> None:
     print('mark_video_as_a_draft')
-    # delete unprocessed marker
-    delete_unprocessed_entry_sql = \
-        f"""DELETE FROM {os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]} WHERE user_id = %s AND hash_id = %s AND upload_time = %s;"""
-    delete_unprocessed_entry_params = (user_id, hash_id, upload_time)
-    # insert into drafts
-    insert_sql = \
-        f"""INSERT INTO {os.environ[VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, upload_time, size_in_bytes, duration_seconds, video_type, thumbnail_url, is_listed)
-            VALUES(%s, %s, %s, %s, %s, %s, %s, %s)"""
-    insert_params = (user_id, hash_id, upload_time, size_in_bytes,
-                     duration_seconds, video_type, thumbnail_url, False)
-    sql_executor(
-        transaction_steps=[
-            (delete_unprocessed_entry_sql, delete_unprocessed_entry_params),
-            (insert_sql, insert_params)
-        ]
-    )
+    update_rds({
+        'user_id': user_id,
+        'hash_id': hash_id,
+        'video_type': video_type,
+        'size_in_bytes': size_in_bytes,
+        'duration_seconds': duration_seconds,
+        'thumbnail_url': thumbnail_url,
+        'upload_time': upload_time
+    }, os.environ[PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME])
 
     send_sns(user_id, hash_id,
              os.environ[PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME])
@@ -333,7 +315,8 @@ def lambda_handler(event, context):
     hash_id: str = file_name.split('.')[0]
     if hash_id is None or len(hash_id) < 1:
         # internal error
-        e = Exception(f'An exception occurred, infrastructure failure, key is not in valid format: {current_file_key}')
+        e = Exception(
+            f'An exception occurred, infrastructure failure, key is not in valid format: {current_file_key}')
         print(e)
         raise e
 
@@ -382,7 +365,7 @@ def lambda_handler(event, context):
     if MAX_FILE_SIZE_IN_BYTES < meta['size_in_bytes']:
         delete_object(bucket, current_file_key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time,
-                                    failure_reason=os.environ[MAX_FILE_SIZE_EXCEEDED_ENV_NAME])
+                                  failure_reason=os.environ[MAX_FILE_SIZE_EXCEEDED_ENV_NAME])
         return {'statusCode': 400}
 
     if not is_supported_video_type(meta['type']):
@@ -390,7 +373,7 @@ def lambda_handler(event, context):
         # not a video, delete file!
         delete_object(bucket, current_file_key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time,
-                                    failure_reason=os.environ[UNSUPPORTED_FILE_FORMAT_ENV_NAME])
+                                  failure_reason=os.environ[UNSUPPORTED_FILE_FORMAT_ENV_NAME])
     else:
         print('a video')
         # video
@@ -401,7 +384,7 @@ def lambda_handler(event, context):
         except Exception as e:
             delete_object(bucket, current_file_key)
             mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time,
-                                        failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
+                                      failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
             print('An exception occurred, internal error')
             print(e)
             raise e
@@ -446,7 +429,7 @@ def lambda_handler(event, context):
         print(e)
         delete_object(bucket, current_file_key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time,
-                                    failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
+                                  failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
         raise e
 
     return {

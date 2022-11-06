@@ -18,11 +18,6 @@ resource "aws_iam_role" "iam_for_new_video_processing_lambda" {
 EOF
 }
 
-# resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_lambda_vpc_access_execution" {
-#   role       = aws_iam_role.iam_for_new_video_processing_lambda.name
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-# }
-
 resource "aws_lambda_permission" "video_processor_lambda_s3_invoke_permission" {
   statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
@@ -51,9 +46,34 @@ resource "aws_iam_policy" "invoke_image_resizer_lambda_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_invoke_lambda_policy" {
+resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_invoke_image_resizer_lambda_policy" {
   role       = aws_iam_role.iam_for_new_video_processing_lambda.name
   policy_arn = aws_iam_policy.invoke_image_resizer_lambda_policy.arn
+}
+
+resource "aws_iam_policy" "invoke_videos_rds_update_lambda_policy" {
+  name        = "invoke_videos_rds_update_lambda_policy"
+  path        = "/"
+  description = "IAM policy to invoke video thumbnail lambda"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "lambda:InvokeFunction",
+          "lambda:InvokeAsync"
+        ]
+        "Resource" : "${var.videos_rds_update_arn}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_invoke_videos_rds_update_lambda_policy" {
+  role       = aws_iam_role.iam_for_new_video_processing_lambda.name
+  policy_arn = aws_iam_policy.invoke_videos_rds_update_lambda_policy.arn
 }
 
 resource "aws_iam_policy" "lambda_s3_videos_bucket" {

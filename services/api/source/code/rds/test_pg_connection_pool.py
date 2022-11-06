@@ -21,11 +21,11 @@ def run_test():
         if (ps_connection):
             print("successfully recived connection from connection pool ")
             ps_cursor = ps_connection.cursor()
-            ps_cursor.execute("select * from mobile")
-            mobile_records = ps_cursor.fetchall()
+            ps_cursor.execute("select * from videos")
+            videos = ps_cursor.fetchall()
 
-            print("Displaying rows from mobile table")
-            for row in mobile_records:
+            print("Displaying rows from videos table")
+            for row in videos:
                 print(row)
 
             ps_cursor.close()

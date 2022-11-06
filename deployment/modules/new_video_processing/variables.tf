@@ -2,15 +2,11 @@ variable "app_name" {
   type = string
 }
 
-variable "vpc" {
-  type = any
-}
-
-variable "private_subnet" {
-  type = any
-}
-
 variable "image_resizer_arn" {
+  type = string
+}
+
+variable "videos_rds_update_arn" {
   type = string
 }
 
@@ -72,33 +68,5 @@ variable "uploaded_videos_client_sync_sns_topic_arn" {
 }
 
 variable "uploaded_video_feedback_event" {
-  type = string
-}
-
-variable "rds_host" {
-  type = string
-}
-
-variable "rds_port" {
-  type = string
-}
-
-variable "rds_user" {
-  type = string
-}
-
-variable "rds_password" {
-  type = string
-}
-
-variable "rds_db_name" {
-  type = string
-}
-
-variable "rds_table_uprocessed_videos" {
-  type = string
-}
-
-variable "rds_table_videos" {
   type = string
 }

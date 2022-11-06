@@ -73,6 +73,30 @@ module "image_resizer" {
   ]
 }
 
+module "videos_rds_update" {
+  source   = "./modules/videos_rds_update"
+  app_name = local.app_name
+
+  new_video_events_processing_has_been_started = local.new_video_events_processing_has_been_started
+  new_video_events_processing_failure          = local.new_video_events_processing_failure
+  new_video_events_moved_to_drafts             = local.new_video_events_moved_to_drafts
+
+  rds_host                    = module.rds.rds_endpoint
+  rds_port                    = module.rds.rds_port
+  rds_user                    = module.rds.rds_username
+  rds_password                = module.rds.rds_password
+  rds_db_name                 = module.rds.db_name
+  rds_table_uprocessed_videos = local.rds_table_uprocessed_videos
+  rds_table_videos            = local.rds_table_videos
+
+  vpc            = module.vpc.vpc
+  private_subnet = module.vpc.private_subnet
+
+  depends_on = [
+    module.vpc.vpc
+  ]
+}
+
 module "new_video_processing" {
   source = "./modules/new_video_processing"
 
@@ -99,22 +123,13 @@ module "new_video_processing" {
   uploaded_videos_client_sync_sns_topic_arn = module.uploaded_videos_client_syncer.input_sns_topic_arn
   uploaded_video_feedback_event             = local.uploaded_video_feedback_event
 
-  rds_host                    = module.rds.rds_endpoint
-  rds_port                    = module.rds.rds_port
-  rds_user                    = module.rds.rds_username
-  rds_password                = module.rds.rds_password
-  rds_db_name                 = module.rds.db_name
-  rds_table_uprocessed_videos = local.rds_table_uprocessed_videos
-  rds_table_videos            = local.rds_table_videos
-
-  vpc            = module.vpc.vpc
-  private_subnet = module.vpc.private_subnet
+  videos_rds_update_arn = module.videos_rds_update.arn
 
   depends_on = [
     module.videos_bucket.videos_bucket,
-    module.image_resizer.image_resizer_arn,
+    module.image_resizer.arn,
     module.uploaded_videos_client_syncer.input_sns_topic_arn,
-    module.rds.rds_endpoint
+    module.videos_rds_update.arn
   ]
 }
 
@@ -125,6 +140,8 @@ module "vpc" {
 
   cidr_block = "172.16.0.0/16"
   az_count   = 2
+
+  region = local.aws_region
 }
 
 module "rds" {
@@ -137,10 +154,11 @@ module "rds" {
   aws_region            = local.aws_region
   vpc_id                = module.vpc.vpc.id
   vpc_private_subnet    = module.vpc.private_subnet
-  allow_security_groups = [module.web_api.web_api_ecs_sg, module.new_video_processing.rds_lambda_sg]
+  allow_security_groups = [module.web_api.web_api_ecs_sg, module.videos_rds_update.rds_lambda_sg]
 
   depends_on = [
-    module.vpc.vpc
+    module.vpc.vpc,
+    module.videos_rds_update.rds_lambda_sg
   ]
 }
 

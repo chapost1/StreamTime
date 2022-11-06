@@ -21,9 +21,7 @@ resource "aws_lambda_function" "new_video_processing" {
   runtime          = "python3.8"
   timeout          = 300 # 5m
   layers = [
-    aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn,
-    # psycopg2
-    "arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-p38-aws-psycopg2:1"
+    aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn
   ]
 
   environment {
@@ -44,13 +42,7 @@ resource "aws_lambda_function" "new_video_processing" {
       new_video_events_moved_to_drafts                    = var.new_video_events_moved_to_drafts
       uploaded_videos_client_sync_sns_topic_arn           = var.uploaded_videos_client_sync_sns_topic_arn
       uploaded_video_feedback_event                       = var.uploaded_video_feedback_event
-      rds_host                                            = var.rds_host
-      rds_port                                            = var.rds_port
-      rds_user                                            = var.rds_user
-      rds_password                                        = var.rds_password
-      rds_db_name                                         = var.rds_db_name
-      rds_table_uprocessed_videos                         = var.rds_table_uprocessed_videos
-      rds_table_videos                                    = var.rds_table_videos
+      videos_rds_update_arn                               = var.videos_rds_update_arn
     }
   }
   tags = {
