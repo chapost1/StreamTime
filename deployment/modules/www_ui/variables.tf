@@ -13,3 +13,7 @@ variable "zone_domain" {
 variable "region" {
   type = string
 }
+
+variable "web_api_url" {
+  type = string
+}

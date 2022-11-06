@@ -1,8 +1,3 @@
-provider "aws" {
-  alias = "acm_provider"
-}
-
-
 data "aws_route53_zone" "zone" {
   name         = var.zone_domain
   private_zone = false

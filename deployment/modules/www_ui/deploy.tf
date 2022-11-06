@@ -1,15 +1,23 @@
 locals {
-  dist = "${path.module}/../../../services/ui/dist/"
+  dist        = "${path.module}/../../../services/ui/dist/"
+  backendJson = "${local.dist}assets/backend.json"
+}
+
+resource "local_file" "backend_json" {
+  content = jsonencode({
+    url = var.web_api_url
+  })
+  filename = local.backendJson
 }
 
 module "template_files" {
   source = "hashicorp/dir/template"
 
   base_dir = local.dist
-  template_vars = {
-    # Pass in any values that you wish to use in your templates.
-    // todo: inject web_api url to config.json
-  }
+
+  depends_on = [
+    local_file.backend_json
+  ]
 }
 
 resource "aws_s3_object" "static_files" {

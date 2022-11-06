@@ -1,20 +1,13 @@
 # Cloudfront distribution for main s3 site.
 
 resource "aws_cloudfront_origin_access_identity" "www_s3_distribution_origin_access_identity" {
-  comment = "s3-my-webapp.example.com"
+  comment = "${va.app_name} s3 distribution access identity"
 }
 
 resource "aws_cloudfront_distribution" "www_s3_distribution" {
   origin {
     domain_name = aws_s3_bucket.www_bucket.bucket_regional_domain_name
-    # domain_name = aws_s3_bucket.www_bucket.website_endpoint
-    origin_id = "S3-${aws_s3_bucket.www_bucket.bucket}"
-    # custom_origin_config {
-    #   http_port                = 80
-    #   https_port               = 443
-    #   origin_protocol_policy   = "match-viewer"
-    #   origin_ssl_protocols     = ["TLSv1", "TLSv1.1", "TLSv1.2"]
-    # }
+    origin_id   = "S3-${aws_s3_bucket.www_bucket.bucket}"
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.www_s3_distribution_origin_access_identity.cloudfront_access_identity_path
