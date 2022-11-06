@@ -24,4 +24,8 @@ resource "aws_security_group" "_" {
   tags = {
     Name = "${local.resource_name_prefix}-rds-sg"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

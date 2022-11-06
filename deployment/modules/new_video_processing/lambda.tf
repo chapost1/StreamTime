@@ -21,7 +21,9 @@ resource "aws_lambda_function" "new_video_processing" {
   runtime          = "python3.8"
   timeout          = 300 # 5m
   layers = [
-    aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn
+    aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn,
+    # psycopg2
+    "arn:aws:lambda:eu-west-1:770693421928:layer:Klayers-p38-aws-psycopg2:1"
   ]
 
   environment {
@@ -37,16 +39,20 @@ resource "aws_lambda_function" "new_video_processing" {
       new_video_processing_failure_max_file_size_exceeded = var.new_video_processing_failure_max_file_size_exceeded
       new_video_processing_failure_corrupted              = var.new_video_processing_failure_corrupted
       new_video_processing_failure_unsupported_video_type = var.new_video_processing_failure_unsupported_video_type
-      dynamodb_table_unprocessed_videos                   = var.dynamodb_table_unprocessed_videos
-      dynamodb_table_drafts_videos                        = var.dynamodb_table_drafts_videos
       new_video_events_processing_has_been_started        = var.new_video_events_processing_has_been_started
       new_video_events_processing_failure                 = var.new_video_events_processing_failure
       new_video_events_moved_to_drafts                    = var.new_video_events_moved_to_drafts
       uploaded_videos_client_sync_sns_topic_arn           = var.uploaded_videos_client_sync_sns_topic_arn
       uploaded_video_feedback_event                       = var.uploaded_video_feedback_event
+      rds_host                                            = var.rds_host
+      rds_port                                            = var.rds_port
+      rds_user                                            = var.rds_user
+      rds_password                                        = var.rds_password
+      rds_db_name                                         = var.rds_db_name
+      rds_table_uprocessed_videos                         = var.rds_table_uprocessed_videos
+      rds_table_videos                                    = var.rds_table_videos
     }
   }
-
   tags = {
     Name = "${var.app_name}-new-video-processing-lambda"
   }

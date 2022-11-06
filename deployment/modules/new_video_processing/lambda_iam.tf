@@ -18,6 +18,11 @@ resource "aws_iam_role" "iam_for_new_video_processing_lambda" {
 EOF
 }
 
+# resource "aws_iam_role_policy_attachment" "iam_role_policy_attachment_lambda_vpc_access_execution" {
+#   role       = aws_iam_role.iam_for_new_video_processing_lambda.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+# }
+
 resource "aws_lambda_permission" "video_processor_lambda_s3_invoke_permission" {
   statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
@@ -103,36 +108,6 @@ EOF
 resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_sns" {
   role       = aws_iam_role.iam_for_new_video_processing_lambda.name
   policy_arn = aws_iam_policy.new_video_processing_lambda_sns.arn
-}
-
-// lambda dynamodb premissions
-resource "aws_iam_policy" "new_video_processing_lambda_dynamodb" {
-  name        = "new_video_processing_lambda_dynamodb"
-  path        = "/"
-  description = "IAM policy for dynamodb operations from a lambda on specific tables"
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "ReadWriteTableItems",
-      "Action": [
-				"dynamodb:*"
-      ],
-      "Resource": [
-        "${var.drafts_videos_dynamodb_table_arn}",
-        "${var.unprocessed_videos_dynamodb_table_arn}"
-      ],
-      "Effect": "Allow"
-    }
-  ]
-}
-EOF
-}
-resource "aws_iam_role_policy_attachment" "new_video_processing_lambda_dynamodb" {
-  role       = aws_iam_role.iam_for_new_video_processing_lambda.name
-  policy_arn = aws_iam_policy.new_video_processing_lambda_dynamodb.arn
 }
 
 # Lambda <-> Cloudwatch

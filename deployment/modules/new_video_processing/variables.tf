@@ -2,6 +2,14 @@ variable "app_name" {
   type = string
 }
 
+variable "vpc" {
+  type = any
+}
+
+variable "private_subnet" {
+  type = any
+}
+
 variable "image_resizer_arn" {
   type = string
 }
@@ -49,13 +57,6 @@ variable "new_video_processing_failure_unsupported_video_type" {
   type = string
 }
 
-variable "dynamodb_table_unprocessed_videos" {
-  type = string
-}
-variable "dynamodb_table_drafts_videos" {
-  type = string
-}
-
 variable "new_video_events_processing_has_been_started" {
   type = string
 }
@@ -74,10 +75,30 @@ variable "uploaded_video_feedback_event" {
   type = string
 }
 
-variable "unprocessed_videos_dynamodb_table_arn" {
+variable "rds_host" {
   type = string
 }
 
-variable "drafts_videos_dynamodb_table_arn" {
+variable "rds_port" {
+  type = string
+}
+
+variable "rds_user" {
+  type = string
+}
+
+variable "rds_password" {
+  type = string
+}
+
+variable "rds_db_name" {
+  type = string
+}
+
+variable "rds_table_uprocessed_videos" {
+  type = string
+}
+
+variable "rds_table_videos" {
   type = string
 }

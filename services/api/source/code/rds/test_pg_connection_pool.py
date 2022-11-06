@@ -3,6 +3,12 @@ from psycopg2 import pool
 from .db_connection_config import config
 
 
+# def sql_executor(conn: pg_connection, transaction_steps: List[Tuple[str, Tuple[Any]]]) -> None:
+#     with conn:
+#         with conn.cursor() as cursor:
+#             for sql, params in transaction_steps:
+#                 cursor.execute(sql, params)
+
 def run_test():
     try:
         postgreSQL_pool = pool.SimpleConnectionPool(2, 20, **config)

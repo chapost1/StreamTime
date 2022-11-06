@@ -34,9 +34,9 @@ locals {
   new_video_events_processing_has_been_started = "new_video_events_processing_has_been_started"
   new_video_events_processing_failure          = "new_video_events_processing_failure"
   new_video_events_moved_to_drafts             = "new_video_events_moved_to_drafts"
-  // dynamoDB tables
-  dynamodb_table_unprocessed_videos = "${local.app_name}-unprocessed-videos"
-  dynamodb_table_drafts_videos      = "${local.app_name}-drafts-videos"
+  # rds
+  rds_table_uprocessed_videos = "unprocessed_videos"
+  rds_table_videos            = "videos"
   // web_api
   web_api_port              = 80
   web_api_health_check_path = "/health_check"
@@ -55,13 +55,6 @@ module "videos_bucket" {
   videos_prefix             = local.s3_videos_prefix
   thumbnails_prefix         = local.s3_thumbnails_prefix
   tmp_thumbnails_prefix     = local.s3_tmp_thumbnails_prefix
-}
-
-module "dynamodb" {
-  source = "./modules/dynamoDB"
-
-  unprocessed_videos_table_name = local.dynamodb_table_unprocessed_videos
-  drafts_videos_table_name      = local.dynamodb_table_drafts_videos
 }
 
 module "uploaded_videos_client_syncer" {
@@ -106,20 +99,22 @@ module "new_video_processing" {
   uploaded_videos_client_sync_sns_topic_arn = module.uploaded_videos_client_syncer.input_sns_topic_arn
   uploaded_video_feedback_event             = local.uploaded_video_feedback_event
 
+  rds_host                    = module.rds.rds_endpoint
+  rds_port                    = module.rds.rds_port
+  rds_user                    = module.rds.rds_username
+  rds_password                = module.rds.rds_password
+  rds_db_name                 = module.rds.db_name
+  rds_table_uprocessed_videos = local.rds_table_uprocessed_videos
+  rds_table_videos            = local.rds_table_videos
 
-  dynamodb_table_unprocessed_videos = local.dynamodb_table_unprocessed_videos
-  dynamodb_table_drafts_videos      = local.dynamodb_table_drafts_videos
-
-  drafts_videos_dynamodb_table_arn      = module.dynamodb.drafts_videos_dynamodb_table_arn
-  unprocessed_videos_dynamodb_table_arn = module.dynamodb.unprocessed_videos_dynamodb_table_arn
+  vpc            = module.vpc.vpc
+  private_subnet = module.vpc.private_subnet
 
   depends_on = [
     module.videos_bucket.videos_bucket,
     module.image_resizer.image_resizer_arn,
     module.uploaded_videos_client_syncer.input_sns_topic_arn,
-    module.dynamodb.drafts_videos_dynamodb_table_arn,
-    module.dynamodb.unprocessed_videos_dynamodb_table_arn,
-    module.dynamodb.invoked_events_dynamodb_table_arn
+    module.rds.rds_endpoint
   ]
 }
 
@@ -142,7 +137,7 @@ module "rds" {
   aws_region            = local.aws_region
   vpc_id                = module.vpc.vpc.id
   vpc_private_subnet    = module.vpc.private_subnet
-  allow_security_groups = [module.web_api.web_api_ecs_sg]
+  allow_security_groups = [module.web_api.web_api_ecs_sg, module.new_video_processing.rds_lambda_sg]
 
   depends_on = [
     module.vpc.vpc

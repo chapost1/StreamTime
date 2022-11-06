@@ -21,11 +21,11 @@ md5_directory() {
 
 BUILD=false
 
-if [ $direcory_to_lookup = "no_dockerfile" ]; then
+if [ $dockerfile_to_cmp = "no_dockerfile" ]; then
     echo "$service does not have a Dockerfile to lookup"
 else
     # need to lookup Dockerfile and compare hash
-    md5_directory $direcory_to_lookup >dockerfile_md5sum.txt.new
+    md5_directory $dockerfile_to_cmp >dockerfile_md5sum.txt.new
     if [ ! -f dockerfile_md5sum.txt ]; then
         touch dockerfile_md5sum.txt
     fi
