@@ -33,7 +33,11 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
     https://aws.amazon.com/
 
-- <b>AWS Route53 Hosted zone /w Domain</b> - deployment step is going to provision an https loadbalancer which will rely on certificate, thus to create & approve this certificate automatically, first, a valid domain should be registered.
+- <b>AWS Route53 Hosted zone /w Domain</b> - deployment step includes:
+  - Certificate creation for Cloudfront and domain for frontend.
+  - Certificate creation for HTTPS connection to the Web server's Load balancer.
+
+  Thus, to create & validate this certificate automatically, first, a valid domain should be registered.
 
     Route53 Domain registration step-by-step guide (zone will be created automatically):
 
