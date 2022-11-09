@@ -312,3 +312,8 @@ dist
 .vscode
 code_md5sum.txt
 dockerfile_md5sum.txt
+
+# local dev
+/services/local-docker-compose.yaml
+/services/local-up.sh
+/services/~pgdata/
