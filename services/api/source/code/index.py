@@ -1,4 +1,4 @@
-from environment import environment
+from environment import environment, constants
 import time
 from typing import Callable
 from fastapi import FastAPI, Request
@@ -22,7 +22,14 @@ async def add_process_time_header(request: Request, call_next: Callable):
 
 @app.middleware('http')# todo: replace with actual authentication mechanism
 async def inject_temporary_dummy_username(request: Request, call_next: Callable):
-    request.state.auth_user_id = 'ae6d14eb-d222-4967-98d9-60a7cc2d7891'
+    is_authenticated = True
+
+    if is_authenticated:
+        # dummy
+        request.state.auth_user_id = 'ae6d14eb-d222-4967-98d9-60a7cc2d7891'
+    else:
+        request.state.auth_user_id = constants.ANONYMOUS_USER
+
     return await call_next(request)
 
 @app.get(environment.HEALTH_CHECK_PATH)

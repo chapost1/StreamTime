@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE users (
     id uuid NOT NULL UNIQUE,
@@ -12,7 +12,7 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_user_id ON users(id);
 
-DROP TABLE IF EXISTS unprocessed_videos;
+DROP TABLE IF EXISTS unprocessed_videos CASCADE;
 
 CREATE TABLE unprocessed_videos (
     hash_id uuid NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE unprocessed_videos (
 
 CREATE INDEX idx_unprocessed_videos_user_id ON unprocessed_videos(user_id);
 
-DROP TABLE IF EXISTS videos;
+DROP TABLE IF EXISTS videos CASCADE;
 
 CREATE TABLE videos (
     hash_id uuid NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE videos (
     thumbnail_url varchar(255) NOT NULL,
     upload_time timestamptz NOT NULL,
     is_private boolean NOT NULL DEFAULT false,
-    is_listed boolean NOT NULL DEFAULT false,
+    listing_time timestamptz DEFAULT NULL,
     CONSTRAINT fk_user_video_user_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE (user_id, hash_id)
 );

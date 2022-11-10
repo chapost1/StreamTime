@@ -20,9 +20,9 @@ class Connection(metaclass=Singleton):
 
     async def __execute(self, transaction_steps: List[Tuple[str, Tuple[Any]]], query=False) -> Union[None, List[Tuple]]:
         handled = False
+        ret = None
         try:
             with (await self.pool.cursor()) as cursor:
-                print('got cursor')
                 try:
                     await self.__transaction(cursor, transaction_steps)
                     if query:
