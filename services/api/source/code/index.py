@@ -3,7 +3,7 @@ import time
 from typing import Callable
 from fastapi import FastAPI, Request
 from routers import routeList
-from services import init as init_services
+from app_startup import init as init_services
 print('app start')
 
 app = FastAPI()
@@ -28,5 +28,5 @@ async def inject_temporary_dummy_username(request: Request, call_next: Callable)
 @app.get(environment.HEALTH_CHECK_PATH)
 async def health_check():
     return {"message": "ok"}
-    
+
 app.include_router(routeList.videos_router, prefix="/video")
