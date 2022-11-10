@@ -1,7 +1,5 @@
 import os
 
-print(os.environ)
-
 HEALTH_CHECK_PATH = os.environ['health_check_path']
 
 RDS_HOST = os.environ['rds_address']
