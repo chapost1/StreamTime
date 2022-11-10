@@ -1,4 +1,2 @@
-from .test_pg_connection_pool import run_test
-
-def test_pg_connection():
-    run_test()
+from rds.connection import init
+from rds.videos import videos

@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2 import pool
-from .db_connection_config import config
+from rds.connection.config import config
 
 
 # def sql_executor(conn: pg_connection, transaction_steps: List[Tuple[str, Tuple[Any]]]) -> None:

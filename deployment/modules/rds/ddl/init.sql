@@ -10,6 +10,8 @@ CREATE TABLE users (
     PRIMARY KEY (id)
 );
 
+CREATE INDEX idx_users_user_id ON users(id);
+
 DROP TABLE IF EXISTS unprocessed_videos;
 
 CREATE TABLE unprocessed_videos (

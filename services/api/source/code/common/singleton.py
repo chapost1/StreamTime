@@ -2,7 +2,6 @@ import threading
 
 lock = threading.Lock()
 
-# to use: _class(metaclass=Singleton)
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
