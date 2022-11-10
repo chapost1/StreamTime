@@ -2,7 +2,6 @@ from typing import Any
 import aiopg
 
 async def create_pg_pool(dsn: str) -> Any:
-    print(dsn)
     try:
         pool = await aiopg.create_pool(dsn, minsize=1, maxsize=20)
         if (pool):
