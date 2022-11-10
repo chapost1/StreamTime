@@ -6,7 +6,7 @@ from models import Video, UserVideosList, SortKeys
 from common.utils import calc_server_time
 from ..validation_utils import required_fields_validator
 
-router = APIRouter(tags=["Videos"])
+router = APIRouter()
 
 # get auth user videos
 @router.get("/", response_model=UserVideosList, response_model_exclude_none=True)
@@ -55,7 +55,7 @@ async def update_video(request: Request, video: Video, hash_id: UUID) -> None:
 
 # delete a video
 @router.delete("/{hash_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def get_authenticated_user_videos(request: Request, hash_id: UUID) -> None:
+async def delete_video(request: Request, hash_id: UUID) -> None:
     authenticated_user_id: str = request.state.auth_user_id
     if authenticated_user_id.__eq__(constants.ANONYMOUS_USER):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED)

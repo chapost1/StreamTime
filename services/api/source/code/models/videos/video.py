@@ -1,4 +1,5 @@
 from models.videos.uploaded_video import UploadedVideo
+from pydantic import HttpUrl
 from typing import Optional
 import datetime
 
@@ -9,7 +10,7 @@ class Video(UploadedVideo):
     size_in_bytes: Optional[int]
     duration_seconds: Optional[int]
     video_type: Optional[str]
-    thumbnail_url: Optional[str]
+    thumbnail_url: Optional[HttpUrl]
     is_private: Optional[bool]
     listing_time: Optional[datetime.datetime]
     

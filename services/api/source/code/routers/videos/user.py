@@ -4,7 +4,7 @@ from rds import videos
 from uuid import UUID
 from models import Video, SortKeys
 
-router = APIRouter(tags=["Videos"])
+router = APIRouter()
 
 # get specific user videos
 @router.get("/{user_id}", response_model=List[Video], response_model_exclude_none=True)
