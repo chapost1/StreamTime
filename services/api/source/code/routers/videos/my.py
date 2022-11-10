@@ -1,20 +1,16 @@
-from environment import constants
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Request, HTTPException, status, Depends
 from rds import videos
 from uuid import UUID
 from models import Video, UserVideosList, SortKeys
 from common.utils import calc_server_time
 from ..validation_utils import required_fields_validator
+from ..auth_guards import authenticated_user
 
 router = APIRouter()
 
 # get auth user videos
 @router.get("/", response_model=UserVideosList, response_model_exclude_none=True)
-async def get_authenticated_user_videos(request: Request) -> UserVideosList:
-    authenticated_user_id: str = request.state.auth_user_id
-    if authenticated_user_id.__eq__(constants.ANONYMOUS_USER):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED)
-    
+async def get_authenticated_user_videos(authenticated_user_id: str = Depends(authenticated_user)) -> UserVideosList:
     return UserVideosList(
         unprocessed_videos=await videos.get_user_unprocessed_videos(user_id=authenticated_user_id),
         videos=await videos.get_user_videos(
@@ -27,12 +23,8 @@ async def get_authenticated_user_videos(request: Request) -> UserVideosList:
 
 # put video (using the hash_id of one which is not listed (check it out) && user_id(is already known))
 @router.put("/{hash_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def update_video(request: Request, video: Video, hash_id: UUID) -> None:
+async def update_video(video: Video, hash_id: UUID, authenticated_user_id: str = Depends(authenticated_user)) -> None:
     # todo: support new thumbnail selection
-
-    authenticated_user_id: str = request.state.auth_user_id
-    if authenticated_user_id == constants.ANONYMOUS_USER:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED)
 
     existing_video: Video = await videos.get_video(user_id=authenticated_user_id, hash_id=hash_id)
     if existing_video is None:
@@ -55,9 +47,6 @@ async def update_video(request: Request, video: Video, hash_id: UUID) -> None:
 
 # delete a video
 @router.delete("/{hash_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_video(request: Request, hash_id: UUID) -> None:
-    authenticated_user_id: str = request.state.auth_user_id
-    if authenticated_user_id.__eq__(constants.ANONYMOUS_USER):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED)
-    
+async def delete_video(request: Request, hash_id: UUID, authenticated_user_id: str = Depends(authenticated_user)) -> None:
+
     """todo: implement""" # consider the case of hash_id in unprocessed / videos

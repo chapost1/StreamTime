@@ -1,16 +1,15 @@
 from environment import constants
 from typing import List, Optional
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends
 from rds import videos
 from models import Video
+from ..auth_guards import any_user
 
 router = APIRouter()
 
 # explore all videos which are already listed
 @router.get("/", response_model=List[Video], response_model_exclude_none=True)
-async def explore_listed_videos(request: Request, include_my: Optional[bool] = False) -> List[Video]:
-    authenticated_user_id: str = request.state.auth_user_id
-
+async def explore_listed_videos(include_my: Optional[bool] = False, authenticated_user_id: str = Depends(any_user)) -> List[Video]:
     # hide authenticated user listed videos by default
     allow_privates_of_user_id = None
     
