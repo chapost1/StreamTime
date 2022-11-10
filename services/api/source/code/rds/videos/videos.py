@@ -5,7 +5,7 @@ from rds.videos import tables
 from common.utils import nl
 
 
-async def explore_listed_videos(allow_privates_of_user_id: str) -> List[Video]:
+async def get_listed_videos(allow_privates_of_user_id: str) -> List[Video]:
     private_visibility_conditions = ['is_private is not true']
     params = []
     if allow_privates_of_user_id is not None:
