@@ -5,13 +5,21 @@ from rds.videos import tables
 from common.utils import nl
 
 
-async def get_listed_videos(allow_privates_of_user_id: str) -> List[Video]:
-    private_visibility_conditions = ['is_private is not true']
+async def get_listed_videos(allow_privates_of_user_id: str, exclude_user_id: str) -> List[Video]:
+    conditions = []
     params = []
     if allow_privates_of_user_id is not None:
-        # allow authenticated user to see his private videos
-        private_visibility_conditions.append('user_id = %s')
+        # allow private visibility:
+        # if this is not the allowed user, show only public (not private)
+        # else, show for the auth user, anything
+        conditions.append('((user_id != %s AND is_private is not true) OR (user_id = %s))')
         params.append(allow_privates_of_user_id)
+        params.append(allow_privates_of_user_id)
+    
+    if exclude_user_id is not None:
+        # hide anything which is related to the excluded user_id
+        conditions.append('user_id != %s')
+        params.append(exclude_user_id)
 
     videos = await Connection().query([
         (
@@ -29,7 +37,7 @@ async def get_listed_videos(allow_privates_of_user_id: str) -> List[Video]:
                     listing_time
                FROM {tables.VIDEOS_TABLE}
                WHERE listing_time is not null
-               AND ({' OR '.join(private_visibility_conditions)})
+               AND ({f'{nl()}AND '.join(conditions)})
                ORDER BY listing_time DESC""",
             tuple(params)
         )
