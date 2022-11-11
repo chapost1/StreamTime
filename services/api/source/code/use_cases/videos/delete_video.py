@@ -1,4 +1,3 @@
-from fastapi import HTTPException, status
 from models import Video
 from uuid import UUID
 from data_access.abstract import VideosDB

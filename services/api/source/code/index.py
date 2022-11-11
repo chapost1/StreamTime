@@ -1,14 +1,32 @@
 from environment import environment, constants
 from typing import Callable
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status, Response
+from fastapi.responses import JSONResponse
 from routers import list as routers
 from app_startup import init as init_services
+from common.app_errors import (NotFoundError, InputError, AppError)
 
 app = FastAPI()
 
 @app.on_event('startup')
 async def init():
     await init_services()
+
+def http_error(details: AppError, status_code: status) -> Response:
+    if details is not None:
+        return JSONResponse(content=details, status_code=status_code)
+    else:
+        return Response(content=details, status_code=status_code)
+
+@app.middleware('http')
+async def app_errors_handler(request: Request, call_next: Callable):
+    try:
+        return await call_next(request)
+    except NotFoundError as e:
+        return http_error(details=e.details, status_code=status.HTTP_404_NOT_FOUND)
+    except InputError as e:
+        return http_error(details=e.details, status_code=status.HTTP_400_BAD_REQUEST)
+
 
 @app.middleware('http')# todo: replace with actual authentication mechanism
 async def inject_temporary_dummy_username(request: Request, call_next: Callable):

@@ -5,7 +5,6 @@ from models import Video
 from data_access.abstract import VideosDB
 
 def make_explore_listed_videos(videos: VideosDB):
-    print(videos)
     async def explore_listed_videos(authenticated_user_id: Union[UUID, str], include_my: bool = False) -> List[Video]:
         is_authenticated_user = not authenticated_user_id.__eq__(constants.ANONYMOUS_USER)
             
@@ -18,8 +17,6 @@ def make_explore_listed_videos(videos: VideosDB):
                 exclude_user_id = None
             else:# user wants to excldue its videos
                 exclude_user_id = authenticated_user_id
-        
-        print(videos.get_listed_videos)
 
         return await videos.get_listed_videos(
             allow_privates_of_user_id=allow_privates_of_user_id,
