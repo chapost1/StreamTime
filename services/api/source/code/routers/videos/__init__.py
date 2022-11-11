@@ -5,7 +5,7 @@ from .user import router as user_videos_router
 from .upload import router as upload_video_router
 from .watch import router as watch_video_router
 
-router = APIRouter(tags=["Videos"])
+router = APIRouter(tags=['Videos'])
 
 router.include_router(explore_videos_router, prefix='/explore')
 

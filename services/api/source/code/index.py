@@ -1,5 +1,4 @@
 from environment import environment, constants
-import time
 from typing import Callable
 from fastapi import FastAPI, Request
 from routers import list as routers
@@ -10,14 +9,6 @@ app = FastAPI()
 @app.on_event('startup')
 async def init():
     await init_services()
-
-@app.middleware('http')
-async def add_process_time_header(request: Request, call_next: Callable):
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    response.headers['X-Process-Time'] = str(process_time)
-    return response
 
 @app.middleware('http')# todo: replace with actual authentication mechanism
 async def inject_temporary_dummy_username(request: Request, call_next: Callable):
@@ -34,6 +25,6 @@ async def inject_temporary_dummy_username(request: Request, call_next: Callable)
 
 @app.get(environment.HEALTH_CHECK_PATH)
 async def health_check():
-    return {"message": "ok"}
+    return {'message': 'ok'}
 
-app.include_router(routers.videos_router, prefix="/video")
+app.include_router(routers.videos_router, prefix='/video')
