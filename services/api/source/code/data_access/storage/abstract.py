@@ -1,8 +1,8 @@
 from typing import Protocol
+from models.storage import FileUploadUrlRecord
 
 class Storage(Protocol):
-    @staticmethod
-    def get_client():
+    async def get_upload_file_url(self, item_key: str) -> FileUploadUrlRecord:
         """
-        returns the client to interact with the storage
+        returns valid upload file url and required fields for validation
         """
