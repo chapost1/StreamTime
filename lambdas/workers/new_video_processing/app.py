@@ -411,6 +411,9 @@ def lambda_handler(event, context):
         copy_source = {'Bucket': bucket, 'Key': current_file_key}
         videos_key_levels = key_levels.copy()
         videos_key_levels[0] = os.environ[VIDEOS_PREFIX_ENV_NAME]
+        # restrict video file to have the appropriate extension
+        extension = get_extension_by_content_type(meta['type'])
+        videos_key_levels[-1] = f'{videos_key_levels[-1].split(".")[0]}.{extension}'
         video_key = '/'.join(videos_key_levels)
         s3Client.copy(copy_source, bucket, video_key)
         delete_object(bucket, current_file_key)  # not needed anymore

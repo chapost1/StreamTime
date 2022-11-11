@@ -1,9 +1,16 @@
 from typing import Protocol
 from typing import List, Dict
-from models import Video, UnprocessedVideo, SortKeys
+from models import Video, UnprocessedVideo, SortKeys, VideoStages
 from uuid import UUID
 
 class VideosDbInterface(Protocol):
+    async def find_video_stage(self, user_id: UUID, hash_id: UUID) -> VideoStages:
+        """
+        Find whether a video is actually exists or not
+        - if not, it will be None
+        - else, it will return it's current stage
+        """
+
     async def get_listed_videos(self, allow_privates_of_user_id: UUID, exclude_user_id: UUID) -> List[Video]:
         """
         Gets listed videos

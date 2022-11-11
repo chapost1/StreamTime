@@ -1,11 +1,36 @@
 from data_access.rds.connection.connection import Connection
 from typing import List, Dict
-from models import Video, UnprocessedVideo, SortKeys
+from models import Video, UnprocessedVideo, SortKeys, VideoStages
 from data_access.rds.videos import tables
 from common.utils import nl
 from uuid import UUID
 
 class Videos:
+    async def find_video_stage(self, user_id: UUID, hash_id: UUID) -> VideoStages:
+        stages = await Connection().query([
+            (
+                f"""
+                SELECT stage FROM (
+                    SELECT '{VideoStages.UNPROCESSED.value}' as stage FROM {tables.UNPROCESSED_VIDEOS_TABLE}
+                    WHERE user_id = %s
+                    AND hash_id = %s
+                ) as unprocessed
+                UNION ALL
+                SELECT stage FROM (
+                    SELECT '{VideoStages.READY.value}' as stage FROM {tables.VIDEOS_TABLE}
+                    WHERE user_id = %s
+                    AND hash_id = %s
+                ) as ready;
+                """,
+                tuple([user_id, hash_id, user_id, hash_id])
+            )
+        ])
+
+        if len(stages) < 1:
+            return None
+
+        return list(map(lambda tup: tup[0], stages))
+
     async def get_listed_videos(self, allow_privates_of_user_id: UUID, exclude_user_id: UUID) -> List[Video]:
         conditions = []
         params = []
