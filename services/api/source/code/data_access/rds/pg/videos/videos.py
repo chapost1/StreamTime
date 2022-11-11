@@ -1,7 +1,7 @@
-from data_access.rds.connection.connection import Connection
+from data_access.rds.pg.connection.connection import Connection
 from typing import List, Dict
 from models import Video, UnprocessedVideo, SortKeys, VideoStages
-from data_access.rds.videos import tables
+from data_access.rds.pg.videos import tables
 from common.utils import nl
 from uuid import UUID
 

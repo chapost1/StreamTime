@@ -1,4 +1,4 @@
-from data_access.rds import init as init_rds
+from data_access.rds.pg import init as init_rds
 from aws import init as init_boto3
 import asyncio
 

@@ -1,5 +1,5 @@
 from uuid import UUID
-from data_access.abstract import VideosDB
+from data_access.rds.abstract import VideosDB
 from typing import Union
 from models import WatchVideoRecord
 

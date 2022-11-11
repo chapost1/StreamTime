@@ -2,7 +2,7 @@ from environment import constants
 from typing import List, Union
 from uuid import UUID
 from models import Video
-from data_access.abstract import VideosDB
+from data_access.rds.abstract import VideosDB
 
 def make_explore_listed_videos(videos: VideosDB):
     async def explore_listed_videos(authenticated_user_id: Union[UUID, str], include_my: bool = False) -> List[Video]:

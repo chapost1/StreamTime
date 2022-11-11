@@ -1,7 +1,7 @@
 from typing import List, Union
 from uuid import UUID
 from models import Video, SortKeys
-from data_access.abstract import VideosDB
+from data_access.rds.abstract import VideosDB
 
 # get specific user videos
 def make_get_specific_user_videos(videos: VideosDB):

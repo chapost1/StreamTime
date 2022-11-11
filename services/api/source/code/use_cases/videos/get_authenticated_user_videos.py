@@ -1,5 +1,5 @@
 from models import UserVideosList, SortKeys
-from data_access.abstract import VideosDB
+from data_access.rds.abstract import VideosDB
 from uuid import UUID
 
 def make_get_authenticated_user_videos(videos: VideosDB):
