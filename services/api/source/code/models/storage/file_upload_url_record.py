@@ -3,6 +3,6 @@ from typing import Dict
 from pydantic import HttpUrl
 
 
-class FileUploadUrlRecord(BaseModel):
+class FileUploadSignedInstructions(BaseModel):
     url: HttpUrl
-    fields: Dict
+    signatures: Dict

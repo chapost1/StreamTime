@@ -1,8 +1,8 @@
 from typing import Protocol
-from models.storage import FileUploadUrlRecord
+from models.storage import FileUploadSignedInstructions
 
 class Storage(Protocol):
-    async def get_upload_file_url(self, item_key: str) -> FileUploadUrlRecord:
+    async def get_upload_file_signed_instructions(self, item_key: str) -> FileUploadSignedInstructions:
         """
-        returns valid upload file url and required fields for validation
+        returns valid upload file signed instuctions
         """
