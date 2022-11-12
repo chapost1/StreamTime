@@ -4,7 +4,7 @@ from typing import List, Tuple, Any, Union
 
 class Connection(metaclass=Singleton):
     __slots__ = (
-        'pool',
+        'pool'
     )
 
     def __init__(self, pool=None) -> None:
@@ -12,6 +12,21 @@ class Connection(metaclass=Singleton):
             raise Exception('No PG connection')
         self.pool = pool
     
+    async def clear(self) -> None:
+        print('pg connetcion pool delete has been called...')
+
+        if self.pool is None:
+            print('connection pool is None')
+        else:
+            print('terminating pg...')            
+            self.pool.terminate()
+            await self.pool.wait_closed()
+            print('pg terminated...')
+            del self.pool
+
+        print('clears singleton instance')
+        Singleton.clear(self.__class__)
+
     async def __transaction(self, cursor, transaction_steps: List[Tuple[str, Tuple[Any]]]) -> None:
         for sql, params in transaction_steps:
             if params is None:

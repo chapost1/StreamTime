@@ -1,16 +1,20 @@
 from environment import environment, constants
 from typing import Callable
-from fastapi import FastAPI, Request, HTTPException, status, Response
+from fastapi import FastAPI, Request, status, Response
 from fastapi.responses import JSONResponse
 from routers import list as routers
-from app_startup import init as init_services
+from app_lifecycle_hooks import on_startup, on_shutdown
 from common.app_errors import (NotFoundError, InputError, AppError)
 
 app = FastAPI()
 
 @app.on_event('startup')
-async def init():
-    await init_services()
+async def startup_event():
+    await on_startup()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await on_shutdown()
 
 def http_error(details: AppError, status_code: status) -> Response:
     if details is not None:

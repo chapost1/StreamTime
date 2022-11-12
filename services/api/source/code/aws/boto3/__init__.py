@@ -4,8 +4,8 @@ from environment import environment
 
 async def init() -> None:
     session = await create_boto3_session(
+        region=environment.AWS_REGION,
         access_key=environment.AWS_ACCESS_KEY,
-        secret_key=environment.AWS_SECRET_KEY,
-        region=environment.AWS_REGION
+        secret_key=environment.AWS_SECRET_KEY
     )
     Boto3(session)
