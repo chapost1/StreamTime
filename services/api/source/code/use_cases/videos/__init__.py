@@ -33,4 +33,4 @@ get_specific_user_videos_uc = make_get_specific_user_videos(videos=videos)
 
 # watch
 from use_cases.videos.get_watch_video_record import make_get_watch_video_record
-get_watch_video_record_uc = make_get_watch_video_record(videos=videos)
+get_watch_video_record_uc = make_get_watch_video_record(videos=videos, storage=videos_s3_client)

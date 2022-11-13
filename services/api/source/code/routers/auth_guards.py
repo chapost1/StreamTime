@@ -5,7 +5,7 @@ from typing import Union
 
 async def authenticated_user(request: Request) -> UUID:
     authenticated_user_id: Union[UUID, str] = await any_user(request=request)
-    if authenticated_user_id.__eq__(constants.ANONYMOUS_USER):
+    if str(authenticated_user_id) == constants.ANONYMOUS_USER:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED)
     return authenticated_user_id
 

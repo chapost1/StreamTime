@@ -33,7 +33,30 @@ class S3:
             except ClientError as e:
                 print(f'Client error during S3 presigned url creation, {e}')
                 raise e
+
     
+    async def get_file_signed_url(self, item_relative_path: str, signature_duration_seconds: int) -> str:
+        async with self.__get_client() as client:
+            try:
+                response = await client.generate_presigned_url(
+                    'get_object',
+                    Params={
+                        'Bucket': self.context.bucket,
+                        'Key': item_relative_path
+                    },
+                    ExpiresIn=signature_duration_seconds
+                )
+                if response is None:
+                    err = f'S3 create GET signed url - no response. respone={response}'
+                    print(err)
+                    raise Exception(err)
+
+                return response  
+            except ClientError as e:
+                print(f'Client error during S3 create GET signed url, {e}')
+                raise e
+
+
     async def delete_file(self, item_relative_path: str) -> None:
          async with self.__get_client() as client:
             try:
