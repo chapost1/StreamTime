@@ -256,6 +256,7 @@ def mark_video_as_a_draft(
     size_in_bytes: int,
     duration_seconds: int,
     thumbnail_url: str,
+    storage_object_key: str,
     upload_time: str
 ) -> None:
     print('mark_video_as_a_draft')
@@ -266,6 +267,7 @@ def mark_video_as_a_draft(
         'size_in_bytes': size_in_bytes,
         'duration_seconds': duration_seconds,
         'thumbnail_url': thumbnail_url,
+        'storage_object_key': storage_object_key,
         'upload_time': upload_time
     }, os.environ[PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME])
 
@@ -425,6 +427,7 @@ def lambda_handler(event, context):
             size_in_bytes=meta['size_in_bytes'],
             duration_seconds=duration_seconds,
             thumbnail_url=f'https://{bucket}.s3.amazonaws.com/{thumbnail_key}',
+            storage_object_key=current_file_key,
             upload_time=upload_time
         )
     except Exception as e:

@@ -36,6 +36,7 @@ CREATE TABLE videos (
     duration_seconds int NOT NULL DEFAULT 0,
     video_type varchar(32) NOT NULL,
     thumbnail_url varchar(255) NOT NULL,
+    storage_object_key varchar(255) NOT NULL,
     upload_time timestamptz NOT NULL,
     is_private boolean NOT NULL DEFAULT false,
     listing_time timestamptz DEFAULT NULL,

@@ -58,6 +58,7 @@ class Videos:
                         duration_seconds,
                         video_type,
                         thumbnail_url,
+                        storage_object_key,
                         upload_time,
                         is_private,
                         listing_time
@@ -78,9 +79,10 @@ class Videos:
             duration_seconds=video[5],
             video_type=video[6],
             thumbnail_url=video[7],
-            upload_time=video[8],
-            is_private=video[9],
-            listing_time=video[10]
+            _storage_object_key=video[8],
+            upload_time=video[9],
+            is_private=video[10],
+            listing_time=video[11]
         ), videos))
 
 
@@ -126,6 +128,7 @@ class Videos:
                         duration_seconds,
                         video_type,
                         thumbnail_url,
+                        storage_object_key,
                         upload_time,
                         is_private,
                         listing_time
@@ -145,9 +148,10 @@ class Videos:
             duration_seconds=video[5],
             video_type=video[6],
             thumbnail_url=video[7],
-            upload_time=video[8],
-            is_private=video[9],
-            listing_time=video[10]
+            _storage_object_key=video[8],
+            upload_time=video[9],
+            is_private=video[10],
+            listing_time=video[11]
         ), videos))
 
 
@@ -163,6 +167,7 @@ class Videos:
                         duration_seconds,
                         video_type,
                         thumbnail_url,
+                        storage_object_key,
                         upload_time,
                         is_private,
                         listing_time
@@ -187,9 +192,10 @@ class Videos:
             duration_seconds=video[5],
             video_type=video[6],
             thumbnail_url=video[7],
-            upload_time=video[8],
-            is_private=video[9],
-            listing_time=video[10]
+            _storage_object_key=video[8],
+            upload_time=video[9],
+            is_private=video[10],
+            listing_time=video[11]
         )
 
 
