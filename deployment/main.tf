@@ -197,9 +197,17 @@ module "web_api" {
   rds_port     = module.rds.rds_port
   rds_db       = module.rds.db_name
 
+  aws_access_key = var.aws_access_key
+  aws_secret_key = var.aws_secret_key
+
+  videos_bucket_arn = module.videos_bucket.videos_bucket.arn
+  videos_bucket = module.videos_bucket.videos_bucket.id
+  uploaded_videos_refix = local.s3_uploaded_videos_prefix
+
   uploaded_videos_client_sync_ws_url = module.uploaded_videos_client_syncer.ws_url
 
   depends_on = [
+    module.videos_bucket.videos_bucket,
     module.uploaded_videos_client_syncer.ws_url,
     module.uploaded_videos_client_syncer.input_sns_topic_arn
   ]

@@ -36,6 +36,7 @@ CREATE TABLE videos (
     duration_seconds int NOT NULL DEFAULT 0,
     video_type varchar(32) NOT NULL,
     thumbnail_url varchar(255) NOT NULL,
+    storage_thumbnail_key varchar(255) NOT NULL,
     storage_object_key varchar(255) NOT NULL,
     upload_time timestamptz NOT NULL,
     is_private boolean NOT NULL DEFAULT false,
@@ -47,3 +48,6 @@ CREATE TABLE videos (
 CREATE INDEX idx_videos_user_id ON videos(user_id);
 
 CREATE INDEX idx_videos_hash_id ON videos(hash_id);
+
+INSERT INTO users (id, username, email, first_name, last_name, password)
+VALUES ('ae6d14eb-d222-4967-98d9-60a7cc2d7891', 'dummy', 'foo@bar.com', 'foo', 'bar', 'secret');

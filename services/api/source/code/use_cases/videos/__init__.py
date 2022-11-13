@@ -21,7 +21,7 @@ from use_cases.videos.update_video import make_update_video
 update_video_uc = make_update_video(videos=videos)
 
 from use_cases.videos.delete_video import make_delete_video
-delete_video_uc = make_delete_video(videos=videos)
+delete_video_uc = make_delete_video(videos=videos, storage=videos_s3_client)
 
 # upload
 from use_cases.videos.get_upload_file_signed_instructions import make_get_upload_video_signed_instructions

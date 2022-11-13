@@ -18,10 +18,12 @@ class Video(UploadedVideo):
         underscore_attrs_are_private = True
     
     _storage_object_key: Optional[str]
+    _storage_thumbnail_key: Optional[str]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._storage_object_key = kwargs.get('_storage_object_key', None)
+        self._storage_thumbnail_key = kwargs.get('_storage_thumbnail_key', None)
 
     
     def is_listed(self) -> bool:

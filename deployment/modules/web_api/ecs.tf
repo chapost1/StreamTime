@@ -18,6 +18,12 @@ data "template_file" "web_api" {
     env_rds_port          = var.rds_port
     env_rds_db            = var.rds_db
 
+   env_aws_access_key = var.aws_access_key
+   env_aws_secret_key = var.aws_secret_key
+
+   env_videos_bucket = var.videos_bucket
+   env_uploaded_videos_prefix = var.uploaded_videos_refix
+
     env_image_hash = random_id.ecr_image_hash.hex
 
     env_app_port           = tostring(var.app_port)

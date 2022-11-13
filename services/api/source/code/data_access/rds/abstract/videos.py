@@ -38,3 +38,8 @@ class VideosDbInterface(Protocol):
         """
         Update specific video (listed/allready processed one)
         """
+    
+    async def delete_video_by_stage(self, user_id: UUID, hash_id: UUID, stage: VideoStages) -> NotImplementedError:
+        """
+        Removes a video record from the right table, by stage
+        """

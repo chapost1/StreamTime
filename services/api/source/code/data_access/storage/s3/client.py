@@ -33,3 +33,14 @@ class S3:
             except ClientError as e:
                 print(f'Client error during S3 presigned url creation, {e}')
                 raise e
+    
+    async def delete_file(self, item_relative_path: str) -> None:
+         async with self.__get_client() as client:
+            try:
+                await client.delete_object(
+                    Bucket=self.context.bucket,
+                    Key=item_relative_path
+                )
+            except ClientError as e:
+                print(f'Client error during S3 delete object op, {e}')
+                raise e

@@ -84,6 +84,7 @@ def mark_video_as_a_draft(
     size_in_bytes: int,
     duration_seconds: int,
     thumbnail_url: str,
+    storage_thumbnail_key: str,
     storage_object_key: str,
     upload_time: str
 ) -> None:
@@ -94,11 +95,11 @@ def mark_video_as_a_draft(
     delete_unprocessed_entry_params = (user_id, hash_id, upload_time)
     # insert into drafts
     insert_sql = \
-        f"""INSERT INTO {os.environ[VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, upload_time, size_in_bytes, duration_seconds, video_type, thumbnail_url, storage_object_key, is_listed)
+        f"""INSERT INTO {os.environ[VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, upload_time, size_in_bytes, duration_seconds, video_type, thumbnail_url, storage_thumbnail_key, storage_object_key)
             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
     insert_params = (user_id, hash_id, upload_time, size_in_bytes,
                      duration_seconds, video_type, thumbnail_url,
-                     storage_object_key, False
+                     storage_thumbnail_key, storage_object_key
                     )
     sql_executor(
         transaction_steps=[
@@ -127,7 +128,8 @@ def lambda_handler(event, context):
                 size_in_bytes=record['size_in_bytes'],
                 duration_seconds=record['duration_seconds'],
                 thumbnail_url=record['thumbnail_url'],
-                thumbnail_url=record['storage_object_key'],
+                storage_thumbnail_key=record['storage_thumbnail_key'],
+                storage_object_key=record['storage_object_key'],
                 upload_time=record['upload_time']
             )
         else:

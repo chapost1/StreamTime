@@ -59,6 +59,7 @@ class Videos:
                         video_type,
                         thumbnail_url,
                         storage_object_key,
+                        storage_thumbnail_key,
                         upload_time,
                         is_private,
                         listing_time
@@ -80,9 +81,10 @@ class Videos:
             video_type=video[6],
             thumbnail_url=video[7],
             _storage_object_key=video[8],
-            upload_time=video[9],
-            is_private=video[10],
-            listing_time=video[11]
+            _storage_thumbnail_key=video[9],
+            upload_time=video[10],
+            is_private=video[11],
+            listing_time=video[12]
         ), videos))
 
 
@@ -129,6 +131,7 @@ class Videos:
                         video_type,
                         thumbnail_url,
                         storage_object_key,
+                        storage_thumbnail_key,
                         upload_time,
                         is_private,
                         listing_time
@@ -149,9 +152,10 @@ class Videos:
             video_type=video[6],
             thumbnail_url=video[7],
             _storage_object_key=video[8],
-            upload_time=video[9],
-            is_private=video[10],
-            listing_time=video[11]
+            _storage_thumbnail_key=video[9],
+            upload_time=video[10],
+            is_private=video[11],
+            listing_time=video[12]
         ), videos))
 
 
@@ -168,6 +172,7 @@ class Videos:
                         video_type,
                         thumbnail_url,
                         storage_object_key,
+                        storage_thumbnail_key,
                         upload_time,
                         is_private,
                         listing_time
@@ -193,9 +198,10 @@ class Videos:
             video_type=video[6],
             thumbnail_url=video[7],
             _storage_object_key=video[8],
-            upload_time=video[9],
-            is_private=video[10],
-            listing_time=video[11]
+            _storage_thumbnail_key=video[9],
+            upload_time=video[10],
+            is_private=video[11],
+            listing_time=video[12]
         )
 
 
@@ -228,3 +234,19 @@ class Videos:
         ])
 
         return None
+    
+
+    async def delete_video_by_stage(self, user_id: UUID, hash_id: UUID, stage: VideoStages) -> None:
+        table = tables.video_stages_to_table(stage)
+        
+        if table is None:
+            raise Exception(f'invalid video stage found. {user_id}/{hash_id} in stage [{stage}]')
+
+        await Connection().execute([
+            (
+                f"""DELETE FROM {table}
+                    WHERE user_id = %s
+                    AND hash_id = %s;""",
+                tuple([user_id, hash_id])
+            )
+        ])

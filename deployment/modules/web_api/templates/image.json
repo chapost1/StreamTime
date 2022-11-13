@@ -47,6 +47,26 @@
             {
                 "name": "image_hash",
                 "value": "${env_image_hash}"
+            },
+            {
+                "name": "aws_region",
+                "value": "${env_aws_region}"
+            },
+            {
+                "name": "aws_access_key",
+                "value": "${env_aws_access_key}"
+            },
+            {
+                "name": "aws_secret_key",
+                "value": "${env_aws_secret_key}"
+            },
+            {
+                "name": "videos_bucket",
+                "value": "${env_videos_bucket}"
+            },
+            {
+                "name": "uploaded_videos_prefix",
+                "value": "${env_uploaded_videos_prefix}"
             }
         ]
     }

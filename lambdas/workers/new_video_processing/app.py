@@ -256,6 +256,7 @@ def mark_video_as_a_draft(
     size_in_bytes: int,
     duration_seconds: int,
     thumbnail_url: str,
+    storage_thumbnail_key: str,
     storage_object_key: str,
     upload_time: str
 ) -> None:
@@ -267,6 +268,7 @@ def mark_video_as_a_draft(
         'size_in_bytes': size_in_bytes,
         'duration_seconds': duration_seconds,
         'thumbnail_url': thumbnail_url,
+        'storage_thumbnail_key': storage_thumbnail_key,
         'storage_object_key': storage_object_key,
         'upload_time': upload_time
     }, os.environ[PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME])
@@ -420,6 +422,7 @@ def lambda_handler(event, context):
         s3Client.copy(copy_source, bucket, video_key)
         delete_object(bucket, current_file_key)  # not needed anymore
         current_file_key = video_key
+
         mark_video_as_a_draft(  # processed successfully
             user_id=user_id,
             hash_id=hash_id,
@@ -427,6 +430,7 @@ def lambda_handler(event, context):
             size_in_bytes=meta['size_in_bytes'],
             duration_seconds=duration_seconds,
             thumbnail_url=f'https://{bucket}.s3.amazonaws.com/{thumbnail_key}',
+            storage_thumbnail_key=thumbnail_key,
             storage_object_key=current_file_key,
             upload_time=upload_time
         )
