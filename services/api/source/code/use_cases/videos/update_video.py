@@ -1,12 +1,13 @@
 from models import Video
 from uuid import UUID
+from typing import Callable
 from data_access.rds.abstract import VideosDB
 from use_cases.validation_utils import required_fields_validator
 from common.utils import calc_server_time
 from common.app_errors import (InputError, NotFoundError)
 
 
-def make_update_video(videos: VideosDB):
+def make_update_video(videos: VideosDB) -> Callable[[UUID, Video, UUID], None]:
     async def update_video(authenticated_user_id: UUID, video: Video, hash_id: UUID) -> None:
         # todo: support new thumbnail selection
         existing_video: Video = await videos.get_video(user_id=authenticated_user_id, hash_id=hash_id)

@@ -1,12 +1,11 @@
-from environment import constants
-from typing import List, Union
+from typing import List, Union, Callable, Optional
 from uuid import UUID
 from models import Video
 from use_cases.validation_utils import is_anonymous_user
 from data_access.rds.abstract import VideosDB
 
-def make_explore_listed_videos(videos: VideosDB):
-    async def explore_listed_videos(authenticated_user_id: Union[UUID, str], include_my: bool = False) -> List[Video]:
+def make_explore_listed_videos(videos: VideosDB) -> Callable[[Union[UUID, str], Optional[bool]], List[Video]]:
+    async def explore_listed_videos(authenticated_user_id: Union[UUID, str], include_my: Optional[bool] = False) -> List[Video]:
         is_authenticated_user = not is_anonymous_user(authenticated_user_id)
             
         if is_authenticated_user:

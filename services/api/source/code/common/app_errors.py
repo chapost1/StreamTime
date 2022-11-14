@@ -21,3 +21,6 @@ class UnauthorizedError(AppError):
 
 class AccessDeniedError(AppError):
     """Caller is may be authenticated but yet missing privileges to access the requested resource"""
+
+class TooEarlyError(AppError):
+    """Requested operation is invalid At the moment, but may be valid later"""

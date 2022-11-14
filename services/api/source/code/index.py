@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, status, Response
 from fastapi.responses import JSONResponse
 from routers import list as routers
 from app_lifecycle_hooks import on_startup, on_shutdown
-from common.app_errors import (NotFoundError, InputError, AppError, UnauthorizedError, AccessDeniedError)
+import common.app_errors as app_errors
 
 app = FastAPI()
 
@@ -16,7 +16,7 @@ async def startup_event():
 async def shutdown_event():
     await on_shutdown()
 
-def http_error(details: AppError, status_code: status) -> Response:
+def http_error(details: app_errors.AppError, status_code: status) -> Response:
     if details is not None:
         return JSONResponse(content=details, status_code=status_code)
     else:
@@ -26,14 +26,16 @@ def http_error(details: AppError, status_code: status) -> Response:
 async def app_errors_handler(request: Request, call_next: Callable):
     try:
         return await call_next(request)
-    except NotFoundError as e:
+    except app_errors.NotFoundError as e:
         return http_error(details=e.details, status_code=status.HTTP_404_NOT_FOUND)
-    except InputError as e:
+    except app_errors.InputError as e:
         return http_error(details=e.details, status_code=status.HTTP_400_BAD_REQUEST)
-    except UnauthorizedError as e:
+    except app_errors.UnauthorizedError as e:
         return http_error(details=e.details, status_code=status.HTTP_401_UNAUTHORIZED)
-    except AccessDeniedError as e:
+    except app_errors.AccessDeniedError as e:
         return http_error(details=e.details, status_code=status.HTTP_403_FORBIDDEN)
+    except app_errors.TooEarlyError as e:
+        return http_error(details=e.details, status_code=status.HTTP_425_TOO_EARLY)
 
 
 @app.middleware('http')# todo: replace with actual authentication mechanism

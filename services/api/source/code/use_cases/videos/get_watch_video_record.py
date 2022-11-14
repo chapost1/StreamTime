@@ -1,13 +1,13 @@
 from uuid import UUID
 from data_access.rds.abstract import VideosDB
-from typing import Union
+from typing import Union, Callable
 from models import WatchVideoRecord, Video
 from common.app_errors import NotFoundError, AccessDeniedError
 from data_access.storage.abstract import Storage
 from use_cases.validation_utils import is_same_user
 
 # returns the video meta data along with watchable url
-def make_get_watch_video_record(videos: VideosDB, storage: Storage):
+def make_get_watch_video_record(videos: VideosDB, storage: Storage) -> Callable[[Union[UUID, str], UUID, UUID], WatchVideoRecord]:
     async def get_watch_video_record(authenticated_user_id: Union[UUID, str], user_id: UUID, hash_id: UUID) -> WatchVideoRecord:        
         if is_same_user(authenticated_user_id, user_id):
             hide_private = False

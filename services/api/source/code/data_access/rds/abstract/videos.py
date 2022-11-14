@@ -28,10 +28,15 @@ class VideosDbInterface(Protocol):
         Gets User videos
         - supports hiding listed/privates to protect user assets from unauthorized
         """
+
+    async def get_unprocessed_video(self, user_id: UUID, hash_id: UUID) -> UnprocessedVideo:
+        """
+        Get specific unprocessed video
+        """
     
     async def get_video(self, user_id: UUID, hash_id: UUID) -> Video:
         """
-        Get specific video
+        Get specific ready video
         """
     
     async def update_video(self, user_id: UUID, hash_id: UUID, to_update: Dict) -> None:

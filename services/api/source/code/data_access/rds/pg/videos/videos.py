@@ -159,6 +159,33 @@ class Videos:
         ), videos))
 
 
+    async def get_unprocessed_video(self, user_id: UUID, hash_id: UUID) -> UnprocessedVideo:
+        videos = await Connection().query([
+            (
+                f"""SELECT 
+                        hash_id,
+                        user_id,
+                        upload_time,
+                        failure_reason
+                FROM {tables.UNPROCESSED_VIDEOS_TABLE}
+                WHERE user_id = %s
+                AND hash_id = %s""",
+                tuple([user_id, hash_id])
+            )
+        ])
+
+        if len(videos) < 1:
+            return None
+
+        video = videos[0]
+        return UnprocessedVideo(
+            hash_id=video[0],
+            user_id=video[1],
+            upload_time=video[2],
+            failure_reason=video[3]
+        )
+
+
     async def get_video(self, user_id: UUID, hash_id: UUID) -> Video:
         videos = await Connection().query([
             (
@@ -178,8 +205,7 @@ class Videos:
                         listing_time
                 FROM {tables.VIDEOS_TABLE}
                 WHERE user_id = %s
-                AND hash_id = %s
-                ORDER BY listing_time DESC""",
+                AND hash_id = %s""",
                 tuple([user_id, hash_id])
             )
         ])
