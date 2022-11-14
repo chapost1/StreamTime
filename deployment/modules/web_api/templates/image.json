@@ -53,14 +53,6 @@
                 "value": "${env_aws_region}"
             },
             {
-                "name": "aws_access_key",
-                "value": "${env_aws_access_key}"
-            },
-            {
-                "name": "aws_secret_key",
-                "value": "${env_aws_secret_key}"
-            },
-            {
                 "name": "videos_bucket",
                 "value": "${env_videos_bucket}"
             },

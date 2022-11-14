@@ -1,7 +1,7 @@
 # Cloudfront distribution for main s3 site.
 
 resource "aws_cloudfront_origin_access_identity" "www_s3_distribution_origin_access_identity" {
-  comment = "${va.app_name} s3 distribution access identity"
+  comment = "${var.app_name} s3 distribution access identity"
 }
 
 resource "aws_cloudfront_distribution" "www_s3_distribution" {

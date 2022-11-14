@@ -18,11 +18,8 @@ data "template_file" "web_api" {
     env_rds_port          = var.rds_port
     env_rds_db            = var.rds_db
 
-   env_aws_access_key = var.aws_access_key
-   env_aws_secret_key = var.aws_secret_key
-
-   env_videos_bucket = var.videos_bucket
-   env_uploaded_videos_prefix = var.uploaded_videos_refix
+    env_videos_bucket          = var.videos_bucket
+    env_uploaded_videos_prefix = var.uploaded_videos_refix
 
     env_image_hash = random_id.ecr_image_hash.hex
 
@@ -44,6 +41,7 @@ data "template_file" "web_api" {
 resource "aws_ecs_task_definition" "web_api_def" {
   family                   = "${var.app_name}-web-api-task"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = local.fargate_cpu
