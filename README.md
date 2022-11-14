@@ -70,8 +70,6 @@ foo@bar:~ (main) $ ./deployment/terraform.sh --command apply \
 
 > ### Note: Provision of resources on AWS with this command can result in invoicing.
 
-<br>
-
 ## Baseline Roadmap
 
 ### Provisioning
