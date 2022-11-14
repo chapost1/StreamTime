@@ -406,6 +406,7 @@ def lambda_handler(event, context):
             print('Video processing exception occurred')
             print(e)
             delete_object(bucket, current_file_key)
+            delete_object(bucket, thumbnail_key)
             mark_processing_as_failed(
                 user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
             raise e
@@ -438,6 +439,7 @@ def lambda_handler(event, context):
         print('Exception, failed to move video into completed prefix')
         print(e)
         delete_object(bucket, current_file_key)
+        delete_object(bucket, thumbnail_key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time,
                                   failure_reason=os.environ[INTERNAL_ERROR_ENV_NAME])
         raise e
