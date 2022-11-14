@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, status, Response
 from fastapi.responses import JSONResponse
 from routers import list as routers
 from app_lifecycle_hooks import on_startup, on_shutdown
-from common.app_errors import (NotFoundError, InputError, AppError, UnauthorizedError)
+from common.app_errors import (NotFoundError, InputError, AppError, UnauthorizedError, AccessDeniedError)
 
 app = FastAPI()
 
@@ -32,6 +32,8 @@ async def app_errors_handler(request: Request, call_next: Callable):
         return http_error(details=e.details, status_code=status.HTTP_400_BAD_REQUEST)
     except UnauthorizedError as e:
         return http_error(details=e.details, status_code=status.HTTP_401_UNAUTHORIZED)
+    except AccessDeniedError as e:
+        return http_error(details=e.details, status_code=status.HTTP_403_FORBIDDEN)
 
 
 @app.middleware('http')# todo: replace with actual authentication mechanism

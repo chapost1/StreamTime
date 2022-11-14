@@ -17,4 +17,7 @@ class InputError(AppError):
     """Caller input is not valid"""
 
 class UnauthorizedError(AppError):
-    """Caller cannot access the required resource"""
+    """Caller is not authenticated, while authentication is required to access the requested resource"""
+
+class AccessDeniedError(AppError):
+    """Caller is may be authenticated but yet missing privileges to access the requested resource"""

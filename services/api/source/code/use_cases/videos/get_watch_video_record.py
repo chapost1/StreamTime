@@ -2,7 +2,7 @@ from uuid import UUID
 from data_access.rds.abstract import VideosDB
 from typing import Union
 from models import WatchVideoRecord, Video
-from common.app_errors import NotFoundError, UnauthorizedError
+from common.app_errors import NotFoundError, AccessDeniedError
 from data_access.storage.abstract import Storage
 from use_cases.validation_utils import is_same_user
 
@@ -22,7 +22,7 @@ def make_get_watch_video_record(videos: VideosDB, storage: Storage):
             raise NotFoundError()
         
         if video.is_private and hide_private:
-            raise UnauthorizedError()
+            raise AccessDeniedError()
 
         eighteen_hours_in_seconds = 18 * 3600
         
