@@ -69,3 +69,56 @@ foo@bar:~ (main) $ ./deployment/terraform.sh --command apply \
 ```
 
 > ### Note: Provision of resources on AWS with this command can result in invoicing.
+
+<br>
+
+## Baseline Roadmap
+
+### Provisioning
+
+&nbsp;&nbsp; :white_check_mark: Network
+
+&nbsp;&nbsp; :white_check_mark: RDS provisioning
+
+&nbsp;&nbsp; :white_check_mark: Serverless processing Lambda workers
+
+&nbsp;&nbsp; :white_check_mark: SNS between processing updates and WSS
+
+&nbsp;&nbsp; :white_check_mark: Websocket communication mamagement via API GW
+
+&nbsp;&nbsp; :white_check_mark: Webserver CF serve Web app
+
+&nbsp;&nbsp; :white_check_mark: RDS DDL init script
+
+&nbsp;&nbsp; :white_check_mark: Web Api Tasks Execution
+
+&nbsp;&nbsp; :white_check_mark: Buckets lifecycle def
+
+&nbsp;&nbsp; :white_check_mark: TLS
+
+&nbsp;&nbsp; :black_square_button: Provision Videos deleter service as a scheduled operation
+
+
+### Software
+
+&nbsp;&nbsp; :white_check_mark: New video processing Lambda worker
+
+&nbsp;&nbsp; :white_check_mark: Image resizer Lambda worker (for thumbnail)
+
+&nbsp;&nbsp; :white_check_mark: RDS records update Lambda worker
+
+&nbsp;&nbsp; :white_check_mark: WSS Connections store Lambda worker
+
+&nbsp;&nbsp; :white_check_mark: Web api videos management
+
+&nbsp;&nbsp; :black_square_button: Web app videos UI
+
+&nbsp;&nbsp; :black_square_button: Web api mark as delete for later handling
+
+&nbsp;&nbsp; :black_square_button: Videos deleter service logic
+
+&nbsp;&nbsp; :black_square_button: Web api users management
+
+&nbsp;&nbsp; :black_square_button: Web api authentication management
+
+&nbsp;&nbsp; :black_square_button: Web app authentication UI
