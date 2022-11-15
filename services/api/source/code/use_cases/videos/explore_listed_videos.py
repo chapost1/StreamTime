@@ -7,7 +7,7 @@ from data_access.rds.abstract import VideosDB
 def make_explore_listed_videos(videos: VideosDB) -> Callable[[Union[UUID, str], Optional[bool]], List[Video]]:
     async def explore_listed_videos(authenticated_user_id: Union[UUID, str], include_my: Optional[bool] = False) -> List[Video]:
         is_authenticated_user = not is_anonymous_user(authenticated_user_id)
-            
+
         if is_authenticated_user:
             # let the authenticated user to view it's own private videos if he will
             # it won't appear unless user wants to see it's own videos anyway

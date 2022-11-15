@@ -111,12 +111,12 @@ class Videos:
         ), videos))
 
 
-    async def get_user_videos(self, user_id: UUID, hide_private: bool, listed_only: bool, sort_key: SortKeys) -> List[UnprocessedVideo]:
+    async def get_user_videos(self, user_id: UUID, hide_private: bool, hide_unlisted: bool, sort_key: SortKeys) -> List[UnprocessedVideo]:
         conditions = ['user_id = %s']
         params = [user_id]
         if hide_private:
             conditions.append('is_private is not true')
-        if listed_only:
+        if hide_unlisted:
             conditions.append('listing_time is not null')
 
         videos = await Connection().query([

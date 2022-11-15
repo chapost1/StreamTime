@@ -1,5 +1,8 @@
 from uuid import UUID, uuid4
+from typing import Union
+from models.videos import SortKeys
 from data_access.rds.abstract import VideosDB
+from use_cases.validation_utils import is_same_user
 
 async def generate_new_video_hash_id_for_user(videos: VideosDB, user_id: UUID) -> UUID:
     found = False
@@ -14,3 +17,16 @@ async def generate_new_video_hash_id_for_user(videos: VideosDB, user_id: UUID) -
         if attempts_left < 1:
             raise RuntimeError('failed to create new hash_id for video upload url, after too many chances')
     return hash_id
+
+def get_cross_users_visibility_settings(authenticated_user_id: Union[UUID, str], user_id: UUID):
+    # build visibility settings by matching selected user id to the viewer
+    if is_same_user(authenticated_user_id, user_id):
+        hide_private = False
+        hide_unlisted = False
+        sort_key = SortKeys.upload_time
+    else:
+        hide_private = True
+        hide_unlisted = True
+        sort_key = SortKeys.listing_time
+    
+    return hide_private, hide_unlisted, sort_key

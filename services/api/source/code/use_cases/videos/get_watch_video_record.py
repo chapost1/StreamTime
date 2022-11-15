@@ -4,17 +4,15 @@ from typing import Union, Callable
 from models import WatchVideoRecord, Video
 from common.app_errors import NotFoundError, AccessDeniedError
 from data_access.storage.abstract import Storage
-from use_cases.validation_utils import is_same_user
+from use_cases.videos.utils import get_cross_users_visibility_settings
 
 # returns the video meta data along with watchable url
 def make_get_watch_video_record(videos: VideosDB, storage: Storage) -> Callable[[Union[UUID, str], UUID, UUID], WatchVideoRecord]:
     async def get_watch_video_record(authenticated_user_id: Union[UUID, str], user_id: UUID, hash_id: UUID) -> WatchVideoRecord:        
-        if is_same_user(authenticated_user_id, user_id):
-            hide_private = False
-            hide_unlisted = False
-        else:
-            hide_private = True
-            hide_unlisted = True
+        hide_private, hide_unlisted = get_cross_users_visibility_settings(
+            authenticated_user_id=authenticated_user_id,
+            user_id=user_id
+        )
 
         video: Video = await videos.get_video(user_id=user_id, hash_id=hash_id)
         if video is None or \

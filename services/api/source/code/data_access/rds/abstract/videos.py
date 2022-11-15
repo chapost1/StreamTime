@@ -23,7 +23,7 @@ class VideosDbInterface(Protocol):
         Gets User Unprocess videos (failed or during processing)
         """
     
-    async def get_user_videos(self, user_id: UUID, hide_private: bool, listed_only: bool, sort_key: SortKeys) -> List[UnprocessedVideo]:
+    async def get_user_videos(self, user_id: UUID, hide_private: bool, hide_unlisted: bool, sort_key: SortKeys) -> List[UnprocessedVideo]:
         """
         Gets User videos
         - supports hiding listed/privates to protect user assets from unauthorized

@@ -49,7 +49,7 @@ def make_delete_video(videos: VideosDB, storage: Storage) -> Callable[[UUID, UUI
 
     for stage in video_stages:
       if stage in delete_action_by_stage:
-        delete = delete_action_by_stage.get(stage)
+        delete: Callable[[UUID, UUID], None] = delete_action_by_stage.get(stage)
         await delete(user_id=authenticated_user_id, hash_id=hash_id)
 
   return delete_video
