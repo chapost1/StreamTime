@@ -1,0 +1,91 @@
+.app-toolbar {
+    position: relative;
+    justify-content: space-between;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+
+    mat-toolbar-row {
+        justify-content: space-between;
+    }
+
+    .logo {
+        vertical-align: middle !important;
+    }
+
+    .theme-toggle {
+        position: relative;
+        vertical-align: middle !important;
+
+        .toggle-icon {
+            top: 50%;
+            transform: translateY(-50%);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .toggle {
+            min-width: 80px;
+            min-height: 40px;
+            position: relative;
+            border: 2px solid;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background-color ease-out 250ms;
+        }
+
+        .toggle::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            border-radius: 30px;
+            transition: transform ease-out 250ms;
+        }
+    }
+}
+
+@mixin light-toolbar-theme($lightTheme) {
+    .app-toolbar {
+        background-color: #010409 !important;
+
+        .theme-toggle {
+            .toggle-icon {
+                left: 15%;
+            }
+
+            .toggle {
+                background-color: #161b22;
+            }
+
+            .toggle::after {
+                background-color: white;
+            }
+        }
+    }
+}
+
+@mixin dark-toolbar-theme($darkTheme) {
+    .app-toolbar {
+        background-color: #161b22 !important;
+
+        .theme-toggle {
+            .toggle-icon {
+                right: 15%;
+                color: #fbfff1;
+            }
+            .toggle {
+                background-color: #fbfff1;
+            }
+
+            .toggle::after {
+                transform: translateX(100%);
+                background-color: #161b22;
+            }
+        }
+    }
+}
+

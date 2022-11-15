@@ -1,0 +1,15 @@
+<mat-toolbar color="primary" [ngClass]="'app-toolbar'">
+    <mat-toolbar-row>
+        <span>
+            <img class="logo" alt="StreamTime Logo" src="../../assets/logo/streamtime-logo-white-colorful-clean.png"
+                width="180px" />
+        </span>
+
+        <div class="theme-toggle">
+            <button class="toggle" (click)="toggleDarkTheme()">
+                <fa-icon class="toggle-icon" *ngIf="isDarkTheme" [icon]="faMoon"></fa-icon>
+                <fa-icon class="toggle-icon" *ngIf="!isDarkTheme" [icon]="faSun"></fa-icon>
+            </button>
+        </div>
+    </mat-toolbar-row>
+</mat-toolbar>
