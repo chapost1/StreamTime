@@ -1,0 +1,81 @@
+.theme-toggle {
+    position: relative;
+    vertical-align: middle !important;
+
+    .toggle-icon {
+        top: 50%;
+        transform: translateY(-50%);
+        position: absolute;
+        z-index: 1;
+    }
+
+    .toggle {
+        min-width: 80px;
+        min-height: 40px;
+        position: relative;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: background-color ease-out 250ms;
+
+        @media screen and (max-width: 640px) {
+            min-width: 60px;
+            min-height: 30px;
+        }
+    }
+
+    .toggle::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50%;
+        height: 100%;
+        border-radius: 30px;
+        transition: transform ease-out 250ms;
+    }
+}
+
+@mixin light-theme-toggle-theme($lightTheme, $background, $oppositeBackground) {
+    .theme-toggle {
+        .toggle-icon {
+            left: 15%;
+            color: #af8a3e;
+
+            &.moon {
+                display: none;
+            }
+        }
+
+        .toggle {
+            background-color: $oppositeBackground;
+            border: 2px solid $oppositeBackground;
+        }
+
+        .toggle::after {
+            background-color: $background;
+        }
+    }
+}
+
+@mixin dark-theme-toggle-theme($darkTheme, $background, $oppositeBackground) {
+    .theme-toggle {
+        .toggle-icon {
+            right: 15%;
+            color: #7d84ef;
+
+            &.sun {
+                display: none;
+            }
+        }
+
+        .toggle {
+            background-color: $oppositeBackground;
+            border: 2px solid $oppositeBackground;
+        }
+
+        .toggle::after {
+            transform: translateX(100%);
+            background-color: $background;
+        }
+    }
+}

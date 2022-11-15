@@ -1,0 +1,28 @@
+.app-logo {
+    .logo {
+        vertical-align: middle !important;
+        width: 240px;
+
+        @media screen and (max-width: 640px) {
+            width: 180px;
+        }
+    }
+}
+
+
+
+@mixin light-logo-theme($lightTheme) {
+    .app-logo {
+        .logo {
+            content: url("../../../assets/logo/streamtime-logo-black-colorful-clean-2nd.png");
+        }
+    }
+}
+
+@mixin dark-logo-theme($darkTheme) {
+    .app-logo {
+        .logo {
+            content: url("../../../assets/logo/streamtime-logo-white-colorful-clean.png");
+        }
+    }
+}
