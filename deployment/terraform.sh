@@ -42,6 +42,11 @@ error() {
 # validate user has docker
 if hash docker 2>/dev/null; then
     echo "docker seems to be installed, proceeding..."
+    # validate docker daemon is running
+    if (! docker ps 2>&1>/dev/null); then
+        echo "Docker is not running. Please start docker on your computer";
+        exit 1;
+    fi
 else
     echo "docker is not installed, exiting..."
     exit 1
