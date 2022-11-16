@@ -9,7 +9,7 @@ RUN curl --silent -o- https://raw.githubusercontent.com/creationix/nvm/master/in
 RUN source ~/.profile
 RUN nvm install 18.12.0
 RUN nvm use 18.12.0
-RUN npm install -g @angular/cli@14.2.8
+RUN npm install -g @angular/cli@14.1.0
 ENV NG_CLI_ANALYTICS=false
 RUN ng version
 
