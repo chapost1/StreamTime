@@ -9,7 +9,26 @@
         width: 100%;
     }
 
-    .sticky+.content {
-        padding-top: 64px;
+    .content {
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+    }
+
+    .sidebar {
+        width: 200px;
+        background-color: blue;
+        min-height: calc(100vh - 64px);
+
+        @media screen and (max-width: 640px) {
+            min-height: calc(100vh - 56px);
+        }
+    }
+
+    .main {
+        margin: 0 auto;
+        padding: 8px;
     }
 }
