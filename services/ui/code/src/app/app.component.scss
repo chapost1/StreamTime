@@ -14,16 +14,6 @@
         flex-flow: wrap
     }
 
-    .sidebar {
-        width: 200px;
-        background-color: blue;
-        min-height: calc(100vh - 64px);
-
-        @media screen and (max-width: 640px) {
-            min-height: calc(100vh - 56px);
-        }
-    }
-
     .main {
         margin: 0 auto;
         padding: 8px;

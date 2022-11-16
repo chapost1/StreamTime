@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ThemeService } from '../../core/services/theme.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 
 @Component({

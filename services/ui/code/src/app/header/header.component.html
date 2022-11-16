@@ -1,0 +1,25 @@
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <app-logo class="navbar-brand"></app-logo>
+        <button (click)=toggleNavigationPanel() class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div [ngClass]="!showCollapsedNavigationPanel ? 'responsive__active' : 'responsive__inactive'"
+            class="{{!showCollapsedNavigationPanel? 'collapse' : ''}} navbar-collapse justify-content-between" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+
+                <li class="nav-item" routerLinkActive="active">
+                    <a class="nav-link" routerLink="./my">My Workspace</a>
+                </li>
+
+                <li class="nav-item" routerLinkActive="active">
+                    <a class="nav-link" routerLink="./explore">Explore</a>
+                </li>
+            </ul>
+
+            <app-toolbar></app-toolbar>
+        </div>
+    </div>
+</nav>

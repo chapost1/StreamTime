@@ -6,6 +6,10 @@
         @media screen and (max-width: 640px) {
             width: 180px;
         }
+
+        &:hover {
+            opacity: 0.8;
+        }
     }
 }
 

@@ -17,9 +17,13 @@
         cursor: pointer;
         transition: background-color ease-out 250ms;
 
-        @media screen and (max-width: 640px) {
+        @media screen and (max-width: 992px) {
             min-width: 60px;
             min-height: 30px;
+        }
+
+        &:hover {
+            opacity: 0.95;
         }
     }
 
@@ -43,6 +47,10 @@
 
             &.moon {
                 display: none;
+            }
+
+            @media screen and (max-width: 992px) {
+                left: 10%;
             }
         }
 
