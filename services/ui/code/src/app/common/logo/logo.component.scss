@@ -14,11 +14,11 @@
 }
 
 
-
 @mixin light-logo-theme($lightTheme) {
     .app-logo {
         .logo {
-            content: url("../../../assets/logo/streamtime-logo-black-colorful-clean-2nd.png");
+            content: url("../../../assets/logo/streamtime-logo-black.png");
+
         }
     }
 }
@@ -26,7 +26,7 @@
 @mixin dark-logo-theme($darkTheme) {
     .app-logo {
         .logo {
-            content: url("../../../assets/logo/streamtime-logo-white-colorful-clean.png");
+            content: url("../../../assets/logo/streamtime-logo-white.png");
         }
     }
 }

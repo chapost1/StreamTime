@@ -19,14 +19,16 @@
 
 // Specific component overrides, pieces that are not in line with the general theming
 // custom components
-@import "./app/header/header.component.scss";
-@import "./app/header/toolbar/theme-toggle/theme-toggle.component.scss";
-@import "./app/common/logo/logo.component.scss";
+@import "./app/header/header.component";
+@import "./app/header/toolbar/theme-toggle/theme-toggle.component";
+@import "./app/common/logo/logo.component";
+
 .light-theme {
     @include light-header-theme($lightTheme, $light-header-bg, $dark-primary-text, $dark-accent-text);
     @include light-theme-toggle-theme($lightTheme, $light-header-bg, $dark-header-bg);
     @include light-logo-theme($lightTheme);
 }
+
 .dark-theme {
     @include dark-header-theme($darkTheme, $dark-header-bg, $light-primary-text, $light-accent-text);
     @include dark-theme-toggle-theme($darkTheme, $dark-header-bg, $light-header-bg);

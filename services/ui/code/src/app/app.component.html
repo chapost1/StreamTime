@@ -1,7 +1,15 @@
 <div class="app" [ngClass]="(isDarkTheme | async)? 'dark-theme': 'light-theme'">
     <div class="mat-app-background">
-        <div *ngIf="!isAppReady" class="vh-100 d-flex align-items-center justify-content-center align-middle">
-            <app-logo></app-logo>
+        <div *ngIf="!isAppReady">
+            <mat-progress-bar mode="indeterminate" class="position-fixed"></mat-progress-bar>
+            <div class="vh-100 d-flex align-items-center justify-content-center align-middle">
+                <app-logo></app-logo>
+            </div>
+            <div class="position-absolute bottom-0 mb-3 text-center w-100">
+                <span class="text-muted">from</span>
+                <br>
+                <span class="fw-bold text-monospace" [style.color]="'var(--primary-color)'">{{creator}}</span>
+            </div>
         </div>
 
         <div *ngIf="isAppReady">

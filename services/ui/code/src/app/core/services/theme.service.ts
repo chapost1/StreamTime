@@ -20,7 +20,7 @@ export class ThemeService {
     if (isDarkTheme) {
       return isDarkTheme === 'true';
     } else {
-      return false;
+      return true;
     }
   }
 

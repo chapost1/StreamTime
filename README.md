@@ -1,5 +1,5 @@
-![Termux Logo](./assets/logo/streamtime-logo-white-colorful-clean.png#gh-dark-mode-only)
-![Termux Logo](./assets/logo/streamtime-logo-black-colorful-clean-2nd.png#gh-light-mode-only)
+![Termux Logo](./assets/logo/streamtime-logo-white.png#gh-dark-mode-only)
+![Termux Logo](./assets/logo/streamtime-logo-black.png#gh-light-mode-only)
 
 <hr>
 

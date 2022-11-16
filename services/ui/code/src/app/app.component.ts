@@ -11,6 +11,7 @@ import { ThemeService } from './core/services/theme.service';
 export class AppComponent implements OnInit, AfterContentChecked {
   public isDarkTheme: Observable<boolean>;
   public title: string = 'stream-time';
+  public creator: string = 'Shahar Tal';
   public isAppReady: boolean = false;
   private initTS: number = -1;
 
@@ -44,8 +45,9 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
   private displayLogoForOneSecSinceInit(then: Function): void {
     const now = Date.now();
+    const oneSec = 1000 * 1;
     const deltaUntilOneSecSinceInit = // avoid negatives
-      Math.max(0, this.initTS + 1000 - now);
+      Math.max(0, this.initTS + oneSec - now);
     setTimeout(then, deltaUntilOneSecSinceInit);
   }
 
