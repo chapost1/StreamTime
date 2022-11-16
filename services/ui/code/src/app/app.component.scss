@@ -10,11 +10,8 @@
     }
 
     .content {
-        display: -webkit-box;
-        display: -moz-box;
-        display: -ms-flexbox;
-        display: -webkit-flex;
         display: flex;
+        flex-flow: wrap
     }
 
     .sidebar {
