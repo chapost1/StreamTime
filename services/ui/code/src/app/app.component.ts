@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterContentChecked } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BackendService } from './core/services/backend.service';
 import { ThemeService } from './core/services/theme.service';
 
 @Component({
@@ -8,12 +9,17 @@ import { ThemeService } from './core/services/theme.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, AfterContentChecked {
-  isDarkTheme: Observable<boolean>;
-  title: string = 'stream-time';
-  backendUrl: string = '';
+  public isDarkTheme: Observable<boolean>;
+  public title: string = 'stream-time';
+  public isAppReady: boolean = false;
+  private initTS: number = -1;
 
-  constructor(private themeService: ThemeService) {
+  constructor(
+    private themeService: ThemeService,
+    private backendService: BackendService
+  ) {
     this.isDarkTheme = this.themeService.isDarkTheme;
+    this.backendService.configRetrievalEmitter.subscribe(this.onBackendConfigRetrieval.bind(this));
   }
 
   ngAfterContentChecked() {
@@ -21,9 +27,29 @@ export class AppComponent implements OnInit, AfterContentChecked {
   }
 
   ngOnInit() {
-    fetch('./assets/backend.json').then(res => res.json())
-      .then(backendDataJson => {
-        this.backendUrl = backendDataJson.url;
-      });
+    this.initTS = Date.now();
+    this.backendService.initConfig();
+  }
+
+  private onBackendConfigRetrieval(status: boolean): void {
+    if (!status) {
+      // raise an error snackbar
+      return;
+    }
+
+    this.displayLogoForOneSecSinceInit(
+      this.markAppAsReady.bind(this)
+    );
+  }
+
+  private displayLogoForOneSecSinceInit(then: Function): void {
+    const now = Date.now();
+    const deltaUntilOneSecSinceInit = // avoid negatives
+      Math.max(0, this.initTS + 1000 - now);
+    setTimeout(then, deltaUntilOneSecSinceInit);
+  }
+
+  private markAppAsReady(): void {
+    this.isAppReady = true;
   }
 }
