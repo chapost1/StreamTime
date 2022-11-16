@@ -1,27 +1,28 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
 
 export interface BackendConfig {
     url: string;
 }
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class BackendService {
-    private _configRetrievalEmitter = new Subject<boolean>();
-    public configRetrievalEmitter = this._configRetrievalEmitter.asObservable();
+    private config: BackendConfig | undefined = undefined;
 
-    private config: BackendConfig | undefined;
-
-    public initConfig() {
+    public initConfig(callback: Function): void {
+        if (typeof this.config != 'undefined') {
+            return callback(true);
+        }
         fetch('../../assets/backend.json').then(res => res.json())
             .then((backendDataJson: BackendConfig) => {
                 this.config = backendDataJson;
-                this._configRetrievalEmitter.next(true);
+                callback(true);
             })
             .catch(err => {
                 console.log('internal server error, couldn\'t get backend config');
                 console.error(err);
-                this._configRetrievalEmitter.next(false);
+                callback(false);
             });
     }
 }

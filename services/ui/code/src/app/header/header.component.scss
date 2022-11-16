@@ -1,6 +1,7 @@
 .navbar {
     .responsive__active {
         display: flex !important;
+
         @media screen and (max-width: 992px) {
             display: none !important;
         }

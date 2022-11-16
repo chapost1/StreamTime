@@ -6,10 +6,6 @@
         @media screen and (max-width: 640px) {
             width: 180px;
         }
-
-        &:hover {
-            opacity: 0.8;
-        }
     }
 }
 
@@ -19,6 +15,9 @@
         .logo {
             content: url("../../../assets/logo/streamtime-logo-black.png");
 
+            &:hover {
+                filter: drop-shadow(0 0 0.5rem var(--accent-lighter-color));
+            }
         }
     }
 }
@@ -27,6 +26,10 @@
     .app-logo {
         .logo {
             content: url("../../../assets/logo/streamtime-logo-white.png");
+
+            &:hover {
+                filter: drop-shadow(0 0 0.5rem var(--primary-darker-color));
+            }
         }
     }
 }

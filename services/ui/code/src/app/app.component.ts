@@ -20,7 +20,6 @@ export class AppComponent implements OnInit, AfterContentChecked {
     private backendService: BackendService
   ) {
     this.isDarkTheme = this.themeService.isDarkTheme;
-    this.backendService.configRetrievalEmitter.subscribe(this.onBackendConfigRetrieval.bind(this));
   }
 
   ngAfterContentChecked() {
@@ -29,7 +28,9 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
   ngOnInit() {
     this.initTS = Date.now();
-    this.backendService.initConfig();
+    this.backendService.initConfig(
+      this.onBackendConfigRetrieval.bind(this)
+    );
   }
 
   private onBackendConfigRetrieval(status: boolean): void {

@@ -9,7 +9,6 @@ import { LogoModule } from './common/logo/logo.module';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { ThemeService } from './core/services/theme.service';
-import { BackendService } from './core/services/backend.service'
 
 import { AppComponent } from './app.component';
 
@@ -30,8 +29,7 @@ import { AppComponent } from './app.component';
     MatProgressBarModule
   ],
   providers: [
-    ThemeService,
-    BackendService
+    ThemeService
   ],
   bootstrap: [AppComponent]
 })
