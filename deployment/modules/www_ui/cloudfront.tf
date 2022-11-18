@@ -18,9 +18,18 @@ resource "aws_cloudfront_distribution" "www_s3_distribution" {
   enabled             = true
 
   aliases = [var.domain]
+
+  # If 403 (some subfolder, serve app and let it handle routing)
+  custom_error_response {
+    error_caching_min_ttl = 300
+    error_code            = 403
+    response_code         = 404
+    response_page_path    = "/index.html"
+  }
+
   # If there is a 404, return index.html with a HTTP 200 Response
   custom_error_response {
-    error_caching_min_ttl = 3000
+    error_caching_min_ttl = 300
     error_code            = 404
     response_code         = 200
     response_page_path    = "/index.html"

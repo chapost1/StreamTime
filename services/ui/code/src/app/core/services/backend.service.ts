@@ -4,9 +4,7 @@ export interface BackendConfig {
     url: string;
 }
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable()
 export class BackendService {
     private config: BackendConfig | undefined = undefined;
 
@@ -14,7 +12,7 @@ export class BackendService {
         if (typeof this.config != 'undefined') {
             return callback(true);
         }
-        fetch('../../assets/backend.json').then(res => res.json())
+        fetch('./assets/backend.json').then(res => res.json())
             .then((backendDataJson: BackendConfig) => {
                 this.config = backendDataJson;
                 callback(true);

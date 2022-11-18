@@ -12,6 +12,10 @@
             display: flex !important;
         }
     }
+
+    .nav-item.active {
+        font-weight: bold;
+    }
 }
 
 @mixin light-header-theme($lightTheme, $background, $primaryFontColor, $accentFontColor) {
@@ -29,10 +33,20 @@
         }
 
         .navbar-nav .nav-item a {
-            color: $primaryFontColor !important;
+            color: $accentFontColor !important;
+        }
 
+        .navbar-nav .nav-item a {
             &:hover {
-                color: $accentFontColor !important;
+                color: $primaryFontColor !important;
+            }
+        }
+
+        .nav-item.active {
+            filter: drop-shadow(0 0 0.5rem var(--accent-color));
+
+            a {
+                color: $primaryFontColor !important;
             }
         }
     }
@@ -53,10 +67,20 @@
         }
 
         .navbar-nav .nav-item a {
-            color: $primaryFontColor !important;
+            color: $accentFontColor !important;
+        }
 
+        .navbar-nav .nav-item a {
             &:hover {
-                color: $accentFontColor !important;
+                color: $primaryFontColor !important;
+            }
+        }
+
+        .nav-item.active {
+            filter: drop-shadow(0 0 0.5rem var(--primary-lighter-color));
+
+            a {
+                color: $primaryFontColor !important;
             }
         }
     }

@@ -10,21 +10,17 @@
             <div [ngClass]="!showCollapsedNavigationPanel ? 'responsive__active' : 'responsive__inactive'"
                 class="{{!showCollapsedNavigationPanel? 'collapse' : ''}} navbar-collapse justify-content-between"
                 id="navbarResponsive">
+                <!--Navigations-->
                 <ul class="navbar-nav ml-auto">
-
-                    <li class="nav-item" routerLinkActive="active">
-                        <a class="nav-link" routerLink="./my">
-                            <fa-icon class="toggle-icon" [icon]="faVideo"></fa-icon>
-                            My Workspace
-                        </a>
-                    </li>
-
-                    <li class="nav-item" routerLinkActive="active">
-                        <a class="nav-link" routerLink="./explore">
-                            <fa-icon class="toggle-icon" [icon]="faCompass"></fa-icon>
-                            Explore
-                        </a>
-                    </li>
+                    <ng-container *ngFor="let navigation of navigations">
+                        <li *ngIf="shouldBeVisible(navigation) | async"
+                            class="nav-item" routerLinkActive="active">
+                            <a class="nav-link" routerLink="/{{navigation.path}}">
+                                <fa-icon class="toggle-icon" [icon]="navigation.icon"></fa-icon>
+                                {{navigation.title}}
+                            </a>
+                        </li>
+                    </ng-container>
                 </ul>
 
                 <app-toolbar></app-toolbar>

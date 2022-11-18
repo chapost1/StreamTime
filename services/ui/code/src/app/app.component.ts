@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterContentChecked } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AuthService } from './core/services/auth.service';
 import { BackendService } from './core/services/backend.service';
 import { ThemeService } from './core/services/theme.service';
 
@@ -17,7 +18,8 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
   constructor(
     private themeService: ThemeService,
-    private backendService: BackendService
+    private backendService: BackendService,
+    private authService: AuthService
   ) {
     this.isDarkTheme = this.themeService.isDarkTheme;
   }
@@ -27,6 +29,8 @@ export class AppComponent implements OnInit, AfterContentChecked {
   }
 
   ngOnInit() {
+    // this.authService.logout();// todo: remove this dummy call
+    this.authService.authenticate();// todo: remove this dummy call
     this.initTS = Date.now();
     this.backendService.initConfig(
       this.onBackendConfigRetrieval.bind(this)
