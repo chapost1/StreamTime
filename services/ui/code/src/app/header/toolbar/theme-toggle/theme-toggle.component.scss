@@ -22,9 +22,13 @@
             min-height: 30px;
         }
 
-        // &:hover {
-        //     opacity: 0.95;
-        // }
+        @media screen and (max-width: 640px) {
+            transform: scale(0.8);
+            transform: translateX(0);
+            min-width: 50px;
+            min-height: 25px;
+            border-width: 1px;
+        }
     }
 
     .toggle::after {
@@ -56,6 +60,13 @@
             @media screen and (max-width: 992px) {
                 left: 10%;
             }
+
+            @media screen and (max-width: 640px) {
+                left: 12%;
+                &.sun {
+                    font-size: 12px;
+                }
+            }
         }
 
         .toggle {
@@ -85,6 +96,13 @@
 
             &.moon {
                 filter: drop-shadow(0 0 0.25rem var(--primary-color));
+            }
+
+            @media screen and (max-width: 640px) {
+                right: 13%;
+                &.moon {
+                    font-size: 12px;
+                }
             }
         }
 

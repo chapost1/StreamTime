@@ -9,7 +9,6 @@ import { ROUTES_CONFIG } from 'src/app/common/routing-policy';
 export class AuthGuard implements CanActivate {
     constructor(private authService: AuthService, private router: Router) { };
     canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-        debugger;
         return new Observable<boolean>((observer: Subscriber<boolean>) => {
             const nextPath = next.routeConfig?.path || '';
             this.handler.call(this, observer, nextPath);

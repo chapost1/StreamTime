@@ -8,6 +8,8 @@
 
 @import './pallete.scss';
 
+@include mat.all-component-themes($lightTheme);
+
 // Theme Init
 .light-theme {
     @include mat.all-component-themes($lightTheme);
@@ -27,12 +29,20 @@
     @include light-header-theme($lightTheme, $light-header-bg, $dark-primary-text, $dark-accent-text);
     @include light-theme-toggle-theme($lightTheme, $light-header-bg, $dark-header-bg);
     @include light-logo-theme($lightTheme);
+
+    .mat-dialog-background {
+        background-color: $light-header-bg;
+    }
 }
 
 .dark-theme {
     @include dark-header-theme($darkTheme, $dark-header-bg, $light-primary-text, $light-accent-text);
     @include dark-theme-toggle-theme($darkTheme, $dark-header-bg, $light-header-bg);
     @include dark-logo-theme($darkTheme);
+
+    .mat-dialog-background {
+        background-color: $dark-header-bg;
+    }
 }
 
 
@@ -60,6 +70,14 @@
     }
 }
 
+.mat-dialog-container,
+.mat-dialog-content, 
+.mat-dialog-actions {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: unset;
+}
+
 
 html,
 body {
@@ -73,3 +91,15 @@ body {
 
 /* Importing Bootstrap SCSS file. */
 @import 'bootstrap/scss/bootstrap';
+
+.clickable {
+    cursor: pointer;
+
+    &.dark-on-hover:hover {
+        filter: brightness(0.8);
+    }
+}
+
+.float-right {
+    float: right;
+}

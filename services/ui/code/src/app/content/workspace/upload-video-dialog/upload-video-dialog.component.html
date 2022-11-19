@@ -1,0 +1,25 @@
+<app-dialog>
+    <div class="py-3">
+        <div class="px-3">
+            <h2 mat-dialog-title class="d-inline">Upload Video</h2>
+            <span class="float-right clickable dark-on-hover text-secondary">
+                <fa-icon [icon]="faXmark" class="fa-2x" (click)="exit()"></fa-icon>
+            </span>
+        </div>
+        <hr>
+        <div mat-dialog-content class="text-center">
+            <div class="my-2">
+                <fa-icon [style.color]="'var(--bs-secondary)'" [icon]="faCloudArrowUp" class="fa-5x clickable dark-on-hover"
+                    (click)="selectFiles()">
+                </fa-icon>
+            </div>
+            Drag and drop video file to upload
+            <div class="text-muted">
+                Your video will remain private until you publish it.
+            </div>
+        </div>
+        <div mat-dialog-actions [align]="'center'" class="my-2">
+            <button mat-raised-button color="primary" (click)="selectFiles()">SELECT FILES</button>
+        </div>
+    </div>
+</app-dialog>

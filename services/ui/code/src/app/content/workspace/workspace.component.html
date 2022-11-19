@@ -1,0 +1,19 @@
+<div class="workspace">
+    <div class="toolbar">
+        <mat-toolbar>
+            <mat-toolbar-row class="justify-content-end">
+                <button mat-stroked-button color="primary" class="shadow-sm" matTooltip="Upload a new video"
+                    [matTooltipPosition]="'left'" (click)="openUploadVideoDialog()">
+                    <fa-icon [icon]="faSquarePlus"></fa-icon>
+                    &nbsp;
+                    <span>CREATE</span>
+                </button>
+            </mat-toolbar-row>
+        </mat-toolbar>
+    </div>
+    <app-content-padding>
+        <div class="content text-center">
+            <p>workspace works!</p>
+        </div>
+    </app-content-padding>
+</div>
