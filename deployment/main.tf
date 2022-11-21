@@ -216,24 +216,24 @@ module "web_api" {
   ]
 }
 
-# module "www_ui" {
-#   source = "./modules/www_ui"
+module "www_ui" {
+  source = "./modules/www_ui"
 
-#   app_name    = local.app_name
-#   zone_domain = local.domain
-#   domain      = local.www_ui_domain
-#   region      = local.aws_region
+  app_name    = local.app_name
+  zone_domain = local.domain
+  domain      = local.www_ui_domain
+  region      = local.aws_region
 
-#   web_api_url            = module.web_api.web_api_hostname
-#   client_videos_sync_wss = module.uploaded_videos_client_syncer.ws_url
+  web_api_url            = module.web_api.web_api_hostname
+  client_videos_sync_wss = module.uploaded_videos_client_syncer.ws_url
 
-#   providers = {
-#     aws              = aws
-#     aws.acm_provider = aws.acm_provider
-#   }
+  providers = {
+    aws              = aws
+    aws.acm_provider = aws.acm_provider
+  }
 
-#   depends_on = [
-#     module.web_api.web_api_hostname,
-#     module.uploaded_videos_client_syncer.ws_url,
-#   ]
-# }
+  depends_on = [
+    module.web_api.web_api_hostname,
+    module.uploaded_videos_client_syncer.ws_url,
+  ]
+}
