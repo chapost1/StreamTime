@@ -5,9 +5,17 @@ import { Observable, Subscriber } from 'rxjs';
 import { ObservableWrapper } from '../../common/utils';
 import { ROUTES_CONFIG } from 'src/app/common/routing-policy';
 
+import { NgToastStackService } from 'ng-toast-stack';
+
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private authService: AuthService, private router: Router) { };
+    
+    constructor(
+        private authService: AuthService,
+        private router: Router,
+        private toast: NgToastStackService
+    ) { };
+
     canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
         return new Observable<boolean>((observer: Subscriber<boolean>) => {
             const nextPath = next.routeConfig?.path || '';
@@ -33,7 +41,8 @@ export class AuthGuard implements CanActivate {
         if (error) {
             approvement = false;
             console.error(error);
-            // todo: actually handle it using snackbar or some special navigation page...
+
+            this.toast.error('unauthorized');
         }
         return approvement;
     }

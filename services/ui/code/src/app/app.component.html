@@ -1,10 +1,17 @@
 <div class="app" [ngClass]="(isDarkTheme | async)? 'dark-theme': 'light-theme'">
     <div class="mat-app-background">
+        <ng-toast-stack></ng-toast-stack>
+
         <!-- Logo display view until app is ready -->
         <div *ngIf="!isAppReady">
-            <mat-progress-bar mode="indeterminate" class="position-fixed"></mat-progress-bar>
-            <div class="vh-100 d-flex align-items-center justify-content-center align-middle">
+
+            <mat-progress-bar *ngIf="!appIsDown" mode="indeterminate" class="position-fixed"></mat-progress-bar>
+
+            <div class="vh-100 d-flex align-items-center justify-content-center align-middle flex-column">
                 <app-logo></app-logo>
+                <div *ngIf="appIsDown" class="pt-2 text-primary">
+                    We will be back soon!
+                </div>
             </div>
             <div class="position-absolute bottom-0 mb-3 text-center w-100">
                 <span class="text-muted">from</span>
@@ -12,6 +19,7 @@
                 <span class="fw-bold text-monospace" [style.color]="'var(--primary-color)'">{{creator}}</span>
             </div>
         </div>
+
         <!-- App content -->
         <div *ngIf="isAppReady">
             <app-header class="sticky"></app-header>

@@ -5,13 +5,13 @@ import { AppDialogModule } from './common/dialog/app-dialog.module';
 import { AppRoutingModule } from './app-routing.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NgToastStackModule } from 'ng-toast-stack';
 import { HeaderModule } from './header/header.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { LogoModule } from './common/logo/logo.module';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ContentModule } from './content/content.module';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
 
 import { ThemeService } from './core/services/theme.service';
 import { BackendService } from './core/services/backend.service';
@@ -33,6 +33,7 @@ import { AppComponent } from './app.component';
     AppDialogModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    NgToastStackModule,
     FontAwesomeModule,
     HeaderModule,
     ContentModule,

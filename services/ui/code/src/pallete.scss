@@ -217,12 +217,34 @@ $mat-warn: (
     )
 );
 $lightTheme-warn: mat.define-palette($mat-warn, main, lighter, darker);
-;
+
+body {
+    --success-color: #47f04f;
+    --success-lighter-color: #c8fbca;
+    --success-darker-color: #4ee92f;
+    --text-success-color: #{$light-primary-text};
+    --text-success-lighter-color: #{$dark-primary-text};
+    --text-success-darker-color: #{$light-primary-text};
+}
+
+$mat-success: (
+    main: #42cd49,
+    lighter: #8df592,
+    darker: #23a329,
+    200: #74f047,
+    // For slide toggle,
+    contrast : (main: $light-primary-text,
+        lighter: $dark-primary-text,
+        darker: $light-primary-text,
+    )
+);
+$lightTheme-success: mat.define-palette($mat-success, main, lighter, darker);
 
 $lightTheme: (
     primary: $lightTheme-primary,
     accent: $lightTheme-accent,
     warn: $lightTheme-warn,
+    success: $lightTheme-success,
     is-dark: false,
     foreground: $mat-light-theme-foreground,
     background: $mat-light-theme-background,
@@ -231,6 +253,7 @@ $darkTheme: (
     primary: $lightTheme-primary,
     accent: $lightTheme-accent,
     warn: $lightTheme-warn,
+    success: $lightTheme-success,
     is-dark: true,
     foreground: $mat-dark-theme-foreground,
     background: $mat-dark-theme-background,

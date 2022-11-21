@@ -33,6 +33,12 @@
     .mat-dialog-background {
         background-color: $light-header-bg;
     }
+
+    /* ng toast stack */
+    ng-toast-stack {
+        z-index: 1001;
+        position: absolute;
+    }
 }
 
 .dark-theme {
@@ -42,6 +48,32 @@
 
     .mat-dialog-background {
         background-color: $dark-header-bg;
+    }
+
+    /* ng toast stack */
+    ng-toast-stack {
+        z-index: 1001;
+        position: absolute;
+
+        .ng-toast-stack {
+            background-color: $dark-bg-tooltip;
+
+            .ng-toast-stack-title {
+                color: $light-primary-text;
+            }
+
+            .ng-toast-stack-message {
+                color: var(--primary-lighter-color);
+            }
+
+            .ng-toast-stack-timer {
+                background-color: $dark-header-bg;
+
+                .ng-toast-stack-timer-bar {
+                    background-color: $dark-bg-lighter-30;
+                }
+            }
+        }
     }
 }
 
@@ -71,7 +103,7 @@
 }
 
 .mat-dialog-container,
-.mat-dialog-content, 
+.mat-dialog-content,
 .mat-dialog-actions {
     margin: 0 !important;
     padding: 0 !important;

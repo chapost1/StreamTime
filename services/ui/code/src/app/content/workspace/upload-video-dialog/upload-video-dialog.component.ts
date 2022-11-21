@@ -1,15 +1,16 @@
-import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { Component, Inject, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { faXmark, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { BackendService } from 'src/app/core/services/backend.service';
-import { ObservableWrapper, PromiseWrapper } from 'src/app/common/utils';
+import { ObservableWrapper } from 'src/app/common/utils';
+
+import { NgToastStackService } from 'ng-toast-stack';
 
 @Component({
     selector: 'dialog-upload-video-dialog',
-    templateUrl: 'upload-video-dialog.component.html',
-    styleUrls: ['upload-video-dialog.component.scss']
+    templateUrl: './upload-video-dialog.component.html',
+    styleUrls: ['./upload-video-dialog.component.scss']
 })
 export class UploadVideoDialog implements OnInit, OnDestroy {
     @ViewChild('fileUploadElement') fileUploadElement: ElementRef | undefined;
@@ -34,10 +35,9 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
     constructor(
         public dialogRef: MatDialogRef<UploadVideoDialog>,
         @Inject(MAT_DIALOG_DATA) public data: unknown,
-        private backendService: BackendService
-    ) {
-        this.fileUploadElement
-    }
+        private backendService: BackendService,
+        private toast: NgToastStackService
+    ) { }
 
     ngOnInit(): void {
         const keydownEvents = this.dialogRef.keydownEvents().subscribe(event => {
@@ -46,6 +46,11 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
             }
         });
         this.subscriptions.add(keydownEvents);
+
+        const backdropClick = this.dialogRef.backdropClick().subscribe(event => {
+            this.exit();
+        });
+        this.subscriptions.add(backdropClick);
     }
 
     ngOnDestroy(): void {
@@ -72,7 +77,7 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
 
         const errorMessage = this.validateFile(file);
         if (errorMessage) {
-            alert(errorMessage); // todo: snackbar
+            this.toast.error(errorMessage);
             return;
         }
 
@@ -114,17 +119,13 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
             this.backendService.uploadVideoFile(file)
         )
         if (error) {
-            if (error.message) {
-                const message = error.message;
-                alert(message);// todo: snackbar
-            } else {
-                const message = 'Could not upload the file!';
-                alert(message);// todo: snackbar
-            }
+            const message = error.message || 'Could not upload the file!';
+            this.toast.error(message);
+        } else {
+            this.toast.success('video has been uploaded');
         }
 
         this.isUploadInProgress = false;
-        // display happy sucessfull snackbar
 
         this.exit();
     }
