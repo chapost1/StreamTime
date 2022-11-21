@@ -17,3 +17,7 @@ variable "region" {
 variable "web_api_url" {
   type = string
 }
+
+variable "client_videos_sync_wss" {
+  type = string
+}

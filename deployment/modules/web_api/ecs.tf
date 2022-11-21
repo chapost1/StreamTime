@@ -21,6 +21,9 @@ data "template_file" "web_api" {
     env_videos_bucket          = var.videos_bucket
     env_uploaded_videos_prefix = var.uploaded_videos_refix
 
+    env_allowed_video_types_to_extension = var.allowed_video_types_to_extension
+    env_max_video_file_size_in_bytes = var.max_video_file_size_in_bytes
+
     env_image_hash = random_id.ecr_image_hash.hex
 
     env_app_port           = tostring(var.app_port)

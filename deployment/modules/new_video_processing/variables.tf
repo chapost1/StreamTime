@@ -40,6 +40,11 @@ variable "s3_thumbnails_acl" {
 variable "s3_max_video_file_size_in_bytes" {
   type = string
 }
+
+variable "allowed_video_types_to_extension" {
+  type = string
+}
+
 variable "new_video_processing_failure_internal_error" {
   type = string
 }

@@ -33,6 +33,7 @@ resource "aws_lambda_function" "new_video_processing" {
       s3_unprocessed_videos_prefix                        = var.s3_unprocessed_videos_prefix,
       s3_thumbnails_acl                                   = var.s3_thumbnails_acl,
       s3_max_video_file_size_in_bytes                     = var.s3_max_video_file_size_in_bytes,
+      allowed_video_types_to_extension                    = var.allowed_video_types_to_extension
       new_video_processing_failure_internal_error         = var.new_video_processing_failure_internal_error
       new_video_processing_failure_max_file_size_exceeded = var.new_video_processing_failure_max_file_size_exceeded
       new_video_processing_failure_corrupted              = var.new_video_processing_failure_corrupted

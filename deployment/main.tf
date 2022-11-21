@@ -32,6 +32,8 @@ locals {
   s3_tmp_thumbnails_prefix        = "tmp-thumbnails"
   s3_thumbnails_acl               = "public-read"
   s3_max_video_file_size_in_bytes = "2e+9" # 2GB
+  # relies on HTML5 supported formats
+  allowed_video_types_to_extension = "{'video/ogg': 'ogv', 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/mpeg': 'mpeg'}"
   // new_video_processing failures
   new_video_processing_failure_internal_error         = "Internal error, please try again later"
   new_video_processing_failure_max_file_size_exceeded = "Maximum file size exceeded"
@@ -120,6 +122,7 @@ module "new_video_processing" {
   s3_unprocessed_videos_prefix                        = local.s3_unprocessed_videos_prefix
   s3_thumbnails_acl                                   = local.s3_thumbnails_acl
   s3_max_video_file_size_in_bytes                     = local.s3_max_video_file_size_in_bytes
+  allowed_video_types_to_extension                    = local.allowed_video_types_to_extension
   new_video_processing_failure_internal_error         = local.new_video_processing_failure_internal_error
   new_video_processing_failure_max_file_size_exceeded = local.new_video_processing_failure_max_file_size_exceeded
   new_video_processing_failure_corrupted              = local.new_video_processing_failure_corrupted
@@ -197,9 +200,12 @@ module "web_api" {
   rds_port     = module.rds.rds_port
   rds_db       = module.rds.db_name
 
-  videos_bucket_arn = module.videos_bucket.videos_bucket.arn
-  videos_bucket = module.videos_bucket.videos_bucket.id
+  videos_bucket_arn     = module.videos_bucket.videos_bucket.arn
+  videos_bucket         = module.videos_bucket.videos_bucket.id
   uploaded_videos_refix = local.s3_uploaded_videos_prefix
+
+  allowed_video_types_to_extension = local.allowed_video_types_to_extension
+  max_video_file_size_in_bytes     = local.s3_max_video_file_size_in_bytes
 
   uploaded_videos_client_sync_ws_url = module.uploaded_videos_client_syncer.ws_url
 
@@ -210,21 +216,24 @@ module "web_api" {
   ]
 }
 
-module "www_ui" {
-  source = "./modules/www_ui"
+# module "www_ui" {
+#   source = "./modules/www_ui"
 
-  app_name    = local.app_name
-  zone_domain = local.domain
-  domain      = local.www_ui_domain
-  region      = local.aws_region
-  web_api_url = module.web_api.web_api_hostname
+#   app_name    = local.app_name
+#   zone_domain = local.domain
+#   domain      = local.www_ui_domain
+#   region      = local.aws_region
 
-  providers = {
-    aws              = aws
-    aws.acm_provider = aws.acm_provider
-  }
+#   web_api_url            = module.web_api.web_api_hostname
+#   client_videos_sync_wss = module.uploaded_videos_client_syncer.ws_url
 
-  depends_on = [
-    module.web_api.web_api_hostname
-  ]
-}
+#   providers = {
+#     aws              = aws
+#     aws.acm_provider = aws.acm_provider
+#   }
+
+#   depends_on = [
+#     module.web_api.web_api_hostname,
+#     module.uploaded_videos_client_syncer.ws_url,
+#   ]
+# }

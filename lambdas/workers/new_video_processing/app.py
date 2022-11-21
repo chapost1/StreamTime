@@ -1,4 +1,5 @@
 from typing import Dict, Tuple
+import ast
 import json
 import subprocess
 import shlex
@@ -25,6 +26,7 @@ UNPROCESSED_VIDEOS_PREFIX_ENV_NAME = 's3_unprocessed_videos_prefix'
 # S3 restrictions
 S3_THUMBNAILS_ACL_ENV_NAME = 's3_thumbnails_acl'
 S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME = 's3_max_video_file_size_in_bytes'
+ALLOWED_VIDEO_TYPES_TO_EXTENSION = 'allowed_video_types_to_extension'
 # FAILURE REASONS
 INTERNAL_ERROR_ENV_NAME = 'new_video_processing_failure_internal_error'
 MAX_FILE_SIZE_EXCEEDED_ENV_NAME = 'new_video_processing_failure_max_file_size_exceeded'
@@ -40,14 +42,6 @@ NOTIFY_CLIENT_SNS_TOPIC = 'uploaded_videos_client_sync_sns_topic_arn'
 
 s3Client = boto3.client('s3')
 sns = boto3.client('sns')
-
-# relies on HTML5 supported formats
-video_types_to_extension = {
-    'video/ogg': 'ogv',
-    'video/mp4': 'mp4',
-    'video/webm': 'webm',
-    'video/mpeg': 'mpeg',
-}
 
 
 def get_utc_timestamp_of_the_next_n_hours(hours: int = 0) -> int:
@@ -71,6 +65,7 @@ def get_object_meta(obj: Dict) -> Dict:
 
 
 def get_extension_by_content_type(content_type: str) -> str:
+    video_types_to_extension = json.loads(json.dumps(ast.literal_eval(os.environ[ALLOWED_VIDEO_TYPES_TO_EXTENSION])))
     return video_types_to_extension.get(content_type, None)
 
 
@@ -173,7 +168,8 @@ def assert_necessery_env_are_here() -> None:
                 UNSUPPORTED_FILE_FORMAT_ENV_NAME, VIDEOS_RDS_UPDATE_LAMBDA_ARN_ENV_NAME,
                 UPLOADED_VIDEO_FEEDBACK_EVENT, NOTIFY_CLIENT_SNS_TOPIC,
                 PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME, PROCESSING_FAILED_EVENT_ENV_NAME,
-                PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME
+                PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME,
+                ALLOWED_VIDEO_TYPES_TO_EXTENSION
                 ]:
         if os.environ.get(env, None) is None:
             raise RuntimeError(f'missing env varialbe: {env}')

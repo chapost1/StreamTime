@@ -59,6 +59,14 @@
             {
                 "name": "uploaded_videos_prefix",
                 "value": "${env_uploaded_videos_prefix}"
+            },
+            {
+                "name": "allowed_video_types_to_extension",
+                "value": "${env_allowed_video_types_to_extension}"
+            },
+            {
+                "name": "max_video_file_size_in_bytes",
+                "value": "${env_max_video_file_size_in_bytes}"
             }
         ]
     }

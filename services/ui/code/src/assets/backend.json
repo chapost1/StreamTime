@@ -1,3 +1,4 @@
 {
-    "url": "http://localhost:80"
+    "url": "http://localhost:80",
+    "client_videos_sync_wss": "wss://localhost"
 }

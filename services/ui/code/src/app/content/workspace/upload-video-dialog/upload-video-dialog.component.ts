@@ -2,9 +2,8 @@ import { Component, Inject, OnDestroy, OnInit, ViewChild, ElementRef } from '@an
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { faXmark, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { BackendService } from 'src/app/core/services/backend.service';
+import { BackendService, VideoUploadConfig } from 'src/app/core/services/backend.service';
 import { ObservableWrapper } from 'src/app/common/utils';
-
 import { NgToastStackService } from 'ng-toast-stack';
 
 @Component({
@@ -16,20 +15,15 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
     @ViewChild('fileUploadElement') fileUploadElement: ElementRef | undefined;
 
     private subscriptions: Subscription = new Subscription();
+
+    private validFileTypes = new Set();
+
+    private maxSizeInBytes = 0;
+
     public faCloudArrowUp = faCloudArrowUp;
     public faXmark = faXmark;
 
-    private validFileTypes = new Set(
-        [
-            'video/ogg',
-            'video/mp4',
-            'video/webm',
-            'video/mpeg'
-        ]
-    );
-
-    private maxSizeInBytes = 2e+9;// todo: use dynamic config var
-
+    public uploadConfigHasBeenRetrieved: boolean = false;
     public isUploadInProgress: boolean = false;
 
     constructor(
@@ -40,6 +34,19 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
+        this.initUploadConfig();
+        this.initListeners();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
+    }
+
+    public exit(): void {
+        this.dialogRef.close();
+    }
+
+    private initListeners(): void {
         const keydownEvents = this.dialogRef.keydownEvents().subscribe(event => {
             if (event.key === "Escape") {
                 this.exit();
@@ -53,12 +60,24 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
         this.subscriptions.add(backdropClick);
     }
 
-    ngOnDestroy(): void {
-        this.subscriptions.unsubscribe();
-    }
-
-    public exit(): void {
-        this.dialogRef.close();
+    private async initUploadConfig(): Promise<void> {
+        const sub = this.backendService.videoUploadConfig.subscribe({
+            next: (config) => {
+                if (!config) {
+                    return;
+                }
+                this.validFileTypes = new Set((<VideoUploadConfig>config).valid_file_types || []);
+                this.maxSizeInBytes = (<VideoUploadConfig>config).max_size_in_bytes;
+                this.uploadConfigHasBeenRetrieved = true;
+            },
+            error: (err) => {
+                console.error(err);
+                this.toast.error('failed to retrieve video upload config');
+                this.exit();
+                return;
+            }
+        });
+        this.subscriptions.add(sub);
     }
 
     public openFileSelectionBrowser(): void {

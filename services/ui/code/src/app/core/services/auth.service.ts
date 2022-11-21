@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable()
 export class AuthService {
     private _isAuthenticated = new BehaviorSubject<boolean>(false);
-    isAuthenticated = this._isAuthenticated.asObservable();
+    public isAuthenticated = this._isAuthenticated.asObservable();
 
     public authenticate() {
         this._isAuthenticated.next(true);

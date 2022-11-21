@@ -6,6 +6,6 @@ output "uploaded_videos_feedback_ws_url" {
   value = module.uploaded_videos_client_syncer.ws_url
 }
 
-output "web_ui_hostmane" {
-  value = module.www_ui.web_ui_hostname
-}
+# output "web_ui_hostmane" {
+#   value = module.www_ui.web_ui_hostname
+# }

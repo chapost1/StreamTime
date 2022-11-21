@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
 from typing import Dict
 from pydantic import HttpUrl
 
-
-class FileUploadSignedInstructions(BaseModel):
+@dataclass
+class FileUploadSignedInstructions:
     url: HttpUrl
     signatures: Dict

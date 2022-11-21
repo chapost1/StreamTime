@@ -5,7 +5,8 @@ locals {
 
 resource "local_file" "backend_json" {
   content = jsonencode({
-    url = var.web_api_url
+    url                    = var.web_api_url
+    client_videos_sync_wss = var.client_videos_sync_wss
   })
   filename = local.backendJson
 }

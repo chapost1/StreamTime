@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 export class ThemeService {
   private readonly localStorageThemeSettings = 'isDarkTheme';
   private _darkTheme = new Subject<boolean>();
-  isDarkTheme = this._darkTheme.asObservable();
+  public isDarkTheme = this._darkTheme.asObservable();
 
   public initTheme() {
     this.setTheme(this.getTheme());

@@ -95,3 +95,11 @@ variable "rds_db" {
 variable "uploaded_videos_client_sync_ws_url" {
   type = string
 }
+
+variable "allowed_video_types_to_extension" {
+  type = string
+}
+
+variable "max_video_file_size_in_bytes" {
+  type = string
+}

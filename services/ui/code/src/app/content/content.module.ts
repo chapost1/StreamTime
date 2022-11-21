@@ -10,6 +10,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { UploadVideoDialog } from './workspace/upload-video-dialog/upload-video-dialog.component';
 
@@ -41,7 +42,8 @@ import { ContentPaddingComponent } from '../common/content/content-padding.compo
     MatDialogModule,
     MatCardModule,
     MatTooltipModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatProgressSpinnerModule
   ],
   exports: [
     ContentComponent,

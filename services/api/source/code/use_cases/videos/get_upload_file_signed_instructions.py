@@ -1,4 +1,4 @@
-from environment.constants import SUPPORTED_VIDEO_TYPES
+from environment.environment import SUPPORTED_VIDEO_TYPES
 from uuid import UUID
 from typing import Callable
 from data_access.rds.abstract import VideosDB
