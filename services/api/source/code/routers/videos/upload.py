@@ -9,6 +9,10 @@ router = APIRouter()
 # upload a video, cosider, maybe return a dataclass...
 @router.get('/', response_model=FileUploadSignedInstructions)
 async def get_upload_video_signed_instructions(
+    file_content_type: str,
     authenticated_user_id: UUID = Depends(authenticated_user)
 ) -> FileUploadSignedInstructions:
-    return await get_upload_video_signed_instructions_uc(authenticated_user_id=authenticated_user_id)
+    return await get_upload_video_signed_instructions_uc(
+        authenticated_user_id=authenticated_user_id,
+        file_content_type=file_content_type
+    )

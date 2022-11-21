@@ -1,12 +1,27 @@
 from environment import environment, constants
 from typing import Callable
 from fastapi import FastAPI, Request, status, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from routers import list as routers
 from app_lifecycle_hooks import on_startup, on_shutdown
 import common.app_errors as app_errors
 
 app = FastAPI()
+
+origins = [# temp
+    "https://stream-time-videos-web-ui.chapost1.com",# use env var
+    "http://localhost",# temp for development
+    "http://localhost:4200",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event('startup')
 async def startup_event():

@@ -8,7 +8,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 import { MatButtonModule } from '@angular/material/button';;
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { UploadVideoDialog } from './workspace/upload-video-dialog/upload-video-dialog.component';
 
@@ -39,7 +40,8 @@ import { ContentPaddingComponent } from '../common/content/content-padding.compo
     MatButtonModule,
     MatDialogModule,
     MatCardModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressBarModule
   ],
   exports: [
     ContentComponent,

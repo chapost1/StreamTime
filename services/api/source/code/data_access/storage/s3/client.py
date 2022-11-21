@@ -17,13 +17,17 @@ class S3:
             region_name=environment.AWS_REGION
         )
     
-    async def get_upload_file_signed_instructions(self, item_relative_path: str) -> FileUploadSignedInstructions:
+    async def get_upload_file_signed_instructions(self, item_relative_path: str, file_content_type: str) -> FileUploadSignedInstructions:
         async with self.__get_client() as client:
             object_key = f'{self.context.upload_prefix}/{item_relative_path}'
             try:
                 response = await client.generate_presigned_post(
                     self.context.bucket,
                     object_key,
+                    Fields={'Content-Type': file_content_type},
+                    Conditions=[
+                        ['starts-with', '$Content-Type', file_content_type]
+                    ],
                     ExpiresIn=constants.MAXIMUM_SECONDS_TO_START_UPLOAD_A_FILE_USING_PRESIGNED_URL
                 )
                 return FileUploadSignedInstructions(
