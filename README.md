@@ -11,6 +11,18 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
 ![Architecture Diagram](./assets/architecture_diagram.jpg)
 
+
+## Status:
+
+POC :soon: MVP
+
+Quick demonstration of video upload directly to S3 using presigned upload under the hood, it triggers processing steps which also creates thumbnail.
+At start, S3 bucket is shown to be empty to demonstrate the upload process.
+
+
+https://user-images.githubusercontent.com/39523779/203157149-00969d10-ead2-4e93-b2f6-84ef9fef6863.mp4
+
+
 ## Prerequisites
 
 #### Ensure the following are installed:
