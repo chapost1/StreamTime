@@ -20,7 +20,7 @@ Quick demonstration of video upload directly to S3 using presigned upload under 
 At start, S3 bucket is shown to be empty to demonstrate the upload process.
 
 
-https://user-images.githubusercontent.com/39523779/203157149-00969d10-ead2-4e93-b2f6-84ef9fef6863.mp4
+https://user-images.githubusercontent.com/39523779/203442739-e2baa0b1-eb5a-4318-8889-e265aa7fcdb2.mp4
 
 
 ## Prerequisites
