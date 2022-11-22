@@ -15,6 +15,8 @@ RUN ng version
 
 COPY /code /var/ng/project
 
+RUN npm ci
+
 RUN ng build
 
 RUN mv /var/ng/project/dist /var/ng/dist
