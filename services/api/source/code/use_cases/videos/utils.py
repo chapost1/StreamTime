@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 from typing import Union
-from models.videos import SortKeys, CrossUsersVisibilitySettings
-from data_access.rds.abstract import VideosDB
+from entities.videos import SortKeys, CrossUsersVisibilitySettings
+from external_systems.data_access.rds.abstract import VideosDB
 from use_cases.validation_utils import is_same_user
 
 async def generate_new_video_hash_id_for_user(videos: VideosDB, user_id: UUID) -> UUID:

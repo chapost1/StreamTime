@@ -1,7 +1,7 @@
 from typing import List, Union, Callable
 from uuid import UUID
-from models import Video
-from data_access.rds.abstract import VideosDB
+from entities.videos import Video
+from external_systems.data_access.rds.abstract import VideosDB
 from use_cases.videos.utils import get_cross_users_visibility_settings
 
 # get specific user videos

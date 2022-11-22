@@ -1,9 +1,9 @@
 from uuid import UUID
-from data_access.rds.abstract import VideosDB
+from external_systems.data_access.rds.abstract import VideosDB
 from typing import Union, Callable
-from models import WatchVideoRecord, Video
+from entities.videos import WatchVideoRecord, Video
 from common.app_errors import NotFoundError, AccessDeniedError
-from data_access.storage.abstract import Storage
+from external_systems.data_access.storage.abstract import Storage
 from use_cases.videos.utils import get_cross_users_visibility_settings
 
 # returns the video meta data along with watchable url

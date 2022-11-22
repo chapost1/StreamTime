@@ -1,5 +1,5 @@
-from models import UserVideosList, SortKeys
-from data_access.rds.abstract import VideosDB
+from entities.videos import UserVideosList, SortKeys
+from external_systems.data_access.rds.abstract import VideosDB
 from uuid import UUID
 from typing import Callable
 
@@ -10,7 +10,7 @@ def make_get_authenticated_user_videos(videos: VideosDB) -> Callable[[UUID], Use
             videos=await videos.get_user_videos(
                 user_id=authenticated_user_id,
                 hide_private=False,
-                listed_only=False,
+                hide_unlisted=False,
                 sort_key=SortKeys.upload_time
             )
         )

@@ -3,7 +3,7 @@ from environment.environment import (
     MAX_VIDEO_FILE_SIZE_IN_BYTES
 )
 from typing import Callable
-from models.storage import VideoUploadConfigRecord
+from entities.storage import VideoUploadConfigRecord
 
 
 # gets configurations to help users know video upload limitations

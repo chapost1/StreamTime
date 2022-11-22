@@ -1,7 +1,7 @@
-from models import Video
+from entities.videos import Video
 from uuid import UUID
 from typing import Callable
-from data_access.rds.abstract import VideosDB
+from external_systems.data_access.rds.abstract import VideosDB
 from use_cases.validation_utils import required_fields_validator
 from common.utils import calc_server_time
 from common.app_errors import (InputError, NotFoundError)

@@ -1,12 +1,12 @@
 from uuid import UUID
 from typing import Callable
-from data_access.rds.abstract import VideosDB
+from external_systems.data_access.rds.abstract import VideosDB
 from common.app_errors import NotFoundError, TooEarlyError
-from models.videos import VideoStages, Video, UnprocessedVideo
-from data_access.storage.abstract import Storage
+from entities.videos import VideoStages, Video, UnprocessedVideo
+from external_systems.data_access.storage.abstract import Storage
 
-def make_delete_video_on_ready_stage_hadler(videos: VideosDB, storage: Storage) -> Callable[[UUID, UUID], None]:
-  async def delete_video_on_ready_stage_hadler(user_id: UUID, hash_id: UUID) -> None:
+def make_delete_video_on_ready_stage_handler(videos: VideosDB, storage: Storage) -> Callable[[UUID, UUID], None]:
+  async def delete_video_on_ready_stage_hadnler(user_id: UUID, hash_id: UUID) -> None:
     # get video meta for delete from S3 in case it is already preoccessed
     video: Video = await videos.get_video(user_id=user_id, hash_id=hash_id)
     # first remove the video so in case of failure, at max the user won't have access to corrupted video record
@@ -19,7 +19,7 @@ def make_delete_video_on_ready_stage_hadler(videos: VideosDB, storage: Storage) 
     # delete from S3 [both video and thumbnail]
     await storage.delete_file(video._storage_object_key)
     await storage.delete_file(video._storage_thumbnail_key)
-  return delete_video_on_ready_stage_hadler
+  return delete_video_on_ready_stage_hadnler
 
 def make_delete_unprocessed_video_handler(videos: VideosDB) -> Callable[[UUID, UUID], None]:
   async def delete_unprocessed_video_handler(user_id: UUID, hash_id: UUID) -> None:
@@ -39,7 +39,7 @@ def make_delete_unprocessed_video_handler(videos: VideosDB) -> Callable[[UUID, U
 def make_delete_video(videos: VideosDB, storage: Storage) -> Callable[[UUID, UUID], None]:
   delete_action_by_stage = {
     VideoStages.UNPROCESSED.value: make_delete_unprocessed_video_handler(videos=videos),
-    VideoStages.READY.value: make_delete_video_on_ready_stage_hadler(videos=videos, storage=storage),
+    VideoStages.READY.value: make_delete_video_on_ready_stage_handler(videos=videos, storage=storage),
   }
   async def delete_video(authenticated_user_id: UUID, hash_id: UUID) -> None:
     # verify video / unprocessed_video

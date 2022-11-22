@@ -1,9 +1,9 @@
 from environment.environment import SUPPORTED_VIDEO_TYPES
 from uuid import UUID
 from typing import Callable
-from data_access.rds.abstract import VideosDB
-from data_access.storage.abstract import Storage
-from models.storage import FileUploadSignedInstructions
+from external_systems.data_access.rds.abstract import VideosDB
+from external_systems.data_access.storage.abstract import Storage
+from entities.storage import FileUploadSignedInstructions
 from use_cases.videos.utils import generate_new_video_hash_id_for_user
 from common.app_errors import InputError
 

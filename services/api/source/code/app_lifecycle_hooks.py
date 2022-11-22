@@ -1,5 +1,5 @@
-from data_access.rds.pg import init as init_rds, terminate as terminate_rds
-from aws import init as init_boto3
+from external_systems.data_access.rds.pg import init as init_rds, terminate as terminate_rds
+from external_systems.aws_integration import init as init_boto3
 import asyncio
 
 
