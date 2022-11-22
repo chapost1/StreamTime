@@ -31,7 +31,7 @@ locals {
   s3_thumbnails_prefix            = "thumbnails"
   s3_tmp_thumbnails_prefix        = "tmp-thumbnails"
   s3_thumbnails_acl               = "public-read"
-  s3_max_video_file_size_in_bytes = "2e+9" # 2GB
+  s3_max_video_file_size_in_bytes = "2.5e+8" # 250 MB
   # relies on HTML5 supported formats
   allowed_video_types_to_extension = "{'video/ogg': 'ogv', 'video/mp4': 'mp4', 'video/webm': 'webm', 'video/mpeg': 'mpeg'}"
   // new_video_processing failures
@@ -208,6 +208,8 @@ module "web_api" {
   max_video_file_size_in_bytes     = local.s3_max_video_file_size_in_bytes
 
   uploaded_videos_client_sync_ws_url = module.uploaded_videos_client_syncer.ws_url
+
+  ui_host_url = "https://${local.www_ui_domain}"
 
   depends_on = [
     module.videos_bucket.videos_bucket,

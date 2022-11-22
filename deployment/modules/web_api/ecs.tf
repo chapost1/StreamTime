@@ -12,17 +12,20 @@ data "template_file" "web_api" {
 
   vars = {
     env_health_check_path = "${var.health_check_path}"
-    env_rds_address       = var.rds_address
-    env_rds_password      = var.rds_password
-    env_rds_username      = var.rds_username
-    env_rds_port          = var.rds_port
-    env_rds_db            = var.rds_db
+
+    env_ui_host_url = var.ui_host_url
+
+    env_rds_address  = var.rds_address
+    env_rds_password = var.rds_password
+    env_rds_username = var.rds_username
+    env_rds_port     = var.rds_port
+    env_rds_db       = var.rds_db
 
     env_videos_bucket          = var.videos_bucket
     env_uploaded_videos_prefix = var.uploaded_videos_refix
 
     env_allowed_video_types_to_extension = var.allowed_video_types_to_extension
-    env_max_video_file_size_in_bytes = var.max_video_file_size_in_bytes
+    env_max_video_file_size_in_bytes     = var.max_video_file_size_in_bytes
 
     env_image_hash = random_id.ecr_image_hash.hex
 

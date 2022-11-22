@@ -17,7 +17,20 @@ class S3:
             region_name=environment.AWS_REGION
         )
     
+    async def prepare_bucket_region(self) -> None:
+        if self.context.region is not None:
+            return
+        async with self.__get_client() as client:
+            try:
+                response = await client.get_bucket_location(Bucket=self.context.bucket)
+                self.context.region = response['LocationConstraint']
+            except ClientError as e:
+                print(f'Client error during fetching bucket region, {e}')
+                raise e
+
+    
     async def get_upload_file_signed_instructions(self, item_relative_path: str, file_content_type: str) -> FileUploadSignedInstructions:
+        await self.prepare_bucket_region()
         async with self.__get_client() as client:
             object_key = f'{self.context.upload_prefix}/{item_relative_path}'
             try:
@@ -30,8 +43,11 @@ class S3:
                     ],
                     ExpiresIn=constants.MAXIMUM_SECONDS_TO_START_UPLOAD_A_FILE_USING_PRESIGNED_URL
                 )
+                # creating bucket url with region to avoid 5xx errors until DNS propagation is fully done
+                # https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingRouting.html
+                url = f'https://{self.context.bucket}.s3-{self.context.region}.amazonaws.com/'
                 return FileUploadSignedInstructions(
-                    url=response['url'],
+                    url=url,
                     signatures=response['fields']
                 )
             except ClientError as e:

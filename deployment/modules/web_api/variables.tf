@@ -103,3 +103,7 @@ variable "allowed_video_types_to_extension" {
 variable "max_video_file_size_in_bytes" {
   type = string
 }
+
+variable "ui_host_url" {
+  type = string
+}

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, concatMap, tap, map } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpBackend, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { NgToastStackService } from 'ng-toast-stack';
-import { ObservableWrapper } from 'src/app/common/utils';
 
 @Injectable()
 export class BackendService {
@@ -15,7 +14,7 @@ export class BackendService {
     constructor(
         private authService: AuthService,
         private httpClient: HttpClient,
-        private toast: NgToastStackService
+        private handler: HttpBackend
     ) {
         // this.authService.logout();// todo: remove this dummy call
         this.authService.authenticate();// todo: remove this dummy call
@@ -30,7 +29,6 @@ export class BackendService {
         if (config) {
             return this._videoUploadConfig.asObservable();
         }
-        // return this._videoUploadConfig.asObservable();
         const url = `${this.hostUrl}/${this.videoEndpointsRoute}/upload/config`;
         return <Observable<VideoUploadConfig>>this.httpClient.get(url).pipe(
             tap((conf: object) => {
@@ -81,7 +79,11 @@ export class BackendService {
 
     private uploadFileUsingInstuctioctions(file: File, instructions: UploadSignatures): Observable<object> {
         const payload = this.createSignedPayloadToUploadFile(file, instructions.signatures);
-        return this.httpClient.post(instructions.url, payload);
+
+        // use new http client to use newly reset-ed headers
+        return new HttpClient(this.handler).request(
+            new HttpRequest('POST', instructions.url, payload, { reportProgress: true })
+        );
     }
 
     private getVideoUploadInstructions(fileType: string): Observable<UploadSignatures> {

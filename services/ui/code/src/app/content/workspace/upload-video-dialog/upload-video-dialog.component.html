@@ -17,7 +17,14 @@
             <div>
                 <input #fileUploadElement class="d-none" type="file" (change)="onFileSelection($event)" />
 
-                <mat-progress-bar *ngIf="isUploadInProgress" mode="indeterminate"></mat-progress-bar>
+                <div *ngIf="isUploadInProgress" class="w-100 py-2">
+                    <div class="text-center">
+                        {{uploadProgress}} / 100
+                    </div>
+
+                    <mat-progress-bar [mode]="'determinate'" [value]="uploadProgress"></mat-progress-bar>
+                </div>
+
             </div>
 
             <div mat-dialog-content class="text-center">

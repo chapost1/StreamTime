@@ -44,6 +44,13 @@ resource "aws_iam_policy" "ecs_access_s3_videos_bucket" {
       ],
       "Resource": "${var.videos_bucket_arn}/*",
       "Effect": "Allow"
+    },
+    {
+      "Action": [
+            "s3:GetBucketLocation"
+      ],
+      "Resource": "arn:aws:s3:::*",
+      "Effect": "Allow"
     }
   ]
 }

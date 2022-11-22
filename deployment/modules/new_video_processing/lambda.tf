@@ -19,7 +19,7 @@ resource "aws_lambda_function" "new_video_processing" {
   role             = aws_iam_role.iam_for_new_video_processing_lambda.arn
   handler          = "app.lambda_handler"
   runtime          = "python3.8"
-  timeout          = 300 # 5m
+  timeout          = 600 # 10m
   layers = [
     aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn
   ]

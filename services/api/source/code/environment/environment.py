@@ -4,6 +4,8 @@ import json
 
 HEALTH_CHECK_PATH = os.environ['health_check_path']
 
+UI_HOST_URL = os.environ['ui_host_url']
+
 RDS_HOST = os.environ['rds_address']
 RDS_PORT = os.environ['rds_port']
 RDS_USER = os.environ['rds_username']

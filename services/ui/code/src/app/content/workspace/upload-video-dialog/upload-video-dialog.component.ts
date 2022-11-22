@@ -3,7 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { faXmark, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 import { BackendService, VideoUploadConfig } from 'src/app/core/services/backend.service';
-import { ObservableWrapper } from 'src/app/common/utils';
+import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { NgToastStackService } from 'ng-toast-stack';
 
 @Component({
@@ -25,6 +25,7 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
 
     public uploadConfigHasBeenRetrieved: boolean = false;
     public isUploadInProgress: boolean = false;
+    public uploadProgress: number = 0;
 
     constructor(
         public dialogRef: MatDialogRef<UploadVideoDialog>,
@@ -125,7 +126,7 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
         // size
         const sizeInBytes = file.size;
         if (this.maxSizeInBytes < sizeInBytes) {
-            return `maximum file size exceeded by ${file.size / this.maxSizeInBytes * 100}%. maximum size is: ${this.maxSizeInBytes * (1e-9)}GB`;
+            return `maximum file size exceeded by ${file.size / this.maxSizeInBytes * 100}%. maximum size is: ${this.maxSizeInBytes * (1e-6)} MB`;
         }
 
         return null;
@@ -134,19 +135,33 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
     private async upload(file: File): Promise<void> {
         this.isUploadInProgress = true;
 
-        const { error } = await ObservableWrapper(
-            this.backendService.uploadVideoFile(file)
-        )
-        if (error) {
-            const message = error.message || 'Could not upload the file!';
-            this.toast.error(message);
-        } else {
-            this.toast.success('video has been uploaded');
+        const done = () => {
+            this.isUploadInProgress = false;
+            this.uploadProgress = 0;
+            this.exit();
         }
 
-        this.isUploadInProgress = false;
+        const onUploadProgress = (event: { type: number, loaded: number, total: number }) => {
+            if (event && event.type === HttpEventType.UploadProgress) {
+                const progress = Math.round(100 * event.loaded / event.total);
+                this.uploadProgress = progress;
+            } else if (event instanceof HttpResponse) {
+                this.toast.success('video has been uploaded');
+                done();
+            }
+        }
 
-        this.exit();
+        const onError = (error: Error) => {
+            const message = error.message || 'Could not upload the file!';
+            this.toast.error(message);
+            done();
+        }
+
+        this.subscriptions.add(
+            this.backendService.uploadVideoFile(file).subscribe({
+                next: onUploadProgress,
+                error: onError
+            })
+        );
     }
-
 }

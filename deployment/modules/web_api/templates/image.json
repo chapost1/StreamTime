@@ -25,6 +25,10 @@
                 "value": "${env_health_check_path}"
             },
             {
+                "name": "ui_host_url",
+                "value": "${env_ui_host_url}"
+            },
+            {
                 "name": "rds_address",
                 "value": "${env_rds_address}"
             },

@@ -9,10 +9,9 @@ import common.app_errors as app_errors
 
 app = FastAPI()
 
-origins = [# temp
-    "https://stream-time-videos-ui.chapost1.com",# use env var
-    "http://localhost",# temp for development
-    "http://localhost:4200",
+origins = [
+    environment.UI_HOST_URL,
+    'http://localhost:4200', # temp
 ]
 
 app.add_middleware(
