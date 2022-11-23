@@ -1,0 +1,17 @@
+.page-not-found {
+    overflow: hidden;
+
+    .guide-image {
+        width: 400px;
+        filter: drop-shadow(#30374d 3px 10px 11px);
+
+        @media screen and (max-width: 640px) {
+            width: 300px;
+        }
+    }
+
+    .url,
+    .heading {
+        color: var(--primary-color);
+    }
+}

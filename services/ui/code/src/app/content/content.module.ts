@@ -16,6 +16,7 @@ import { DndDirective } from '../core/directives/drag-and-drop.directive';
 
 import { UploadVideoDialog } from './workspace/upload-video-dialog/upload-video-dialog.component';
 
+import { LogoModule } from '../common/logo/logo.module';
 import { ContentComponent } from './content.component';
 import { WorkspaceComponent } from './workspace/workspace.component';
 import { ExploreComponent } from './explore/explore.component';
@@ -36,6 +37,7 @@ import { ContentPaddingComponent } from '../common/content/content-padding.compo
     DndDirective
   ],
   imports: [
+    LogoModule,
     CommonModule,
     AppDialogModule,
     ContentRoutingModule,

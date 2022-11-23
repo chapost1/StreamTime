@@ -2,7 +2,7 @@ import { AuthGuard } from "../core/guards/auth-guard";
 import { NegateAuthGuard } from "../core/guards/negate-auth-guard";
 import { CanActivate } from "@angular/router";
 import { _Constructor } from "@angular/material/core";
-import { faCompass, faVideo, faLock, faQuestion, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faCompass, faVideo, faLock, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 export const ROUTES_CONFIG: Readonly<{
     [key in routes_map]: RouteConfig
@@ -36,16 +36,6 @@ export const ROUTES_CONFIG: Readonly<{
         navigationBarVisibility: true,
         children: {},
         icon: faCompass
-    },
-    PAGE_NOT_FOUND: {
-        path: '404',
-        title: 'Page Not Found',
-        canActivate: [],
-        isAuthenticationNeeded: false,
-        visibleToAuthenticatedUsers: true,
-        navigationBarVisibility: false,
-        children: {},
-        icon: faQuestion
     }
 });
 
@@ -63,5 +53,4 @@ export type RouteConfig = {
 type routes_map =
     'LOG_IN' |
     'WORKSPACE' |
-    'EXPLORE' |
-    'PAGE_NOT_FOUND';
+    'EXPLORE';

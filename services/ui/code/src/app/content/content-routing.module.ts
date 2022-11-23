@@ -11,8 +11,7 @@ const routes: Routes = [
   { path: ROUTES_CONFIG.WORKSPACE.path, component: WorkspaceComponent, canActivate: ROUTES_CONFIG.WORKSPACE.canActivate },
   { path: ROUTES_CONFIG.EXPLORE.path, component: ExploreComponent, canActivate: ROUTES_CONFIG.EXPLORE.canActivate },
   { path: ROUTES_CONFIG.LOG_IN.path, component: LoginComponent, canActivate: ROUTES_CONFIG.LOG_IN.canActivate },
-  { path: ROUTES_CONFIG.PAGE_NOT_FOUND.path, component: PageNotFoundComponent },
-  { path: '**', redirectTo: ROUTES_CONFIG.PAGE_NOT_FOUND.path, pathMatch: 'full' }
+  { path: '**', pathMatch: 'full', component: PageNotFoundComponent }
 ];
 
 @NgModule({

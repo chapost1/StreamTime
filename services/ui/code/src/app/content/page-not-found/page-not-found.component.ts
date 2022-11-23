@@ -1,15 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-page-not-found',
-  template: `
-  <app-content-padding>
-    <p>
-      page-not-found works!
-    </p>
-  </app-content-padding>
-  `,
-  styles: [
-  ]
+  templateUrl: './page-not-found.component.html',
+  styleUrls: ['./page-not-found.component.scss']
 })
-export class PageNotFoundComponent { }
+export class PageNotFoundComponent implements OnInit {
+  public url: string = '';
+
+  constructor(private router: Router) { }
+
+  ngOnInit() {
+    this.url = this.router.url;
+  }
+}
