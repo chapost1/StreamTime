@@ -4,28 +4,29 @@ import { Subject } from 'rxjs';
 @Injectable()
 export class ThemeService {
   private readonly localStorageThemeSettings = 'isDarkTheme';
-  private _darkTheme = new Subject<boolean>();
-  public isDarkTheme = this._darkTheme.asObservable();
+  private _darkThemeSubject = new Subject<boolean>();
+  public isDarkTheme = this._darkThemeSubject.asObservable();
 
   public initTheme() {
-    this.setTheme(this.getTheme());
+    this._isDarkTheme = this._isDarkTheme;
   }
 
   public toggle() {
-    this.setTheme(!this.getTheme());
+    this._isDarkTheme = !this._isDarkTheme;
   }
 
-  private getTheme(): boolean {
-    const isDarkTheme = localStorage.getItem(this.localStorageThemeSettings);
-    if (isDarkTheme) {
-      return isDarkTheme === 'true';
+  private get _isDarkTheme(): boolean {
+    const isDarkTheme: string | null = localStorage.getItem(this.localStorageThemeSettings);
+    if (typeof isDarkTheme === 'string') {
+      return isDarkTheme.toBoolean();
     } else {
+      // default to true
       return true;
     }
   }
 
-  private setTheme(isDarkTheme: boolean): void {
-    this._darkTheme.next(isDarkTheme);
-    localStorage.setItem(this.localStorageThemeSettings, String(isDarkTheme));
+  private set _isDarkTheme(isDarkTheme: boolean) {
+    this._darkThemeSubject.next(isDarkTheme);
+    localStorage.setItem(this.localStorageThemeSettings, isDarkTheme.toString());
   }
 }

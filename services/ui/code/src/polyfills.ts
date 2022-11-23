@@ -55,3 +55,12 @@ import 'zone.js';  // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+
+declare global {
+    interface String {
+        toBoolean(): boolean;
+    }
+}
+String.prototype.toBoolean = function (): boolean {
+    return this.toLowerCase() === 'true';
+}
