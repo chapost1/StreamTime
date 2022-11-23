@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, concatMap, tap, map } from 'rxjs';
-import { HttpClient, HttpBackend, HttpHeaders, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpBackend, HttpRequest } from '@angular/common/http';
 import { AuthService } from './auth.service';
-import { NgToastStackService } from 'ng-toast-stack';
+import { BackendConfig, VideoUploadConfig, UploadResponse, UploadSignatures } from '../models/backend.types';
 
 @Injectable()
 export class BackendService {
@@ -56,7 +56,7 @@ export class BackendService {
             });
     }
 
-    public uploadVideoFile(file: File): Observable<any> {
+    public uploadVideoFile(file: File): Observable<UploadResponse> {
         return this.getVideoUploadInstructions(file.type).pipe(
             // use concatMap to make sure you make the second call after the first one completes
             concatMap((instructions: UploadSignatures) => {
@@ -77,11 +77,11 @@ export class BackendService {
         return payload;
     }
 
-    private uploadFileUsingInstuctioctions(file: File, instructions: UploadSignatures): Observable<object> {
+    private uploadFileUsingInstuctioctions(file: File, instructions: UploadSignatures): Observable<UploadResponse> {
         const payload = this.createSignedPayloadToUploadFile(file, instructions.signatures);
 
         // use new http client to use newly reset-ed headers
-        return new HttpClient(this.handler).request(
+        return <Observable<UploadResponse>>new HttpClient(this.handler).request(
             new HttpRequest('POST', instructions.url, payload, { reportProgress: true })
         );
     }
@@ -96,17 +96,4 @@ export class BackendService {
 
         return <Observable<UploadSignatures>>this.httpClient.get(urlToGetUploadInstructions, options);
     }
-}
-export interface BackendConfig {
-    url: string;
-}
-
-export interface UploadSignatures {
-    url: string;
-    signatures: any;
-}
-
-export interface VideoUploadConfig {
-    valid_file_types: string[],
-    max_size_in_bytes: number
 }

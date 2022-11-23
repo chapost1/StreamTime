@@ -2,7 +2,8 @@ import { Component, Inject, OnDestroy, OnInit, ViewChild, ElementRef } from '@an
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { faXmark, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { BackendService, VideoUploadConfig } from 'src/app/core/services/backend.service';
+import { VideoUploadConfig, UploadResponse } from '../../../core/models/backend.types';
+import { BackendService } from 'src/app/core/services/backend.service';
 import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { NgToastStackService } from 'ng-toast-stack';
 
@@ -141,26 +142,21 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
             this.exit();
         }
 
-        const onUploadProgress = (event: { type: number, loaded: number, total: number }) => {
-            if (event && event.type === HttpEventType.UploadProgress) {
-                const progress = Math.round(100 * event.loaded / event.total);
-                this.uploadProgress = progress;
-            } else if (event instanceof HttpResponse) {
-                this.toast.success('video has been uploaded');
-                done();
-            }
-        }
-
-        const onError = (error: Error) => {
-            const message = error.message || 'Could not upload the file!';
-            this.toast.error(message);
-            done();
-        }
-
         this.subscriptions.add(
             this.backendService.uploadVideoFile(file).subscribe({
-                next: onUploadProgress,
-                error: onError
+                next: (event: UploadResponse) => {
+                    if (event && event.type === HttpEventType.UploadProgress) {
+                        this.uploadProgress = Math.round(100 * event.loaded / event.total);
+                    } else if (event instanceof HttpResponse) {
+                        this.toast.success('video has been uploaded');
+                        done();
+                    }
+                },
+                error: (error: Error) => {
+                    const message = error.message || 'Could not upload the file!';
+                    this.toast.error(message);
+                    done();
+                }
             })
         );
     }

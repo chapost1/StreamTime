@@ -15,13 +15,9 @@ export class AppComponent implements OnInit, AfterContentChecked {
   public title: string = 'stream-time';
   public creator: string = 'Shahar Tal';
   public isAppReady: boolean = false;
-
   public appIsDown: boolean = false;
 
-  public showProgressBarWhileAppIsNotReady: boolean = true;
-
   private initTS: number = -1;
-
 
   constructor(
     private themeService: ThemeService,
