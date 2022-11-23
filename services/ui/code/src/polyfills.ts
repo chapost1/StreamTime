@@ -62,5 +62,13 @@ declare global {
     }
 }
 String.prototype.toBoolean = function (): boolean {
-    return this.toLowerCase() === 'true';
+    switch (this.toLowerCase()) {
+        case 'true':
+        case '1': {
+            return true;
+        }
+        default: {
+            return false;
+        }
+    }
 }
