@@ -82,6 +82,18 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
         this.subscriptions.add(sub);
     }
 
+    public onFileDropped(files: FileList): void {
+        if (this.isUploadInProgress) {
+            return;
+        }
+        const file: File | null = this.extractFileFromList(files);
+        if (!file) {
+            return;
+        }
+
+        this.newFileHandler(file);
+    }
+
     public openFileSelectionBrowser(): void {
         if (this.isUploadInProgress) {
             return;
@@ -95,7 +107,10 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
         if (!file) {
             return;
         }
+        this.newFileHandler(file);
+    }
 
+    private newFileHandler(file: File) {
         const errorMessage = this.validateFile(file);
         if (errorMessage) {
             this.toast.error(errorMessage);
@@ -107,11 +122,16 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
 
     private popSelectedFileFromElement(element: HTMLInputElement): File | null {
         if (element.files) {
-            const file: File | null = element.files?.item(0);
+            const file: File | null = this.extractFileFromList(element.files);
             this.resetFileUploadElement(element);
             return file;
         }
         return null;
+    }
+
+    private extractFileFromList(files: FileList): File | null {
+        const file: File | null = files?.item(0);
+        return file;
     }
 
     private resetFileUploadElement(element: HTMLInputElement): void {
@@ -122,7 +142,7 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
         // type
         const type = file.type;
         if (!this.validFileTypes.has(type)) {
-            return `${type} file type is unsupported. try one of these: ${Array.from(this.validFileTypes).join(', ')}`;
+            return `${type} file type is unsupported. try one of: ${Array.from(this.validFileTypes).join(', ')}.`;
         }
         // size
         const sizeInBytes = file.size;

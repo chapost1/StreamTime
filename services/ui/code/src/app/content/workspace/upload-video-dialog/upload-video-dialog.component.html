@@ -27,11 +27,11 @@
 
             </div>
 
-            <div mat-dialog-content class="text-center">
-                <div class="my-2">
+            <div mat-dialog-content class="text-center overflow-hidden">
+                <div class="my-2 p-2 dnd-container {{isUploadInProgress? 'disabled' : ''}}" appDnd
+                    (fileDropped)="onFileDropped($event)">
                     <fa-icon [style.color]="'var(--bs-secondary)'" [icon]="faCloudArrowUp"
-                        class="upload-icon fa-5x clickable dark-on-hover {{isUploadInProgress? 'disabled' : ''}}"
-                        (click)="openFileSelectionBrowser()">
+                        class="upload-icon fa-5x clickable dark-on-hover" (click)="openFileSelectionBrowser()">
                     </fa-icon>
                 </div>
                 <div>

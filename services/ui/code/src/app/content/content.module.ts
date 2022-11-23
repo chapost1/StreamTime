@@ -12,6 +12,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { DndDirective } from '../core/directives/drag-and-drop.directive';
+
 import { UploadVideoDialog } from './workspace/upload-video-dialog/upload-video-dialog.component';
 
 import { ContentComponent } from './content.component';
@@ -30,7 +32,8 @@ import { ContentPaddingComponent } from '../common/content/content-padding.compo
     LoginComponent,
     PageNotFoundComponent,
     ContentPaddingComponent,
-    UploadVideoDialog
+    UploadVideoDialog,
+    DndDirective
   ],
   imports: [
     CommonModule,
