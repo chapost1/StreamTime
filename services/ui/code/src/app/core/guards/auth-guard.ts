@@ -24,13 +24,17 @@ export class AuthGuard implements CanActivate {
                 if (!isAuthenticated && !isAimingLoginPath) {
                     this.router.navigateByUrl(`/${loginPath}`);
                 }
+
             }),
             map((isAuthenticated: boolean) => isAuthenticated),
-            catchError((error: any, caught: Observable<boolean>): Observable<boolean> => {
+            catchError((error: any, caught: Observable<boolean>): Observable<never> => {
+                // display error
                 console.error(error);
                 this.toast.error('unauthorized');
+                // navigate to somewhere else
                 this.router.navigateByUrl(`/`);
-                return throwError(false);
+                // re-throw
+                return throwError(() => error);
             })
         );
     }
