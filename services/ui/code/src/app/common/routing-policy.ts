@@ -4,26 +4,16 @@ import { CanActivate } from "@angular/router";
 import { _Constructor } from "@angular/material/core";
 import { faCompass, faVideo, faLock, faQuestion, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
-
-
-export interface RouteConfig {
-    path: string;
-    title: string;
-    canActivate: Array<_Constructor<CanActivate>>;
-    isAuthenticationNeeded: boolean;
-    visibleToAuthenticatedUsers: boolean;
-    navigationBarVisibility: boolean;
-    children: { [key: string]: RouteConfig };
-    icon: IconDefinition;
-}
-export const ROUTES_CONFIG = Object.freeze({
+export const ROUTES_CONFIG: Readonly<{
+    [key in routes_map]: RouteConfig
+}> = Object.freeze({
     LOG_IN: {
         path: 'login',
         title: 'Login',
         canActivate: [NegateAuthGuard],
         isAuthenticationNeeded: false,
         visibleToAuthenticatedUsers: false,
-        navigationBarVisibility: true, 
+        navigationBarVisibility: true,
         children: {},
         icon: faLock
     },
@@ -58,3 +48,20 @@ export const ROUTES_CONFIG = Object.freeze({
         icon: faQuestion
     }
 });
+
+export type RouteConfig = {
+    path: string;
+    title: string;
+    canActivate: Array<_Constructor<CanActivate>>;
+    isAuthenticationNeeded: boolean;
+    visibleToAuthenticatedUsers: boolean;
+    navigationBarVisibility: boolean;
+    children: { [key: string]: RouteConfig };
+    icon: IconDefinition;
+}
+
+type routes_map =
+    'LOG_IN' |
+    'WORKSPACE' |
+    'EXPLORE' |
+    'PAGE_NOT_FOUND';

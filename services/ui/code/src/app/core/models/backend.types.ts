@@ -1,20 +1,20 @@
 import { HttpResponse } from '@angular/common/http';
 
-export interface BackendConfig {
+export type BackendConfig = {
     url: string;
 }
 
-export interface UploadSignatures {
+export type UploadSignatures = {
     url: string;
     signatures: any;
 }
 
-export interface VideoUploadConfig {
+export type VideoUploadConfig = {
     valid_file_types: string[],
     max_size_in_bytes: number
 }
 
-interface UploadProgress {
+export type UploadProgress = {
     type: number,
     loaded: number,
     total: number
