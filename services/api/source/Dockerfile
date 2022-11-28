@@ -8,4 +8,5 @@ ARG APP_PORT=80
 ENV APP_PORT=$APP_PORT
 EXPOSE $APP_PORT
 
-CMD ["python", "index.py"]
+CMD ["index.py"]
+ENTRYPOINT ["python"]
