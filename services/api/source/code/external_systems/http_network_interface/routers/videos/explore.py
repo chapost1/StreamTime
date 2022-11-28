@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from entities.videos import Video
 from uuid import UUID
 from ..auth_guards import any_user
-from external_systems.routers.videos.data_accessors import videos_db_client
+from external_systems.data_access.rds.pg.videos import videos_db_client
 from use_cases.videos.explore_listed_videos import make_explore_listed_videos
 
 router = APIRouter()

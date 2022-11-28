@@ -1,0 +1,1 @@
+from .index import app, register_shutdown_task, register_startup_task

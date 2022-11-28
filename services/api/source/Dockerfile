@@ -6,4 +6,4 @@ COPY ./code/ /code/
 
 EXPOSE 80
 
-CMD ["uvicorn", "index:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["python", "index.py"]

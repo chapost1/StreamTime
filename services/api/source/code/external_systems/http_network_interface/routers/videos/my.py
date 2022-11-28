@@ -2,7 +2,8 @@ from fastapi import APIRouter, status, Depends
 from uuid import UUID
 from entities.videos import Video, UserVideosList
 from ..auth_guards import authenticated_user
-from external_systems.routers.videos.data_accessors import videos_db_client, videos_s3_client
+from external_systems.data_access.rds.pg.videos import videos_db_client
+from external_systems.data_access.storage.s3.videos import videos_s3_client
 from use_cases.videos.get_authenticated_user_videos import make_get_authenticated_user_videos
 from use_cases.videos.update_video import make_update_video
 from use_cases.videos.delete_video import make_delete_video
