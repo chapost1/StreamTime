@@ -2,6 +2,8 @@ import os
 import ast
 import json
 
+APP_PORT = int(os.environ.get('APP_PORT', 80))
+
 HEALTH_CHECK_PATH = os.environ['health_check_path']
 
 UI_HOST_URL = os.environ['ui_host_url']
