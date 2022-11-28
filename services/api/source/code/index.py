@@ -9,8 +9,7 @@ from app_lifecycle_hooks import (
     on_shutdown
 )
 
-register_startup_task(on_startup)
-register_shutdown_task(on_shutdown)
-
 if __name__ == '__main__':
+    register_startup_task(on_startup)
+    register_shutdown_task(on_shutdown)
     uvicorn.run(app=app, host='0.0.0.0', port=80, workers=1)
