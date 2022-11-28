@@ -1,51 +1,57 @@
 <app-dialog class="upload-video-dialog">
     <div class="py-3">
-        <div *ngIf="!uploadConfigHasBeenRetrieved">
-            <mat-spinner class="m-auto"></mat-spinner>
-        </div>
+        <div *ngIf="uploadConfigHasBeenRetrieved;then content else loadingSignal"></div>
 
-        <div *ngIf="uploadConfigHasBeenRetrieved">
-
-            <div class="px-3">
-                <h2 mat-dialog-title class="d-inline">Upload Video</h2>
-                <span class="float-right clickable dark-on-hover text-secondary">
-                    <fa-icon [icon]="faXmark" class="fa-2x" (click)="exit()"></fa-icon>
-                </span>
-            </div>
-            <hr>
-
+        <ng-template #loadingSignal>
             <div>
-                <input #fileUploadElement class="d-none" type="file" (change)="onFileSelection($event)" />
-
-                <div *ngIf="isUploadInProgress" class="w-100 py-2">
-                    <div class="text-center">
-                        {{uploadProgress}} / 100
-                    </div>
-
-                    <mat-progress-bar [mode]="'determinate'" [value]="uploadProgress"></mat-progress-bar>
-                </div>
-
+                <mat-spinner class="m-auto"></mat-spinner>
             </div>
+        </ng-template>
 
-            <div mat-dialog-content class="text-center overflow-hidden">
-                <div class="my-2 p-2 dnd-container {{isUploadInProgress? 'disabled' : ''}}" appDnd
-                    (fileDropped)="onFileDropped($event)">
-                    <fa-icon [style.color]="'var(--bs-secondary)'" [icon]="faCloudArrowUp"
-                        class="upload-icon fa-5x clickable dark-on-hover" (click)="openFileSelectionBrowser()">
-                    </fa-icon>
+        <ng-template #content>
+            <div>
+
+                <div class="px-3">
+                    <h2 mat-dialog-title class="d-inline">Upload Video</h2>
+                    <span class="float-right clickable dark-on-hover text-secondary">
+                        <fa-icon [icon]="faXmark" class="fa-2x" (click)="exit()"></fa-icon>
+                    </span>
                 </div>
+                <hr>
+
                 <div>
-                    Drag and drop video file to upload
-                    <div class="text-muted">
-                        Your video will remain private until you publish it.
+                    <input #fileUploadElement class="d-none" type="file" (change)="onFileSelection($event)" />
+
+                    <div *ngIf="isUploadInProgress" class="w-100 py-2">
+                        <div class="text-center">
+                            {{uploadProgress}} / 100
+                        </div>
+
+                        <mat-progress-bar [mode]="'determinate'" [value]="uploadProgress"></mat-progress-bar>
+                    </div>
+
+                </div>
+
+                <div mat-dialog-content class="text-center overflow-hidden">
+                    <div class="my-2 p-2 dnd-container {{isUploadInProgress? 'disabled' : ''}}" appDnd
+                        (fileDropped)="onFileDropped($event)">
+                        <fa-icon [style.color]="'var(--bs-secondary)'" [icon]="faCloudArrowUp"
+                            class="upload-icon fa-5x clickable dark-on-hover" (click)="openFileSelectionBrowser()">
+                        </fa-icon>
+                    </div>
+                    <div>
+                        Drag and drop video file to upload
+                        <div class="text-muted">
+                            Your video will remain private until you publish it.
+                        </div>
                     </div>
                 </div>
+                <div mat-dialog-actions [align]="'center'" class="my-2">
+                    <button mat-raised-button [disabled]="isUploadInProgress" color="primary"
+                        (click)="openFileSelectionBrowser()">SELECT
+                        FILE</button>
+                </div>
             </div>
-            <div mat-dialog-actions [align]="'center'" class="my-2">
-                <button mat-raised-button [disabled]="isUploadInProgress" color="primary"
-                    (click)="openFileSelectionBrowser()">SELECT
-                    FILE</button>
-            </div>
-        </div>
+        </ng-template>
     </div>
 </app-dialog>

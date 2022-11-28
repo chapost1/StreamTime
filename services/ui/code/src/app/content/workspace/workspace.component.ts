@@ -3,6 +3,7 @@ import { faSquarePlus } from '@fortawesome/free-solid-svg-icons';
 import { MatDialog } from '@angular/material/dialog';
 import { UploadVideoDialog } from './upload-video-dialog/upload-video-dialog.component';
 import { Subscription } from 'rxjs';
+import { userVideosList as userVideosListMock } from './mocks';
 
 @Component({
   selector: 'app-workspace',
@@ -12,6 +13,8 @@ import { Subscription } from 'rxjs';
 export class WorkspaceComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   public faSquarePlus = faSquarePlus;
+
+  public userVideosListMock = userVideosListMock;
 
   constructor(public dialog: MatDialog) { }
 
@@ -25,23 +28,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // todo:
     // close WS connection
-    
+
     this.subscriptions.unsubscribe();
   }
 
   openUploadVideoDialog() {
-    const dialogRef = this.dialog.open(UploadVideoDialog, {
+    this.dialog.open(UploadVideoDialog, {
       autoFocus: false,
       height: 'auto',
       minWidth: 'calc(100% - 2rem)',
       disableClose: true,
       exitAnimationDuration: '200ms'
     });
-
-    const dialogSubscription = dialogRef.afterClosed().subscribe(result => {
-      console.log(`Dialog result: ${result}`);
-    });
-
-    this.subscriptions.add(dialogSubscription);
   }
 }

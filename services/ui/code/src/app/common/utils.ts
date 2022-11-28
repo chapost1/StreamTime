@@ -30,3 +30,7 @@ export const ObservableWrapper = (observable: Observable<unknown>): Promise<Wrap
         }
     });
 }
+
+export const removeUndefinedValuesKeysFromObject = (obj: any) => {
+    Object.keys(obj).forEach(key => obj[key] === undefined ? delete obj[key] : {});
+}

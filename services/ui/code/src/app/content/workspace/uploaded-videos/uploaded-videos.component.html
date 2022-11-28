@@ -1,0 +1,13 @@
+<div *ngIf="isUserVideosListNotEmpty();then content else fallback"></div>
+
+<ng-template #fallback>
+    <div>
+        <!--Todo: define fallback Image and message-->
+        no videos uploaded yet. please upload one....
+    </div>
+</ng-template>
+
+<ng-template #content>
+    <div>
+    </div>
+</ng-template>

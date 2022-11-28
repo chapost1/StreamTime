@@ -2,10 +2,11 @@ import { Component, Inject, OnDestroy, OnInit, ViewChild, ElementRef } from '@an
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { faXmark, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
-import { VideoUploadConfig, UploadResponse } from '../../../core/models/backend.types';
+import { IUploadResponse } from '../../../core/models/backend/upload.types';
 import { BackendService } from 'src/app/core/services/backend.service';
 import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { NgToastStackService } from 'ng-toast-stack';
+import UploadConfig from 'src/app/core/models/entities/upload-config';
 
 @Component({
     selector: 'dialog-upload-video-dialog',
@@ -64,12 +65,13 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
 
     private async initUploadConfig(): Promise<void> {
         const sub = this.backendService.videoUploadConfig.subscribe({
-            next: (config) => {
-                if (!config) {
+            next: (config: UploadConfig | undefined) => {
+                if (!(config instanceof UploadConfig)) {
                     return;
                 }
-                this.validFileTypes = new Set((<VideoUploadConfig>config).valid_file_types || []);
-                this.maxSizeInBytes = (<VideoUploadConfig>config).max_size_in_bytes;
+                
+                this.validFileTypes = new Set(config.validFileTypes);
+                this.maxSizeInBytes = config.maxSizeInBytes;
                 this.uploadConfigHasBeenRetrieved = true;
             },
             error: (err) => {
@@ -164,7 +166,7 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
 
         this.subscriptions.add(
             this.backendService.uploadVideoFile(file).subscribe({
-                next: (event: UploadResponse) => {
+                next: (event: IUploadResponse) => {
                     if (event && event.type === HttpEventType.UploadProgress) {
                         this.uploadProgress = Math.round(100 * event.loaded / event.total);
                     } else if (event instanceof HttpResponse) {

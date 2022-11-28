@@ -23,6 +23,7 @@ import { ExploreComponent } from './explore/explore.component';
 import { LoginComponent } from './login/login.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { ContentPaddingComponent } from '../common/content/content-padding.component';
+import { UploadedVideosComponent } from './workspace/uploaded-videos/uploaded-videos.component';
 
 
 @NgModule({
@@ -34,7 +35,8 @@ import { ContentPaddingComponent } from '../common/content/content-padding.compo
     PageNotFoundComponent,
     ContentPaddingComponent,
     UploadVideoDialog,
-    DndDirective
+    DndDirective,
+    UploadedVideosComponent
   ],
   imports: [
     LogoModule,
