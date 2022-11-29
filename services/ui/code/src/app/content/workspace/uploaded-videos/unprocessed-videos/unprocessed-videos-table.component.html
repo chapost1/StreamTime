@@ -1,43 +1,44 @@
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z8 w-100 text-start" matSort
-    matSortActive="uploadTimeTS" matSortDisableClear matSortDirection="desc">
+<div class="unprocessed-videos-table">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 w-100 text-start" matSort
+        matSortActive="uploadTimeTS" matSortDisableClear matSortDirection="desc">
 
-    <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef> Actions </th>
-        <td mat-cell *matCellDef="let element">
-            <div *ngIf="!element.isStillProcessing()">
-                <button mat-button matTooltip="Delete forever" [matTooltipPosition]="'below'">
-                    <fa-icon [icon]="icons.delete"></fa-icon>
-                </button>
-            </div>
-        </td>
-    </ng-container>
-
-    <ng-container matColumnDef="uploadTimeTS">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Date </th>
-        <td mat-cell *matCellDef="let element">
-            <label>{{element.uploadTime | date}}</label>
-            <br>
-            <span class="text-muted">Uploaded</span>
-        </td>
-    </ng-container>
-
-    <ng-container matColumnDef="failureReason">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Processing Status </th>
-        <td mat-cell *matCellDef="let element">
-            <div *ngIf="element.isStillProcessing()">
-                <!-- <mat-spinner [diameter]="30"></mat-spinner> -->
-                <div class="pe-2">
-                    <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
-                    <div class="pt-2">Processing...</div>
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <td mat-cell *matCellDef="let element">
+                <div *ngIf="!element.isStillProcessing()">
+                    <button mat-button matTooltip="Delete forever" [matTooltipPosition]="'below'">
+                        <fa-icon [icon]="icons.delete"></fa-icon>
+                    </button>
                 </div>
-            </div>
-            <div *ngIf="element.isFailed()">
-                <fa-icon [icon]="icons.error"></fa-icon>
-                {{element.failureReason}}
-            </div>
-        </td>
-    </ng-container>
+            </td>
+        </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns();"></tr>
-</table>
+        <ng-container matColumnDef="uploadTimeTS">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Date </th>
+            <td mat-cell *matCellDef="let element">
+                <label>{{element.uploadTime | date}}</label>
+                <br>
+                <span class="text-muted">Uploaded</span>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="failureReason">
+            <th mat-header-cell *matHeaderCellDef> Processing Status </th>
+            <td mat-cell *matCellDef="let element">
+                <div *ngIf="element.isStillProcessing()">
+                    <div class="pe-2">
+                        <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+                        <div class="pt-2">Processing...</div>
+                    </div>
+                </div>
+                <div *ngIf="element.isFailed()">
+                    <fa-icon [icon]="icons.error" matTooltip="Failed" [matTooltipPosition]="'below'"></fa-icon>
+                    {{element.failureReason}}
+                </div>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns();"></tr>
+    </table>
+</div>

@@ -7,8 +7,7 @@ import { MatSort } from '@angular/material/sort';
 @Component({
   selector: 'app-unprocessed-videos-table',
   templateUrl: 'unprocessed-videos-table.component.html',
-  styles: [
-  ]
+  styleUrls: ['unprocessed-videos-table.component.scss']
 })
 export class UnprocessedVideosTableComponent implements OnChanges {
   @Input() unprocessedVideos: UnprocessedVideo[] = [];
