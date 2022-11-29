@@ -7,15 +7,15 @@
     </div>
     <div class="d-flex flex-column mx-2 p-2">
         <label class="title">
-            {{ video.title ? video.title: 'Draft' }}
+            {{ video.isListed() && video.title ? video.title: 'Draft' }}
         </label>
         <p class="text-muted description">
-            {{ video.description ? video.description: 'Description' }}
+            {{ video.isListed() && video.description ? video.description: 'Description' }}
         </p>
 
         <div class="d-flex flex-row">
             <button mat-button matTooltip="Edit" [matTooltipPosition]="'below'">
-                <fa-icon [icon]="icons.edit"></fa-icon>
+                <fa-icon [icon]="icons.edit" class="text-secondary"></fa-icon>
             </button>
 
             <button mat-button [disabled]="!video.isListed()" matTooltip="{{video.isListed()?'Watch':null}}"
@@ -24,7 +24,7 @@
             </button>
 
             <button mat-button matTooltip="Delete forever" [matTooltipPosition]="'below'">
-                <fa-icon [icon]="icons.delete"></fa-icon>
+                <fa-icon [icon]="icons.delete" class="text-danger"></fa-icon>
             </button>
         </div>
     </div>
