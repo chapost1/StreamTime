@@ -1,0 +1,31 @@
+<div *ngIf="video" class="d-flex p-2 video-summary">
+    <div class="mx-2 position-relative thumbnail-wrapper">
+        <img [src]="video.thumbnailUrl" [alt]="video.description" class="thumbnail" />
+        <span class="position-absolute video-duration py-1 px-2">
+            {{video.durationSeconds | secondsToTime}}
+        </span>
+    </div>
+    <div class="d-flex flex-column mx-2 p-2">
+        <label class="title">
+            {{ video.title ? video.title: 'Draft' }}
+        </label>
+        <p class="text-muted description">
+            {{ video.description ? video.description: 'Description' }}
+        </p>
+
+        <div class="d-flex flex-row">
+            <button mat-button matTooltip="Edit" [matTooltipPosition]="'below'">
+                <fa-icon [icon]="icons.edit"></fa-icon>
+            </button>
+
+            <button mat-button [disabled]="!video.isListed()" matTooltip="{{video.isListed()?'Watch':null}}"
+                [matTooltipPosition]="'below'">
+                <fa-icon [icon]="icons.watch"></fa-icon>
+            </button>
+
+            <button mat-button matTooltip="Delete forever" [matTooltipPosition]="'below'">
+                <fa-icon [icon]="icons.delete"></fa-icon>
+            </button>
+        </div>
+    </div>
+</div>

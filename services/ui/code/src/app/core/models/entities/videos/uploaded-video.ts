@@ -5,6 +5,7 @@ class UploadedVideo {
     hashId: string;
     userId: string;
     uploadTime: string;
+    uploadTimeTS: number;
 
     protected constructor(hashId: string, userId: string, uploadTime: string) {
         assertField(this.constructor.name, 'hashId', hashId);
@@ -13,6 +14,7 @@ class UploadedVideo {
         this.userId = userId;
         assertField(this.constructor.name, 'uploadTime', uploadTime);
         this.uploadTime = uploadTime;
+        this.uploadTimeTS = new Date(this.uploadTime).getTime();
     }
 
     static fromInterface(source: IUploadedVideo): UploadedVideo {

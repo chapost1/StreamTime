@@ -1,4 +1,4 @@
-import UnprocessedVideo from './uploaded-video';
+import UnprocessedVideo from './unprocessed-video';
 import Video from './video';
 
 export interface UserVideosList {

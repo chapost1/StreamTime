@@ -8,7 +8,7 @@ export const userVideosList: UserVideosList = {
             {// still processing 
                 hash_id: '69e14f7b-4b90-456a-9883-87be71e09bf5',
                 user_id: 'ae6d14eb-d222-4967-98d9-60a7cc2d7891',
-                upload_time: '2022-11-28T20:18:37.406479+00:00'
+                upload_time: '2022-10-26T20:18:37.406479+00:00'
             }
         ),
         UnprocessedVideo.fromInterface(
@@ -26,8 +26,8 @@ export const userVideosList: UserVideosList = {
                 hash_id: '29rf4f7b-4b90-456a-9883-87be71e09bf5',
                 user_id: 'ae6d14eb-d222-4967-98d9-60a7cc2d7891',
                 upload_time: '2022-11-28T20:18:37.406479+00:00',
-                size_in_bytes: 123,
-                duration_seconds: 500,
+                size_in_bytes: 1.6e+6,
+                duration_seconds: 600,
                 thumbnail_url: 'https://i.ytimg.com/vi/b7DrwqoHAGA/hqdefault.jpg',
                 video_type: 'video/mp4',
                 is_private: false,

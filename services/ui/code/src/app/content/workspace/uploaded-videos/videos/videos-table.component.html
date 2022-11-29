@@ -1,0 +1,60 @@
+<table mat-table [dataSource]="dataSource"  class="w-100 text-start" matSort
+    matSortActive="uploadTime" matSortDisableClear matSortDirection="desc">
+
+    <ng-container matColumnDef="videoSummary" sticky>
+        <th mat-header-cell *matHeaderCellDef> Video </th>
+        <td mat-cell *matCellDef="let element">
+            <app-video-summary [video]="element"></app-video-summary>
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="isPrivate">
+        <th mat-header-cell *matHeaderCellDef> Publicity </th>
+        <td mat-cell *matCellDef="let element">
+            <div>
+                <span *ngIf="!element.isPrivate">
+                    <fa-icon [icon]="icons.public"></fa-icon>
+                    Public
+                </span>
+
+                <span *ngIf="element.isPrivate">
+                    <fa-icon [icon]="icons.private"></fa-icon>
+                    Private
+                </span>
+            </div>
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="listingTime">
+        <th mat-header-cell *matHeaderCellDef> Visibility </th>
+        <td mat-cell *matCellDef="let element">
+            <div>
+                <span *ngIf="!element.isListed()">
+                    <fa-icon [icon]="icons.draft"></fa-icon>
+                    Waiting for publish
+                </span>
+                <span *ngIf="element.isListed()">
+                    <fa-icon [icon]="icons.listed"></fa-icon>
+                    Published
+                </span>
+            </div>
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="uploadTimeTS">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Date </th>
+        <td mat-cell *matCellDef="let element">
+            <label>{{element.uploadTime | date}}</label>
+            <br>
+            <span class="text-muted">Uploaded</span>
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="sizeInBytes">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Size </th>
+        <td mat-cell *matCellDef="let element"> {{element.sizeInBytes | readableFileSize}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns();"></tr>
+</table>

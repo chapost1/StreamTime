@@ -1,0 +1,59 @@
+.video-summary {
+    flex-direction: row;
+
+    .title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 75ch;
+    }
+
+    .description {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        max-width: 42ch;
+    }
+
+    .video-duration {
+        background-color: rgba(34, 34, 34, 1);
+        bottom: 2px;
+        right: 2px;
+        vertical-align: middle;
+        color: white;
+    }
+
+    .thumbnail-wrapper {
+        position: relative;
+        width: 270px;
+        height: 150px;
+    }
+
+    .thumbnail {
+        position: absolute;
+        width: 270px;
+        height: 150px;
+    }
+
+    @media screen and (max-width: 1008px) {
+        flex-direction: column;
+
+        .title {
+            max-width: 32ch;
+        }
+    }
+
+    @media screen and (max-width: 640px) {
+        .thumbnail-wrapper,
+        .thumbnail {
+            width: 180px;
+            height: 100px;
+        }
+
+        .title {
+            max-width: 18ch;
+        }
+    }
+}

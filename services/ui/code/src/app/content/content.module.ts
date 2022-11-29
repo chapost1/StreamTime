@@ -11,6 +11,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
 
 import { DndDirective } from '../core/directives/drag-and-drop.directive';
 
@@ -24,10 +26,17 @@ import { LoginComponent } from './login/login.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { ContentPaddingComponent } from '../common/content/content-padding.component';
 import { UploadedVideosComponent } from './workspace/uploaded-videos/uploaded-videos.component';
+import { VideoSummaryComponent } from './workspace/uploaded-videos/videos/video-summary/video-summary.component';
+import { VideosTableComponent } from './workspace/uploaded-videos/videos/videos-table.component';
+import { UnprocessedVideosTableComponent } from './workspace/uploaded-videos/unprocessed-videos/unprocessed-videos-table.component';
 
+import { SecondsToTimePipe } from '../core/pipes/seconds-to-time';
+import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
 
 @NgModule({
   declarations: [
+    SecondsToTimePipe,
+    ReadableFileSizePipe,
     ContentComponent,
     WorkspaceComponent,
     ExploreComponent,
@@ -36,7 +45,10 @@ import { UploadedVideosComponent } from './workspace/uploaded-videos/uploaded-vi
     ContentPaddingComponent,
     UploadVideoDialog,
     DndDirective,
-    UploadedVideosComponent
+    UploadedVideosComponent,
+    VideoSummaryComponent,
+    VideosTableComponent,
+    UnprocessedVideosTableComponent
   ],
   imports: [
     LogoModule,
@@ -50,7 +62,9 @@ import { UploadedVideosComponent } from './workspace/uploaded-videos/uploaded-vi
     MatCardModule,
     MatTooltipModule,
     MatProgressBarModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTableModule,
+    MatSortModule
   ],
   exports: [
     ContentComponent,

@@ -3,11 +3,28 @@
 <ng-template #fallback>
     <div>
         <!--Todo: define fallback Image and message-->
-        no videos uploaded yet. please upload one....
+        No videos has been uploaded yet. please upload one....
     </div>
 </ng-template>
 
 <ng-template #content>
-    <div>
+    <div class="text-start">
+
+        <div *ngIf="0 < (userVideosList?.unprocessedVideos || []).length">
+            <h2 class="m-2">Unprocessed Videos</h2>
+            <div class="table-wrapper">
+                <app-unprocessed-videos-table [unprocessedVideos]="userVideosList?.unprocessedVideos || []">
+                </app-unprocessed-videos-table>
+            </div>
+        </div>
+
+        <br>
+
+        <div *ngIf="0 < (userVideosList?.videos || []).length">
+            <h2 class="m-2">Ready Videos</h2>
+            <div class="table-wrapper mat-elevation-z8">
+                <app-videos-table [videos]="userVideosList?.videos || []"></app-videos-table>
+            </div>
+        </div>
     </div>
 </ng-template>
