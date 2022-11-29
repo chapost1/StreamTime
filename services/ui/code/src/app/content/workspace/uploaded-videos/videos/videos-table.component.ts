@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
 import Video from 'src/app/core/models/entities/videos/video';
-import { faEye, faEyeSlash, faBars, faList } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash, faPenToSquare, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 
@@ -19,8 +19,8 @@ export class VideosTableComponent implements OnChanges {
   public icons = {
     public: faEye,
     private: faEyeSlash,
-    draft: faBars,
-    listed: faList
+    draft: faPenToSquare,
+    listed: faCheck
   }
 
   ngOnChanges(changes: SimpleChanges) {
