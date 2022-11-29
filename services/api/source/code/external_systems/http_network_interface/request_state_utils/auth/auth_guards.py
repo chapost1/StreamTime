@@ -1,4 +1,4 @@
-from environment import constants
+import common.constants as constants
 from fastapi import Request, HTTPException, status
 from external_systems.http_network_interface.request_state_utils.auth import auth_state
 from uuid import UUID

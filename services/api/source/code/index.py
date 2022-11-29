@@ -1,4 +1,4 @@
-from environment import environment
+import common.environment as environment
 from external_systems.http_network_interface import HttpServer
 from app_lifecycle_hooks import (
     on_startup,

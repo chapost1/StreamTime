@@ -1,6 +1,6 @@
 from typing import Any, List, Union
 from uuid import UUID
-from environment import constants
+import common.constants as constants
 
 def required_fields_validator(entity: Any, fields: List[str]):
     missing_fields = []

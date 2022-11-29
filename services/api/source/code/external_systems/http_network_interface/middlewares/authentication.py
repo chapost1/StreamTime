@@ -1,4 +1,4 @@
-from environment import constants
+import common.constants as constants
 from typing import Callable
 from fastapi import Request
 from external_systems.http_network_interface.request_state_utils.auth import auth_state

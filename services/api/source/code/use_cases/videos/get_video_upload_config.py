@@ -1,4 +1,4 @@
-from environment.environment import (
+from common.environment import (
     SUPPORTED_VIDEO_TYPES,
     MAX_VIDEO_FILE_SIZE_IN_BYTES
 )

@@ -3,7 +3,7 @@ from aiobotocore.session import (
     get_session as aio_get_session,
     AioSession
 )
-from environment import environment
+import common.environment as environment
 
 async def create_boto3_session(region: str, access_key: Optional[str], secret_key: Optional[str]) -> AioSession:
     session: AioSession = aio_get_session()

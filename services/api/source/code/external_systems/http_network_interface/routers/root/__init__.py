@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from environment import environment
+import common.environment as environment
 from .health_check import health_check
 router = APIRouter(tags=['Root'])
 

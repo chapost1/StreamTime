@@ -1,7 +1,5 @@
-from environment import (
-    environment,
-    constants
-)
+import common.constants as constants
+import common.environment as environment
 from external_systems.aws_integration import Boto3
 from botocore.exceptions import ClientError
 from entities.storage import FileUploadSignedInstructions

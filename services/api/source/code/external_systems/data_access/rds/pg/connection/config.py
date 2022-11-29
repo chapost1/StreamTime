@@ -1,4 +1,4 @@
-from environment import environment
+import common.environment as environment
 
 config = {
     "host": environment.RDS_HOST,

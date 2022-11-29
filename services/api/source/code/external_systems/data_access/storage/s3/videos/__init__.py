@@ -1,4 +1,4 @@
-from environment import environment
+import common.environment as environment
 from external_systems.data_access.storage.s3.client import S3
 from external_systems.data_access.storage.s3.context import Context
 

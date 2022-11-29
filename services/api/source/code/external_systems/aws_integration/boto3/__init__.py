@@ -1,6 +1,6 @@
 from external_systems.aws_integration.boto3.boto3 import Boto3
 from external_systems.aws_integration.boto3.session import create_boto3_session
-from environment import environment
+import common.environment as environment
 
 async def init() -> None:
     session = await create_boto3_session(
