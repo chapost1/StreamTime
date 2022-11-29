@@ -1,18 +1,31 @@
 from environment import constants
 from typing import Callable
 from fastapi import Request
+from external_systems.http_network_interface.request_state_utils.auth import auth_state
 
-async def inject_temporary_dummy_username(request: Request, call_next: Callable):
-    # dummy values
+def verify_is_user_authenticated(request: Request) -> bool:
+    # dummy logic
     is_user_authentication_verified = True
-    authenticated_user_id = 'ae6d14eb-d222-4967-98d9-60a7cc2d7891'
+    return is_user_authentication_verified
 
-    if is_user_authentication_verified:
-        request.state.auth_user_id = authenticated_user_id
-    else:
-        request.state.auth_user_id = constants.ANONYMOUS_USER
+
+def detect_authenticated_user_id(request: Request) -> str:
+    authenticated_user_id = constants.ANONYMOUS_USER
+
+    if verify_is_user_authenticated(request=request):
+        # dummy value
+        authenticated_user_id = 'ae6d14eb-d222-4967-98d9-60a7cc2d7891'
+
+    return authenticated_user_id
+
+def inject_authenticated_user_id(request: Request) -> None:
+    authenticated_user_id = detect_authenticated_user_id(request=request)
+    auth_state.set_authenticated_user_id(
+        request=request,
+        authenticated_user_id=authenticated_user_id
+    )
+
+async def authenticate_user(request: Request, call_next: Callable):
+    inject_authenticated_user_id(request=request)
 
     return await call_next(request)
-
-async def authenticate_user(*args, **kwargs):
-    return await inject_temporary_dummy_username(*args, **kwargs)

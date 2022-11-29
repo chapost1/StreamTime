@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 from fastapi import APIRouter, Depends
 from entities.videos import Video
 from uuid import UUID
-from ..auth_guards import any_user
+from external_systems.http_network_interface.request_state_utils.auth.auth_guards import any_user
 from external_systems.data_access.rds.pg.videos import videos_db_client
 from use_cases.videos.explore_listed_videos import make_explore_listed_videos
 

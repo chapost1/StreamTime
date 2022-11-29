@@ -4,7 +4,7 @@ from uuid import UUID
 from entities.videos import WatchVideoRecord
 from external_systems.data_access.rds.pg.videos import videos_db_client
 from external_systems.data_access.storage.s3.videos import videos_s3_client
-from ..auth_guards import any_user
+from external_systems.http_network_interface.request_state_utils.auth.auth_guards import any_user
 from use_cases.videos.get_watch_video_record import make_get_watch_video_record
 
 router = APIRouter()
