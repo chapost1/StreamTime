@@ -10,7 +10,7 @@
         </ng-container>
 
         <ng-container matColumnDef="isPrivate">
-            <th mat-header-cell *matHeaderCellDef> Publicity </th>
+            <th mat-header-cell *matHeaderCellDef> Visibility </th>
             <td mat-cell *matCellDef="let element">
                 <div>
                     <span *ngIf="!element.isPrivate">
@@ -27,7 +27,7 @@
         </ng-container>
 
         <ng-container matColumnDef="listingTime">
-            <th mat-header-cell *matHeaderCellDef> Visibility </th>
+            <th mat-header-cell *matHeaderCellDef> Status </th>
             <td mat-cell *matCellDef="let element">
                 <div>
                     <span *ngIf="!element.isListed()">
