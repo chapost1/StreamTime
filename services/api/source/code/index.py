@@ -5,7 +5,8 @@ from app_lifecycle_hooks import (
     on_shutdown
 )
 
-if __name__ == '__main__':
+
+def run() -> None:
     server = HttpServer(
         on_startup=on_startup,
         on_shutdown=on_shutdown,
@@ -17,3 +18,7 @@ if __name__ == '__main__':
     server.listen(
         port=environment.APP_PORT
     )
+
+
+if __name__ == '__main__':
+    run()
