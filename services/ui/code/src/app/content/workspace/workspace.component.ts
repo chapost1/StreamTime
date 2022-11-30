@@ -71,16 +71,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   public onDelete(video: UploadedVideo): void {
-    this.deleteVideo(video.hashId, (success: boolean) => {
-      if (!success) {
-        return;
-      }
-      const list: UploadedVideo[] = this.getVideoListByVideoType(video);
-      this.clearVideoFromUserList(list, video.hashId);
-    });
+    const onSuccess = () => {
+      const list: UploadedVideo[] = this.getListByVideoType(video);
+      this.removeVideoFromList(list, video.hashId);
+    }
+
+    this.deleteVideo(video.hashId, onSuccess);
   }
 
-  private getVideoListByVideoType(video: UploadedVideo): UploadedVideo[] {
+  private getListByVideoType(video: UploadedVideo): UploadedVideo[] {
     if (video instanceof UnprocessedVideo) {
       return this.userVideosList.unprocessedVideos;
     } else if (video instanceof Video) {
@@ -89,7 +88,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return [];
   }
 
-  private clearVideoFromUserList(list: UploadedVideo[], hashId: string): void {
+  private removeVideoFromList(list: UploadedVideo[], hashId: string): void {
     const idx = list.findIndex(video => video.hashId === hashId);
     if (idx < 0) {
       return;
@@ -97,16 +96,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     list.splice(idx, 1);
   }
 
-  public deleteVideo(hashId: string, then: Function): void {
+  public deleteVideo(hashId: string, onSuccess: Function): void {
     const sub = this.backendService.deleteVideo(hashId)
       .subscribe({
-        next: () => {
-          then(true);
-        },
-        error: (e) => {
-          this.toast.error(e);
-          then(false);
-        }
+        next: onSuccess.bind(this),
+        error: this.toast.error
       });
 
     this.subscriptions.add(sub);
