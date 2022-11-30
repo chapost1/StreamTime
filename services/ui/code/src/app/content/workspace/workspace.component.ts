@@ -5,10 +5,8 @@ import { UploadVideoDialog } from './upload-video-dialog/upload-video-dialog.com
 import { Subscription } from 'rxjs';
 import { BackendService } from 'src/app/core/services/backend.service';
 import { NgToastStackService } from 'ng-toast-stack';
-import { UserVideosList } from 'src/app/core/models/entities/videos/types';
 import UploadedVideo from 'src/app/core/models/entities/videos/uploaded-video';
-import UnprocessedVideo from 'src/app/core/models/entities/videos/unprocessed-video';
-import Video from 'src/app/core/models/entities/videos/video';
+import UserVideosList from 'src/app/core/models/entities/videos/user-videos-list';
 
 @Component({
   selector: 'app-workspace',
@@ -22,10 +20,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   public fetchingUserVideosList: boolean = false;
-  public userVideosList: UserVideosList = {
-    unprocessedVideos: [],
-    videos: []
-  }
+  public userVideosList: UserVideosList = new UserVideosList();
 
   constructor(
     public dialog: MatDialog,
@@ -57,12 +52,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return new Promise(resolve => {
       const sub = this.backendService.getAuthenticatedUserVideos()
         .subscribe({
-          next: (userVideosList) => {
+          next: userVideosList => {
             this.userVideosList = userVideosList;
           },
-          error: (e) => {
-            this.toast.error(e);
-          },
+          error: this.toast.error,
           complete: resolve
         });
 
@@ -72,28 +65,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   public onDelete(video: UploadedVideo): void {
     const onSuccess = () => {
-      const list: UploadedVideo[] = this.getListByVideoType(video);
-      this.removeVideoFromList(list, video.hashId);
+      this.userVideosList.removeVideo(video);
     }
 
     this.deleteVideo(video.hashId, onSuccess);
-  }
-
-  private getListByVideoType(video: UploadedVideo): UploadedVideo[] {
-    if (video instanceof UnprocessedVideo) {
-      return this.userVideosList.unprocessedVideos;
-    } else if (video instanceof Video) {
-      return this.userVideosList.videos;
-    }
-    return [];
-  }
-
-  private removeVideoFromList(list: UploadedVideo[], hashId: string): void {
-    const idx = list.findIndex(video => video.hashId === hashId);
-    if (idx < 0) {
-      return;
-    }
-    list.splice(idx, 1);
   }
 
   public deleteVideo(hashId: string, onSuccess: Function): void {

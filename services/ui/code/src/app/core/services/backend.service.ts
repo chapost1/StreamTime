@@ -5,10 +5,8 @@ import { AuthService } from './auth.service';
 import { IBackendConfig } from '../models/backend/backend.types';
 import { IUploadConfig, IUploadResponse, IUploadSignatures } from '../models/backend/upload.types';
 import UploadConfig from '../models/entities/upload-config';
-import { UserVideosList } from '../models/entities/videos/types';
 import { IUserVideosList } from '../models/backend/videos.types';
-import UnprocessedVideo from '../models/entities/videos/unprocessed-video';
-import Video from '../models/entities/videos/video';
+import UserVideosList from '../models/entities/videos/user-videos-list';
 
 @Injectable()
 export class BackendService {
@@ -109,12 +107,7 @@ export class BackendService {
         return <Observable<UserVideosList>>this.httpClient.get(url)
             .pipe(
                 map((object: object) => {
-                    const input = <IUserVideosList>object;
-                    const userVideosList: UserVideosList = {
-                        unprocessedVideos: input.unprocessed_videos.map(uv => UnprocessedVideo.fromInterface(uv)),
-                        videos: input.videos.map(vid => Video.fromInterface(vid))
-                    }
-                    return userVideosList;
+                    return UserVideosList.fromInterface(<IUserVideosList>object);
                 })
             );
     }
