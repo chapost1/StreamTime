@@ -8,8 +8,10 @@ import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./theme-toggle.component.scss']
 })
 export class ThemeToggleComponent {
-  readonly faSun = faSun;
-  readonly faMoon = faMoon;
+  public icons = {
+    sun: faSun,
+    moon: faMoon
+  }
 
   constructor(private themeService: ThemeService) { }
 
