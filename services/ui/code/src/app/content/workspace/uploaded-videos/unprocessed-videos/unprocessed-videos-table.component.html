@@ -6,7 +6,7 @@
             <th mat-header-cell *matHeaderCellDef> Actions </th>
             <td mat-cell *matCellDef="let element">
                 <div *ngIf="!element.isStillProcessing()">
-                    <button mat-button matTooltip="Delete forever" [matTooltipPosition]="'below'">
+                    <button mat-button (click)="onDelete(element)" matTooltip="Delete forever" [matTooltipPosition]="'below'">
                         <fa-icon [icon]="icons.delete" class="text-danger"></fa-icon>
                     </button>
                 </div>

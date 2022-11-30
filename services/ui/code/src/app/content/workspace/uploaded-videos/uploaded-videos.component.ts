@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { UserVideosList } from 'src/app/core/models/entities/videos/types';
 import { faEye, faEyeSlash, faBars, faList } from '@fortawesome/free-solid-svg-icons';
+import UploadedVideo from 'src/app/core/models/entities/videos/uploaded-video';
 
 @Component({
   selector: 'app-uploaded-videos',
@@ -8,6 +9,7 @@ import { faEye, faEyeSlash, faBars, faList } from '@fortawesome/free-solid-svg-i
   styleUrls: ['uploaded-videos.component.scss']
 })
 export class UploadedVideosComponent {
+  @Output() deleteVideoEmitter: EventEmitter<UploadedVideo> = new EventEmitter<UploadedVideo>();
   @Input() userVideosList: UserVideosList | undefined = undefined;
 
   public icons = {
@@ -24,5 +26,9 @@ export class UploadedVideosComponent {
 
   public unprocessedVideosDisplayedColumns(): string[] {
     return ['videoSummary', 'failureReason', 'uploadTime'];
+  }
+
+  public onDelete(video: UploadedVideo): void {
+    this.deleteVideoEmitter.emit(video);
   }
 }

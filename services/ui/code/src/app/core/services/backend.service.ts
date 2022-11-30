@@ -118,4 +118,9 @@ export class BackendService {
                 })
             );
     }
+
+    public deleteVideo(hashId: string): Observable<Object> {
+        const url = `${this.hostUrl}/${this.videoEndpointsRoute}/my/${hashId}`;
+        return this.httpClient.delete(url);
+    }
 }

@@ -23,7 +23,7 @@
                 <fa-icon [icon]="icons.watch"></fa-icon>
             </button>
 
-            <button mat-button matTooltip="Delete forever" [matTooltipPosition]="'below'">
+            <button mat-button (click)="onDelete(video)" matTooltip="Delete forever" [matTooltipPosition]="'below'">
                 <fa-icon [icon]="icons.delete" class="text-danger"></fa-icon>
             </button>
         </div>

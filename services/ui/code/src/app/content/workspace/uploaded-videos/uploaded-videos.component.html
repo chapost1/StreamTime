@@ -13,7 +13,8 @@
         <div *ngIf="0 < (userVideosList?.unprocessedVideos || []).length">
             <h2 class="m-2">Unprocessed Videos</h2>
             <div class="table-wrapper">
-                <app-unprocessed-videos-table [unprocessedVideos]="userVideosList?.unprocessedVideos || []">
+                <app-unprocessed-videos-table (deleteVideoEmitter)="onDelete($event)"
+                    [unprocessedVideos]="userVideosList?.unprocessedVideos || []">
                 </app-unprocessed-videos-table>
             </div>
         </div>
@@ -23,7 +24,8 @@
         <div *ngIf="0 < (userVideosList?.videos || []).length">
             <h2 class="m-2">Ready Videos</h2>
             <div class="table-wrapper">
-                <app-videos-table [videos]="userVideosList?.videos || []"></app-videos-table>
+                <app-videos-table (deleteVideoEmitter)="onDelete($event)" [videos]="userVideosList?.videos || []">
+                </app-videos-table>
             </div>
         </div>
     </div>
