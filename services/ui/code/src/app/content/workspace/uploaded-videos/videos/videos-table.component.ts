@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, IterableDiffer, IterableDiffers, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
+import { Component, EventEmitter, Input, IterableDiffer, IterableDiffers, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import Video from 'src/app/core/models/entities/videos/video';
 import { faEye, faEyeSlash, faPenToSquare, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { MatTableDataSource } from '@angular/material/table';
