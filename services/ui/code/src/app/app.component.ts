@@ -16,6 +16,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
   public creator: string = 'Shahar Tal';
   public isAppReady: boolean = false;
   public appIsDown: boolean = false;
+  public displayApp: boolean = false;
 
   private initTS: number = -1;
 
@@ -48,8 +49,9 @@ export class AppComponent implements OnInit, AfterContentChecked {
       return;
     }
 
+    this.markAppAsReady();
     this.displayLogoForOneSecSinceInit(
-      this.markAppAsReady.bind(this)
+      this.revealApp.bind(this)
     );
   }
 
@@ -63,5 +65,9 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
   private markAppAsReady(): void {
     this.isAppReady = true;
+  }
+
+  private revealApp(): void {
+    this.displayApp = true;
   }
 }

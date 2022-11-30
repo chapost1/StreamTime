@@ -4,7 +4,7 @@
             <mat-toolbar-row class="justify-content-end">
                 <button mat-stroked-button color="primary" class="shadow-sm" matTooltip="Upload a new video"
                     [matTooltipPosition]="'left'" (click)="openUploadVideoDialog()">
-                    <fa-icon [icon]="faSquarePlus"></fa-icon>
+                    <fa-icon [icon]="icons.createPlusIcon"></fa-icon>
                     &nbsp;
                     <span>CREATE</span>
                 </button>
@@ -12,8 +12,16 @@
         </mat-toolbar>
     </div>
     <app-content-padding>
-        <div class="content text-center">
-            <app-uploaded-videos [userVideosList]="userVideosListMock"></app-uploaded-videos>
+        <div class="text-center">
+            <div *ngIf="fetchingUserVideosList;then watingForUserVideosList else userVideosListIsReady"></div>
+            <ng-template #userVideosListIsReady>
+                <app-uploaded-videos [userVideosList]="userVideosList"></app-uploaded-videos>
+            </ng-template>
+            <ng-template #watingForUserVideosList>
+                <div class="py-3">
+                    <mat-spinner class="text-center mx-auto" [diameter]="80"></mat-spinner>
+                </div>
+            </ng-template>
         </div>
     </app-content-padding>
 </div>

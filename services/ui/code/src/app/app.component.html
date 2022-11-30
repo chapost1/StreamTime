@@ -3,7 +3,7 @@
         <ng-toast-stack></ng-toast-stack>
 
         <!-- Logo display view until app is ready -->
-        <div *ngIf="!isAppReady">
+        <div [hidden]="displayApp">
 
             <mat-progress-bar *ngIf="!appIsDown" mode="indeterminate" class="position-fixed"></mat-progress-bar>
 
@@ -23,7 +23,7 @@
         </div>
 
         <!-- App content -->
-        <div *ngIf="isAppReady">
+        <div *ngIf="isAppReady" [hidden]="!displayApp">
             <app-header class="sticky"></app-header>
             <app-content></app-content>
         </div>

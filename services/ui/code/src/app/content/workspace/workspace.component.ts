@@ -3,7 +3,9 @@ import { faSquarePlus } from '@fortawesome/free-solid-svg-icons';
 import { MatDialog } from '@angular/material/dialog';
 import { UploadVideoDialog } from './upload-video-dialog/upload-video-dialog.component';
 import { Subscription } from 'rxjs';
-import { userVideosList as userVideosListMock } from './mocks';
+import { BackendService } from 'src/app/core/services/backend.service';
+import { NgToastStackService } from 'ng-toast-stack';
+import { UserVideosList } from 'src/app/core/models/entities/videos/types';
 
 @Component({
   selector: 'app-workspace',
@@ -12,17 +14,27 @@ import { userVideosList as userVideosListMock } from './mocks';
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
-  public faSquarePlus = faSquarePlus;
+  public icons = {
+    createPlusIcon: faSquarePlus
+  }
 
-  public userVideosListMock = userVideosListMock;
+  public fetchingUserVideosList: boolean = false;
+  public userVideosList: UserVideosList = {
+    unprocessedVideos: [],
+    videos: []
+  }
 
-  constructor(public dialog: MatDialog) { }
+  constructor(
+    public dialog: MatDialog,
+    private backendService: BackendService,
+    private toast: NgToastStackService
+  ) { }
 
   ngOnInit(): void {
     // todo:
     // open WS connection
 
-    // todo: retrieve list of authenticated user video assets & pass it to some view oriented child componenet
+    this.initUserVideosList();
   }
 
   ngOnDestroy(): void {
@@ -32,7 +44,31 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  openUploadVideoDialog() {
+  private async initUserVideosList(): Promise<void> {
+    this.fetchingUserVideosList = true;
+    await this.fetchUserVideosList();
+    this.fetchingUserVideosList = false;
+  }
+
+  private fetchUserVideosList(): Promise<void> {
+    return new Promise(resolve => {
+      const sub = this.backendService.getAuthenticatedUserVideos()
+        .subscribe({
+          next: (userVideosList) => {
+            this.userVideosList = userVideosList;
+            resolve();
+          },
+          error: (e) => {
+            this.toast.error(e);
+            resolve();
+          }
+        });
+
+      this.subscriptions.add(sub);
+    })
+  }
+
+  public openUploadVideoDialog() {
     this.dialog.open(UploadVideoDialog, {
       autoFocus: false,
       height: 'auto',
