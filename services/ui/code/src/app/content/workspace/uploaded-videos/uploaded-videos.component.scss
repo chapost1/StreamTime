@@ -1,3 +1,14 @@
-.table-wrapper {
-    overflow: auto;
+.uploaded-videos {
+    .quote {
+        inline-size: 180px;
+    }
+
+    .cameraman-image {
+        width: 300px;
+        filter: drop-shadow(#30374d 2px 4px 12px);
+    }
+
+    .table-wrapper {
+        overflow: auto;
+    }
 }

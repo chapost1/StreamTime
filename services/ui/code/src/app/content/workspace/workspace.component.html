@@ -16,6 +16,7 @@
             <div *ngIf="fetchingUserVideosList;then watingForUserVideosList else userVideosListIsReady"></div>
             <ng-template #userVideosListIsReady>
                 <app-uploaded-videos (deleteVideoEmitter)="onDelete($event)"
+                (uploadVideoEmitter)="onUploadVideoRequest($event)"
                 [userVideosList]="userVideosList">
             </app-uploaded-videos>
             </ng-template>

@@ -1,32 +1,50 @@
-<div *ngIf="isUserVideosListNotEmpty();then content else fallback"></div>
+<div class="uploaded-videos">
+    <div *ngIf="isUserVideosListNotEmpty();then content else fallback"></div>
 
-<ng-template #fallback>
-    <div>
-        <!--Todo: define fallback Image and message-->
-        No videos has been uploaded yet. please upload one....
-    </div>
-</ng-template>
+    <ng-template #fallback>
+        <div class="d-flex flex-column mx-auto text-center">
+            <div class="my-2">
+                <img class="cameraman-image" src="../../../../assets/images/npc/arthur-the-cameraman.png" width="300"
+                    alt="Arthur the cameraman, a yellow bear" />
+            </div>
+            <div>
+                <p class="my-0 p-0 mx-auto text-center quote">
+                    <strong>
+                        <span class="text-info">"</span>Every great workspace have to start with a great video!<span
+                            class="text-info">"</span>
+                    </strong>
+                </p>
 
-<ng-template #content>
-    <div class="text-start">
+                <span class="text-muted"> - Arthur, Cameraman</span>
 
-        <div *ngIf="0 < (userVideosList?.unprocessedVideos || []).length">
-            <h2 class="m-2">Unprocessed Videos</h2>
-            <div class="table-wrapper">
-                <app-unprocessed-videos-table (deleteVideoEmitter)="onDelete($event)"
-                    [unprocessedVideos]="userVideosList?.unprocessedVideos || []">
-                </app-unprocessed-videos-table>
+                <div class="my-2">
+                    <button mat-flat-button color="primary" (click)="onUploadVideoClick()">Upload my first video!</button>
+                </div>
             </div>
         </div>
+    </ng-template>
 
-        <br>
+    <ng-template #content>
+        <div class="text-start">
 
-        <div *ngIf="0 < (userVideosList?.videos || []).length">
-            <h2 class="m-2">Ready Videos</h2>
-            <div class="table-wrapper">
-                <app-videos-table (deleteVideoEmitter)="onDelete($event)" [videos]="userVideosList?.videos || []">
-                </app-videos-table>
+            <div *ngIf="0 < (userVideosList?.unprocessedVideos || []).length">
+                <h2 class="m-2">Unprocessed Videos</h2>
+                <div class="table-wrapper">
+                    <app-unprocessed-videos-table (deleteVideoEmitter)="onDelete($event)"
+                        [unprocessedVideos]="userVideosList?.unprocessedVideos || []">
+                    </app-unprocessed-videos-table>
+                </div>
+            </div>
+
+            <br>
+
+            <div *ngIf="0 < (userVideosList?.videos || []).length">
+                <h2 class="m-2">Ready Videos</h2>
+                <div class="table-wrapper">
+                    <app-videos-table (deleteVideoEmitter)="onDelete($event)" [videos]="userVideosList?.videos || []">
+                    </app-videos-table>
+                </div>
             </div>
         </div>
-    </div>
-</ng-template>
+    </ng-template>
+</div>
