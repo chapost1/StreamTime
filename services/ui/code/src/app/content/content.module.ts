@@ -69,6 +69,9 @@ import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
   exports: [
     ContentComponent,
   ],
+  providers: [
+    ReadableFileSizePipe
+  ],
   bootstrap: [ContentComponent],
   entryComponents: [UploadVideoDialog]
 })

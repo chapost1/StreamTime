@@ -7,6 +7,7 @@ import { BackendService } from 'src/app/core/services/backend.service';
 import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { NgToastStackService } from 'ng-toast-stack';
 import UploadConfig from 'src/app/core/models/entities/upload-config';
+import { ReadableFileSizePipe } from 'src/app/core/pipes/readable-file-size';
 
 @Component({
     selector: 'dialog-upload-video-dialog',
@@ -35,7 +36,8 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
         public dialogRef: MatDialogRef<UploadVideoDialog>,
         @Inject(MAT_DIALOG_DATA) public data: unknown,
         private backendService: BackendService,
-        private toast: NgToastStackService
+        private toast: NgToastStackService,
+        private readableFileSizePipe: ReadableFileSizePipe
     ) { }
 
     ngOnInit(): void {
@@ -151,7 +153,9 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
         // size
         const sizeInBytes = file.size;
         if (this.maxSizeInBytes < sizeInBytes) {
-            return `maximum file size exceeded by ${file.size / this.maxSizeInBytes * 100}%. maximum size is: ${this.maxSizeInBytes * (1e-6)} MB`;
+            const readableMaxSize = this.readableFileSizePipe.transform(this.maxSizeInBytes);
+            const exceededBy = sizeInBytes / this.maxSizeInBytes * 100;
+            return `maximum file size exceeded by ${exceededBy}%. maximum size is: ${readableMaxSize}`;
         }
 
         return null;
