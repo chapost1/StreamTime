@@ -109,13 +109,15 @@ def get_video_duration_seconds(s3_source_signed_url: str) -> float:
         raise e
     return duration
 
+def seconds_to_hh_mm_ss(seconds: int) -> str:
+    time_partitions = str(datetime.timedelta(seconds=seconds)).split('.')[0].split(':')
+    return ':'.join(list(map(lambda partition: partition.zfill(2), time_partitions)))
 
 def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
     executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
 
     mid_of_video_duration_seconds = duration_seconds / 4
-    time_frame_to_extract = str(datetime.timedelta(
-        seconds=mid_of_video_duration_seconds)).split('.')[0]  # hh:mm:ss
+    time_frame_to_extract = seconds_to_hh_mm_ss(mid_of_video_duration_seconds)
     frame_path = '/tmp/frame.png'
 
     ffmpeg_cmd = f"{executable_path} -y -ss {time_frame_to_extract} -i \"" + \
