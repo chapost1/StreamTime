@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 import ast
 import json
 import subprocess
@@ -107,28 +107,41 @@ def get_video_duration_seconds(s3_source_signed_url: str) -> float:
         print('Extract Duration exception')
         print(e)
         raise e
+    
     return duration
 
 def seconds_to_hh_mm_ss(seconds: int) -> str:
     time_partitions = str(datetime.timedelta(seconds=seconds)).split('.')[0].split(':')
     return ':'.join(list(map(lambda partition: partition.zfill(2), time_partitions)))
 
-def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
-    executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
-
-    mid_of_video_duration_seconds = duration_seconds / 4
-    time_frame_to_extract = seconds_to_hh_mm_ss(mid_of_video_duration_seconds)
-    frame_path = '/tmp/frame.png'
-
-    ffmpeg_cmd = f"{executable_path} -y -ss {time_frame_to_extract} -i \"" + \
-        str(s3_source_signed_url) + f"\" -frames:v 1 {frame_path}"
-    print(ffmpeg_cmd)
+def run_ffmpeg_thumbnail_extraction_command(command) -> Any:
+    print(command)
     try:
-        os.system(ffmpeg_cmd)
+        subprocess.call(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception as e:
         print('Extract Thumbnail exception')
         print(e)
         raise e
+
+def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
+    executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
+
+    mid_of_video_duration_seconds = duration_seconds / 3
+    time_frame_to_extract = seconds_to_hh_mm_ss(mid_of_video_duration_seconds)
+    frame_path = '/tmp/frame.png'
+    
+    if os.path.exists(frame_path):
+        os.remove(frame_path)
+
+    ffmpeg_cmd = f"{executable_path} -y -ss {time_frame_to_extract} -i \"" + \
+        str(s3_source_signed_url) + f"\" -frames:v 1 {frame_path}"
+    run_ffmpeg_thumbnail_extraction_command(ffmpeg_cmd)
+    
+    if not os.path.exists(frame_path):
+        # fallback extract first frame - usually happens on very large files - will finish quickly as a last resort solution
+        ffmpeg_cmd = f"{executable_path} -y -i \"" + \
+            str(s3_source_signed_url) + f"\" -vframes 1 {frame_path}"
+        run_ffmpeg_thumbnail_extraction_command(ffmpeg_cmd)
 
     print('Going to upload thumbnail: ' + bucket + '/' + thumbnail_key)
     with open(frame_path, "rb") as f:
