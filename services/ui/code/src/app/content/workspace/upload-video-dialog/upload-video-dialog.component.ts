@@ -22,8 +22,10 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
 
     private maxSizeInBytes = 0;
 
-    public faCloudArrowUp = faCloudArrowUp;
-    public faXmark = faXmark;
+    public icons = {
+        uploadAreaIcon: faCloudArrowUp,
+        exitBtn: faXmark
+    }
 
     public uploadConfigHasBeenRetrieved: boolean = false;
     public isUploadInProgress: boolean = false;

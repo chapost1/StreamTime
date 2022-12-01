@@ -14,7 +14,7 @@
                 <div class="px-3">
                     <h2 mat-dialog-title class="d-inline">Upload Video</h2>
                     <span class="float-right clickable dark-on-hover text-secondary">
-                        <fa-icon [icon]="faXmark" class="fa-2x" (click)="exit()"></fa-icon>
+                        <fa-icon [icon]="icons.exitBtn" class="fa-2x" (click)="exit()"></fa-icon>
                     </span>
                 </div>
                 <hr>
@@ -35,7 +35,7 @@
                 <div mat-dialog-content class="text-center overflow-hidden">
                     <div class="my-2 p-2 dnd-container {{isUploadInProgress? 'disabled' : ''}}" appDnd
                         (fileDropped)="onFileDropped($event)">
-                        <fa-icon [style.color]="'var(--bs-secondary)'" [icon]="faCloudArrowUp"
+                        <fa-icon [style.color]="'var(--bs-secondary)'" [icon]="icons.uploadAreaIcon"
                             class="upload-icon fa-5x clickable dark-on-hover" (click)="openFileSelectionBrowser()">
                         </fa-icon>
                     </div>
