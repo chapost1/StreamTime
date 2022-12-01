@@ -7,11 +7,13 @@ import { BackendService } from 'src/app/core/services/backend.service';
 import { NgToastStackService } from 'ng-toast-stack';
 import UploadedVideo from 'src/app/core/models/entities/videos/uploaded-video';
 import UserVideosList from 'src/app/core/models/entities/videos/user-videos-list';
+import { UploadedVideosSyncService } from 'src/app/core/services/uploaded-videos-sync.service';
 
 @Component({
   selector: 'app-workspace',
   templateUrl: './workspace.component.html',
-  styleUrls: ['./workspace.component.scss']
+  styleUrls: ['./workspace.component.scss'],
+  providers: [UploadedVideosSyncService]
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
@@ -25,21 +27,24 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   constructor(
     public dialog: MatDialog,
     private backendService: BackendService,
+    private syncService: UploadedVideosSyncService,
     private toast: NgToastStackService
   ) { }
 
   ngOnInit(): void {
-    // todo:
-    // open WS connection
-
+    this.connectUploadedVideosSyncCalls();
     this.initUserVideosList();
   }
 
   ngOnDestroy(): void {
-    // todo:
-    // close WS connection
-
     this.subscriptions.unsubscribe();
+  }
+  
+  private connectUploadedVideosSyncCalls(): void {
+    const sub = this.syncService.syncCalls?.subscribe({
+      next: this.fetchUserVideosList.bind(this)
+    });
+    this.subscriptions.add(sub);
   }
 
   private async initUserVideosList(): Promise<void> {

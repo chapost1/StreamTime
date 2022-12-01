@@ -28,6 +28,10 @@ export class BackendService {
         return <string>this.config?.url;
     }
 
+    public get videosSyncWSURL(): string {
+        return <string>this.config?.client_videos_sync_wss;
+    }
+
     public get videoUploadConfig(): Observable<UploadConfig | undefined> {
         const config = this._videoUploadConfig.getValue();
         if (config) {
