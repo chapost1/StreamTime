@@ -10,11 +10,12 @@ export class ReadableFileSizePipe implements PipeTransform {
         if (size < 0) {
             return '0 B';
         }
-        var units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-        var i = 0;
-        while(size >= 1024) {
-            size /= 1024;
-            ++i;
+        const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const fileFormatStepFactor = 1000;// on mem it's 1024
+        let i = 0;
+        while (size >= fileFormatStepFactor && i < units.length - 1) {
+            size /= fileFormatStepFactor;
+            i++;
         }
         return `${size.toFixed(1)} ${units[i]}`
     };
