@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { Observable, tap, map, catchError, throwError } from 'rxjs';
-import { ROUTES_CONFIG } from 'src/app/common/routing-policy';
+import { ROUTES_CONFIG } from '../routing-policy';
 
 import { NgToastStackService } from 'ng-toast-stack';
 

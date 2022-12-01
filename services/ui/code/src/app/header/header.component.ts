@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Observable, map, BehaviorSubject } from 'rxjs';
-import { ROUTES_CONFIG, RouteConfig } from '../common/routing-policy';
+import { ROUTES_CONFIG, RouteConfig } from '../core/routing-policy';
 import { AuthService } from '../core/services/auth.service';
 
 @Component({

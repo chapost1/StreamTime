@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ROUTES_CONFIG } from '../common/routing-policy';
+import { ROUTES_CONFIG } from '../core/routing-policy';
 import { WorkspaceComponent } from './workspace/workspace.component';
 import { ExploreComponent } from './explore/explore.component';
 import { LoginComponent } from './login/login.component';

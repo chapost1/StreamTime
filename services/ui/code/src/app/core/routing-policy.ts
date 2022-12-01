@@ -1,5 +1,5 @@
-import { AuthGuard } from "../core/guards/auth-guard";
-import { NegateAuthGuard } from "../core/guards/negate-auth-guard";
+import { AuthGuard } from "./guards/auth-guard";
+import { NegateAuthGuard } from "./guards/negate-auth-guard";
 import { CanActivate } from "@angular/router";
 import { _Constructor } from "@angular/material/core";
 import { faCompass, faVideo, faLock, IconDefinition } from '@fortawesome/free-solid-svg-icons';
