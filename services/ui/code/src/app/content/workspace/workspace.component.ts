@@ -60,8 +60,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           next: userVideosList => {
             this.userVideosList = userVideosList;
           },
-          error: e => {
-            this.toast.error(e);
+          error: (error: Error) => {
+            this.toast.error(error.message);
           },
           complete: resolve
         });
@@ -82,8 +82,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const sub = this.backendService.deleteVideo(hashId)
       .subscribe({
         next: onSuccess.bind(this),
-        error: e => {
-          this.toast.error(e);
+        error: (error: Error) => {
+          this.toast.error(error.message);
         }
       });
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, concatMap, tap, map } from 'rxjs';
-import { HttpClient, HttpBackend, HttpRequest } from '@angular/common/http';
+import { BehaviorSubject, Observable, concatMap, tap, map, throwError, catchError } from 'rxjs';
+import { HttpClient, HttpBackend, HttpRequest, HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { IBackendConfig } from '../models/backend/backend.types';
 import { IUploadConfig, IUploadResponse, IUploadSignatures } from '../models/backend/upload.types';
@@ -44,7 +44,8 @@ export class BackendService {
             }),
             map((conf: object) => {
                 return UploadConfig.fromInterface(<IUploadConfig>conf);
-            })
+            }),
+            catchError(this.handleError)
         );
     }
 
@@ -91,7 +92,7 @@ export class BackendService {
         // use new http client to use newly reset-ed headers
         return <Observable<IUploadResponse>>new HttpClient(this.handler).request(
             new HttpRequest('POST', instructions.url, payload, { reportProgress: true })
-        );
+        ).pipe(catchError(this.handleError));
     }
 
     private getVideoUploadInstructions(fileType: string): Observable<IUploadSignatures> {
@@ -102,7 +103,13 @@ export class BackendService {
             }
         };
 
-        return <Observable<IUploadSignatures>>this.httpClient.get(urlToGetUploadInstructions, options);
+        return <Observable<IUploadSignatures>>this.httpClient.get(urlToGetUploadInstructions, options)
+            .pipe(
+                map((object: object) => {
+                    return <IUploadSignatures>object
+                }),
+                catchError(this.handleError)
+            );
     }
 
     public getAuthenticatedUserVideos(): Observable<UserVideosList> {
@@ -112,12 +119,57 @@ export class BackendService {
             .pipe(
                 map((object: object) => {
                     return UserVideosList.fromInterface(<IUserVideosList>object);
-                })
+                }),
+                catchError(this.handleError)
             );
     }
 
     public deleteVideo(hashId: string): Observable<Object> {
         const url = `${this.hostUrl}/${this.videoEndpointsRoute}/my/${hashId}`;
-        return this.httpClient.delete(url);
+        return this.httpClient.delete(url).pipe(catchError(this.handleError));
+    }
+
+    private handleError(err: HttpErrorResponse): Observable<Error> {
+        let errorMessage: string = 'unknown error';
+
+        if (err.status === 0) {
+            // A client-side or network error occurred. Handle it accordingly.
+            console.error(err.error);
+            errorMessage = `An error occurred: ${err.statusText}`;
+        } else {
+            console.error(err.message);
+            // The backend returned an unsuccessful response code.
+            if (err.status < 500) {
+                switch (err.status) {
+                    case HttpStatusCode.BadRequest:
+                    case HttpStatusCode.UnprocessableEntity:
+                    case HttpStatusCode.PayloadTooLarge: {
+                        errorMessage = 'Bad Request';
+                        break;
+                    }
+                    case HttpStatusCode.Unauthorized:
+                    case HttpStatusCode.Forbidden: {
+                        errorMessage = 'Access Denied';
+                        break;
+                    }
+                    case HttpStatusCode.NotFound: {
+                        errorMessage = 'Not Found';
+                        break;
+                    }
+                    case HttpStatusCode.TooEarly: {
+                        errorMessage = 'Too early, try later';
+                        break;
+                    }
+                    default: {
+                        errorMessage = 'Something went wrong';
+                    }
+                }
+            } else {
+                errorMessage = `internal server error: ${err.status}`;
+            }
+        }
+
+        console.log(errorMessage);
+        return throwError(() => new Error(errorMessage));
     }
 }

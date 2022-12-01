@@ -78,11 +78,10 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
                 this.maxSizeInBytes = config.maxSizeInBytes;
                 this.uploadConfigHasBeenRetrieved = true;
             },
-            error: (err) => {
+            error: (err: Error) => {
                 console.error(err);
                 this.toast.error('failed to retrieve video upload config');
                 this.exit();
-                return;
             }
         });
         this.subscriptions.add(sub);

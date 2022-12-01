@@ -30,7 +30,7 @@ export class AuthGuard implements CanActivate {
             catchError((error: any, caught: Observable<boolean>): Observable<never> => {
                 // display error
                 console.error(error);
-                this.toast.error('unauthorized');
+                this.toast.error('Unauthorized');
                 // navigate to somewhere else
                 this.router.navigateByUrl(`/`);
                 // re-throw

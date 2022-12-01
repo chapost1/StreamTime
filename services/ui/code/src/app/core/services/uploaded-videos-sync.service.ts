@@ -59,7 +59,7 @@ export class UploadedVideosSyncService implements OnDestroy {
         });
         const observer = {
             error: (error: any) => {
-                this.toast.error(error);
+                this.toast.error(`${error}`);
             },
             complete: () => {
                 console.error('websocket connection has been closed');
