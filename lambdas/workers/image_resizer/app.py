@@ -4,14 +4,25 @@ import boto3
 import os
 from PIL import Image
 
+
 s3Client = boto3.client('s3')
 
+
 def resize_image(image_path: str, resized_path: str, size: Tuple[int, int]):
-  with Image.open(image_path) as image:
-      image.thumbnail(size)
-      image.save(resized_path)
+    """Resize image locally"""
+
+    with Image.open(image_path) as image:
+        image.thumbnail(size)
+        image.save(resized_path)
+
 
 def lambda_handler(event, context):
+    """
+    Accepts a source and dest S3 object keys (and bucket)
+    Resize the image and move it to its new destination
+    First, it creates new image and only on success it removes the former one
+    """
+
     try:
         ACL = event.get('ACL', 'private')
         source_bucket = event['source_bucket']

@@ -7,6 +7,7 @@ import boto3
 import os
 import datetime
 
+
 # CONSTANTS
 EXECUTABLES_DIRECTORY = '/opt/var/task/python'
 THUMBNAIL_SIZE = (360, 200)
@@ -110,9 +111,11 @@ def get_video_duration_seconds(s3_source_signed_url: str) -> float:
     
     return duration
 
+
 def seconds_to_hh_mm_ss(seconds: int) -> str:
     time_partitions = str(datetime.timedelta(seconds=seconds)).split('.')[0].split(':')
     return ':'.join(list(map(lambda partition: partition.zfill(2), time_partitions)))
+
 
 def run_ffmpeg_thumbnail_extraction_command(command) -> Any:
     print(command)
@@ -122,6 +125,7 @@ def run_ffmpeg_thumbnail_extraction_command(command) -> Any:
         print('Extract Thumbnail exception')
         print(e)
         raise e
+
 
 def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
     executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
@@ -289,22 +293,40 @@ def mark_video_as_a_draft(
 
 
 def lambda_handler(event, context):
+    """
+    Triggers on a new video upload to S3
+    This function orchestrate the processing logic and responsible on:
+    - Validation
+    - Processing and Thumbnail extraction
+    - Update relevant services on the processing state (i.e: failures, stage progress)
+      - i.e: SNS, Another lambdas for thumbnail resize, RDS update, etc..
+    - Delete asset from S3 on failure
+
+    * On unhandled failures such as timeout a garbage-collectore service should delete assets and update DB
+    """
+
     assert_necessery_env_are_here()
+
+    # request constants
     MAX_FILE_SIZE_IN_BYTES: int = int(
         float(os.environ[S3_MAX_VIDEO_SIZE_IN_BYTES_ENV_NAME]))
     # The number of seconds that the Signed URL is valid
     SIGNED_URL_EXPIRATION: int = 60 * 10
+    # server time
     upload_time: str = datetime.datetime.utcnow().replace(
         tzinfo=datetime.timezone.utc).isoformat()
 
+    # extract key identifier as var
     bucket = event['Records'][0]['s3']['bucket']['name']
     current_file_key = event['Records'][0]['s3']['object']['key']
 
+    # validates object key format is as supported (and not a directory for example)
     if current_file_key.split('/')[0] != os.environ[UPLOADED_VIDEOS_PREFIX_ENV_NAME]:
         print(
             f'An invalid s3 prefix, for key: {current_file_key}, processing has been stopped before being able to get hash_id due to infrastructure failure')
         return {'statusCode': 500}
 
+    # validate object key exists and accessable
     try:
         obj: Dict = s3Client.get_object(
             Bucket=bucket,
@@ -317,6 +339,8 @@ def lambda_handler(event, context):
         print(e)
         raise e
 
+    # validate object key format by levels count
+    # the uploaded-videos lambda triggered by specific prefix and the format should be known 
     key_levels = current_file_key.split('/')
     if len(key_levels) < 3:
         # internal error
@@ -325,6 +349,7 @@ def lambda_handler(event, context):
         print(e)
         raise e
 
+    # extract user & video identifiers via object key
     file_name: str = key_levels[-1]
     user_id: str = key_levels[-2]
     hash_id: str = file_name.split('.')[0]
@@ -366,6 +391,7 @@ def lambda_handler(event, context):
             user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
         return {'statusCode': 500}
 
+    # extract object meta data    
     try:
         meta = get_object_meta(obj)
         print(meta)
@@ -377,12 +403,14 @@ def lambda_handler(event, context):
             user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
         return {'statusCode': 400}
 
+    # validate file size
     if MAX_FILE_SIZE_IN_BYTES < meta['size_in_bytes']:
         delete_object(bucket, current_file_key)
         mark_processing_as_failed(user_id=user_id, hash_id=hash_id, upload_time=upload_time,
                                   failure_reason=os.environ[MAX_FILE_SIZE_EXCEEDED_ENV_NAME])
         return {'statusCode': 400}
 
+    # validate video type
     if not is_supported_video_type(meta['type']):
         print('not a video')
         # not a video, delete file!
@@ -404,6 +432,7 @@ def lambda_handler(event, context):
             print(e)
             raise e
 
+        # get video duration    
         try:
             duration_seconds: float = get_video_duration_seconds(
                 s3_source_signed_url)
@@ -422,6 +451,7 @@ def lambda_handler(event, context):
                 user_id=user_id, hash_id=hash_id, upload_time=upload_time, failure_reason=os.environ[CORRUPTED_ENV_NAME])
             raise e
 
+    # processing is done, mark as ready
     try:
         # move to videos S3 prefix
         copy_source = {'Bucket': bucket, 'Key': current_file_key}

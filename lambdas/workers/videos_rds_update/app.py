@@ -4,6 +4,7 @@ from psycopg2.extensions import connection as pg_connection
 import json
 import os
 
+
 ##########################
 ######## ENV VARS ########
 ##########################
@@ -20,6 +21,7 @@ RDS_DB_NAME_ENV_NAME = 'rds_db_name'
 # DB tables names
 UNPROCESSED_VIDEOS_TABLE_ENV_NAME = 'rds_table_uprocessed_videos'
 VIDEOS_TABLE_ENV_NAME = 'rds_table_videos'
+
 
 # it is good practice in lambda to open connection outside of handler and never close it,
 # according to: https://aws.amazon.com/premiumsupport/knowledge-center/lambda-rds-connection-timeouts/
@@ -110,6 +112,12 @@ def mark_video_as_a_draft(
 
 
 def lambda_handler(event, context):
+    """
+    Persists Video in one of the optional stages (i.e: processing, failed, draft)
+    Accepts a trigger purpose (i.e: FAILURE) and a data record
+    And save it in RDS
+    """
+
     assert_necessery_env_are_here()
     try:
         trigger = event['trigger']
