@@ -11,7 +11,17 @@ Part of a CS degree course <strong>(EASS)</strong> final project.
 
 ### High Level Diagram
 
-![HL Diagram](./assets/hl_architecture_diagram.jpg)
+![HL Diagram](./assets/diagrams/hl_architecture_diagram.jpg)
+
+### Video Upload Use Case Sequence Diagram
+
+This diagram is intended to show the relationship between the system components in the case of system-wide usage.
+
+> Note: In order to better understand the diagram, the async operations are synchronized in the image below.
+>
+> As a result, the time intervals on the diagram are out of true proportions.
+
+![Video Upload Use Case Sequence Diagram](./assets/diagrams/video_upload_use_case_seq_diagram.jpg)
 
 ### Web Api Service Diagram
 
