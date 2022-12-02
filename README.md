@@ -28,7 +28,7 @@ https://user-images.githubusercontent.com/39523779/203442739-e2baa0b1-eb5a-4318-
 
 This diagram is intended to show the relationship between the system components in the case of system-wide usage.
 
-> Note: In order to better understand the diagram, the async operations are synchronized in the image below.
+> Note: In order to better understand the diagram below, the async operations are synchronized.
 >
 > As a result, the time intervals on the diagram are out of true proportions.
 
