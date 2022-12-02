@@ -1,6 +1,8 @@
 
 from common.singleton import Singleton
 from typing import List, Tuple, Any, Union
+import aiopg
+
 
 class Connection(metaclass=Singleton):
     """
@@ -13,7 +15,7 @@ class Connection(metaclass=Singleton):
         'pool'
     )
 
-    def __init__(self, pool=None) -> None:
+    def __init__(self, pool: aiopg.Pool = None) -> None:
         if pool is None:
             raise Exception('No PG connection')
         self.pool = pool
