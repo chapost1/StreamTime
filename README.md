@@ -7,6 +7,17 @@ AWS based solution of simple video drive.
 
 Part of a CS degree course <strong>(EASS)</strong> final project.
 
+## Status:
+
+POC :soon: MVP
+
+Quick demonstration of video upload directly to S3 using presigned upload under the hood, it triggers processing steps which also creates thumbnail.
+At start, S3 bucket is shown to be empty to demonstrate the upload process.
+
+
+https://user-images.githubusercontent.com/39523779/203442739-e2baa0b1-eb5a-4318-8889-e265aa7fcdb2.mp4
+
+
 ## Design:
 
 ### High Level Diagram
@@ -30,17 +41,6 @@ This diagram is intended to show the relationship between the system components 
 This Diagram should explain the relation between the app layers.
 
 ![Web Api Service Diagram](./services/api/abstract_web_api_architecture_diagram.jpg)
-
-## Status:
-
-POC :soon: MVP
-
-Quick demonstration of video upload directly to S3 using presigned upload under the hood, it triggers processing steps which also creates thumbnail.
-At start, S3 bucket is shown to be empty to demonstrate the upload process.
-
-
-https://user-images.githubusercontent.com/39523779/203442739-e2baa0b1-eb5a-4318-8889-e265aa7fcdb2.mp4
-
 
 ## Prerequisites
 
