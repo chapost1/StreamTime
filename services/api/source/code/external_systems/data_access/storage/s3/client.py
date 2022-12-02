@@ -3,9 +3,19 @@ import common.environment as environment
 from external_systems.aws_integration import Boto3
 from botocore.exceptions import ClientError
 from entities.storage import FileUploadSignedInstructions
+from external_systems.data_access.storage.abstract import Storage
 from external_systems.data_access.storage.s3.context import Context
 
+
 class S3:
+    f"""
+    Storage client class which implements the abstract protocol
+    Uses S3 as a concrete implementation
+
+    Abstract protocol docs:
+    {Storage.__doc__}
+    """
+
     def __init__(self, context: Context):
         self.context = context
 

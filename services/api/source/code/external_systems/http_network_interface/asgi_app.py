@@ -18,6 +18,11 @@ def create_new_asgi_app(
     attach_middlewares_fn: AttachMiddlewaresFn,
     attach_routers_fn: AttachRoutersFn
 ) -> Starlette:
+    """
+    Creates an ASGI app
+    Attaches essentials as middlewares, routers and up/down events to it on creation
+    """
+
     asgi_app = FastAPI(
         on_startup=[on_startup],
         on_shutdown=[on_shutdown]

@@ -6,15 +6,24 @@ from common.app_errors import NotFoundError, AccessDeniedError
 from external_systems.data_access.storage.abstract import Storage
 from use_cases.videos.utils import get_cross_users_visibility_settings
 
-# returns the video meta data along with watchable url
-def make_get_watch_video_record(videos: VideosDB, storage: Storage) -> Callable[[Union[UUID, str], UUID, UUID], WatchVideoRecord]:
-    async def get_watch_video_record(authenticated_user_id: Union[UUID, str], user_id: UUID, hash_id: UUID) -> WatchVideoRecord:        
+
+def make_get_watch_video_record(database: VideosDB, storage: Storage) -> Callable[[Union[UUID, str], UUID, UUID], WatchVideoRecord]:
+    """Creates Get Watch Video Record use case"""
+
+    async def get_watch_video_record(authenticated_user_id: Union[UUID, str], user_id: UUID, hash_id: UUID) -> WatchVideoRecord:  
+        """
+        Gets Watch Video record
+
+        It holds a presigned watchable url.
+        It is needed to grant premission to access (watch) to the video assets storage
+        """
+
         visibility_settings = get_cross_users_visibility_settings(
             authenticated_user_id=authenticated_user_id,
             user_id=user_id
         )
 
-        video: Video = await videos.get_video(user_id=user_id, hash_id=hash_id)
+        video: Video = await database.get_video(user_id=user_id, hash_id=hash_id)
         if video is None or \
            not video.is_listed() and visibility_settings.hide_unlisted:
             raise NotFoundError()
@@ -23,7 +32,8 @@ def make_get_watch_video_record(videos: VideosDB, storage: Storage) -> Callable[
             raise AccessDeniedError()
 
         eighteen_hours_in_seconds = 18 * 3600
-        
+        # videos assets are private by default.
+        # therefore, we need to create a signed link to let the user watch the asset
         watchable_url = await storage.get_file_signed_url(
             item_relative_path=video._storage_object_key,
             signature_duration_seconds=min(eighteen_hours_in_seconds, video.duration_seconds * 3)

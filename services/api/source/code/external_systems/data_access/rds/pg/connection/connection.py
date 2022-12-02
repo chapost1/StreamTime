@@ -3,6 +3,12 @@ from common.singleton import Singleton
 from typing import List, Tuple, Any, Union
 
 class Connection(metaclass=Singleton):
+    """
+    Singleton PG Connection client class which supports async operations
+
+    It uses connection pool to avoid TCP hand-shake on every database operation
+    """
+
     __slots__ = (
         'pool'
     )

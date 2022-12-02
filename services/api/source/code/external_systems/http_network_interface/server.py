@@ -6,6 +6,12 @@ from external_systems.http_network_interface.routers import attach_routers
 
 
 class HttpServer:
+    """
+    A class which its purpose is to encapsulate the usage of the http_network_interface from outside
+    It lets the user to avoid being familiar with the concrete implementation
+    For example, the app entrypoint should not be familiar with the fact it uses FastAPI
+    """
+
     __slots__ = (
         'app'
     )

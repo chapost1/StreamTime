@@ -5,7 +5,18 @@ from use_cases.validation_utils import is_anonymous_user
 from external_systems.data_access.rds.abstract import VideosDB
 
 
-def get_explore_visibility_settings(authenticated_user_id: Union[UUID, str], include_my: Optional[bool]) -> Tuple[UUID, UUID]:
+def get_explore_visibility_settings(authenticated_user_id: Union[UUID, str], include_my: bool) -> Tuple[UUID, UUID]:
+    """
+    Gets the visibility settings while exploring listed videos
+
+    Args Explanation:
+        include_my: A flag, used to select whether the selected user want to view it's own Videos
+    
+    Returns Explanation:
+        exclude_user_id: The User id to hide it's videos, if any
+        allow_privates_of_user_id: The User id to allow viewing it's own private assets, if any
+    """
+
     is_authenticated_user = not is_anonymous_user(authenticated_user_id)
 
     allow_privates_of_user_id = None
@@ -22,15 +33,18 @@ def get_explore_visibility_settings(authenticated_user_id: Union[UUID, str], inc
     return exclude_user_id, allow_privates_of_user_id
 
 
-def make_explore_listed_videos(videos: VideosDB) -> Callable[[Union[UUID, str], Optional[bool]], List[Video]]:
+def make_explore_listed_videos(database: VideosDB) -> Callable[[Union[UUID, str], Optional[bool]], List[Video]]:
+    """Creates Explore Listed Videos use case"""
+
     async def explore_listed_videos(authenticated_user_id: Union[UUID, str], include_my: Optional[bool] = False) -> List[Video]:
+        """Gets Listed Videos"""
         
         exclude_user_id, allow_privates_of_user_id = get_explore_visibility_settings(
             authenticated_user_id=authenticated_user_id,
             include_my=include_my
         )
 
-        return await videos.get_listed_videos(
+        return await database.get_listed_videos(
             allow_privates_of_user_id=allow_privates_of_user_id,
             exclude_user_id=exclude_user_id
         )

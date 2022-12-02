@@ -6,6 +6,8 @@ from typing import Union
 
 
 async def authenticated_user(request: Request) -> UUID:
+    """Asserts the request contains an authenticated user id"""
+
     authenticated_user_id: Union[UUID, str] = await any_user(request=request)
     if str(authenticated_user_id) == constants.ANONYMOUS_USER:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED)
@@ -13,6 +15,7 @@ async def authenticated_user(request: Request) -> UUID:
 
 
 async def any_user(request: Request) -> Union[UUID, str]:
+    """Gets the authenticated user identifier from request (even if it is anonymous)"""
     try:
         authenticated_user_id: UUID = auth_state.get_authenticated_user_id(request=request)
         return authenticated_user_id

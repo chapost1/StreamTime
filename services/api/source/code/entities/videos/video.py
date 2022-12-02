@@ -1,11 +1,20 @@
 from entities.videos.uploaded_video import UploadedVideo
-from pydantic import HttpUrl, Field
-from typing import Optional
+from pydantic import HttpUrl
+from typing import Optional, List, Set, ClassVar
 import datetime
 
+# a list of required fields to update while listing the video for the first time
+# otherwise, they will remain empty
+REQUIRED_FIELDS_ON_LISTING = ['title', 'description']
+# a set of fields which are allowed to update by design
+ALLOWED_UPDATE_FIELDS = {'title', 'description', 'listing_time', 'is_private'}
 
 class Video(UploadedVideo):
+    # static
+    REQUIRED_FIELDS_ON_LISTING: ClassVar[List[str]] = REQUIRED_FIELDS_ON_LISTING
+    ALLOWED_UPDATE_FIELDS: ClassVar[Set[str]] = ALLOWED_UPDATE_FIELDS
 
+    # per instance
     title: Optional[str]
     description: Optional[str]
     size_in_bytes: Optional[int]

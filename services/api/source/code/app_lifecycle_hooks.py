@@ -3,7 +3,9 @@ from external_systems.aws_integration import init as init_boto3
 import asyncio
 
 
-async def on_startup():
+async def on_startup() -> None:
+    """Initialize services the app relies on"""
+
     initialization_tasks = [
         init_rds,
         init_boto3
@@ -13,5 +15,7 @@ async def on_startup():
             tg.create_task(init_target())
 
 
-async def on_shutdown():
+async def on_shutdown() -> None:
+    """Gracefully terminates services the app relies on"""
+
     await terminate_rds()

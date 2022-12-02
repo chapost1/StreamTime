@@ -1,6 +1,8 @@
 from typing import Optional, Dict
 
 class AppError(Exception):
+    """The Base AppError Class to help later detection and encapsulate similar logic"""
+
     __slots__ = (
         'details'
     )

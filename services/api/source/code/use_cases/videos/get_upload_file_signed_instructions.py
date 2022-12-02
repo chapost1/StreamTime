@@ -8,13 +8,23 @@ from use_cases.videos.utils import generate_new_video_hash_id_for_user
 from common.app_errors import InputError
 
 
-# gets signed isntructions for uploading a new video file
-def make_get_upload_video_signed_instructions(videos: VideosDB, storage: Storage) -> Callable[[UUID], FileUploadSignedInstructions]:
+def make_get_upload_video_signed_instructions(database: VideosDB, storage: Storage) -> Callable[[UUID], FileUploadSignedInstructions]:
+    """Creates Get Upload Video Signed Instructions use case"""
+
     async def get_upload_video_signed_instructions(authenticated_user_id: UUID, file_content_type: str) -> FileUploadSignedInstructions:
+        """
+        Gets Signed Instructions to upload a Video
+
+        A struct which holds a single use signed instructions to upload a Video
+        It is needed to avoid free-access to the videos assets storage
+        And yet to allow the users to upload a file using a single use signed instructions
+        """
+
         if file_content_type not in SUPPORTED_VIDEO_TYPES:
             raise InputError(f'unsupported video file type::{file_content_type}, try one of these: {SUPPORTED_VIDEO_TYPES}')
 
-        hash_id = await generate_new_video_hash_id_for_user(videos=videos, user_id=authenticated_user_id)
+        # assets the uniqueness of the new hash id
+        hash_id = await generate_new_video_hash_id_for_user(database=database, user_id=authenticated_user_id)
 
         object_key = f'{authenticated_user_id}/{hash_id}'
 

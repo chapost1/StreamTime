@@ -11,9 +11,12 @@ from use_cases.videos.delete_video import make_delete_video
 router = APIRouter()
 
 
-# get auth user videos
-get_authenticated_user_videos_uc = make_get_authenticated_user_videos(videos=videos_db_client)
-@router.get("/", response_model=UserVideosList, response_model_exclude_none=True)
+# get authenticated user videos
+get_authenticated_user_videos_uc = make_get_authenticated_user_videos(database=videos_db_client)
+#
+@router.get("/", response_model=UserVideosList, response_model_exclude_none=True, responses={
+    status.HTTP_401_UNAUTHORIZED: {}
+})
 async def get_authenticated_user_videos(
     authenticated_user_id: UUID = Depends(authenticated_user)
 ) -> UserVideosList:
@@ -22,9 +25,14 @@ async def get_authenticated_user_videos(
     )
 
 
-# put video
-update_video_uc = make_update_video(videos=videos_db_client)
-@router.put("/{hash_id}", status_code=status.HTTP_204_NO_CONTENT)
+# update a video
+update_video_uc = make_update_video(database=videos_db_client)
+#
+@router.put("/{hash_id}", status_code=status.HTTP_204_NO_CONTENT, responses={
+    status.HTTP_401_UNAUTHORIZED: {},
+    status.HTTP_404_NOT_FOUND: {},
+    status.HTTP_400_BAD_REQUEST: {}
+})
 async def update_video(
     video: Video,
     hash_id: UUID,
@@ -38,8 +46,13 @@ async def update_video(
 
 
 # delete a video
-delete_video_uc = make_delete_video(videos=videos_db_client, storage=videos_s3_client)
-@router.delete('/{hash_id}', status_code=status.HTTP_204_NO_CONTENT)
+delete_video_uc = make_delete_video(database=videos_db_client, storage=videos_s3_client)
+#
+@router.delete('/{hash_id}', status_code=status.HTTP_204_NO_CONTENT, responses={
+    status.HTTP_401_UNAUTHORIZED: {},
+    status.HTTP_404_NOT_FOUND: {},
+    status.HTTP_425_TOO_EARLY: {}
+})
 async def delete_video(
     hash_id: UUID,
     authenticated_user_id: UUID = Depends(authenticated_user)

@@ -1,5 +1,5 @@
 from typing import List, Union
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from uuid import UUID
 from entities.videos import Video
 from external_systems.data_access.rds.pg.videos import videos_db_client
@@ -10,8 +10,11 @@ router = APIRouter()
 
 
 # get specific user videos
-get_specific_user_videos_uc = make_get_specific_user_videos(videos=videos_db_client)
-@router.get('/{user_id}', response_model=List[Video], response_model_exclude_none=True)
+get_specific_user_videos_uc = make_get_specific_user_videos(database=videos_db_client)
+#
+@router.get('/{user_id}', response_model=List[Video], response_model_exclude_none=True, responses={
+    status.HTTP_404_NOT_FOUND: {}
+})
 async def get_specific_user_videos(
     user_id: UUID,
     authenticated_user_id: Union[UUID, str] = Depends(any_user)

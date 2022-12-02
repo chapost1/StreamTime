@@ -9,8 +9,9 @@ from use_cases.videos.explore_listed_videos import make_explore_listed_videos
 router = APIRouter()
 
 
-# explore all videos which are already listed
-explore_listed_videos_uc = make_explore_listed_videos(videos=videos_db_client)
+# explore listed videos
+explore_listed_videos_uc = make_explore_listed_videos(database=videos_db_client)
+#
 @router.get('/', response_model=List[Video], response_model_exclude_none=True)
 async def explore_listed_videos(
     include_my: Optional[bool] = False,

@@ -4,6 +4,8 @@ from aiobotocore.session import AioSession
 
 
 class Boto3(metaclass=Singleton):
+    """Singleton AWS Client class which supports async operations"""
+
     __slots__ = (
         '__session',
     )

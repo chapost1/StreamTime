@@ -1,5 +1,6 @@
 import common.environment as environment
 
+# Postgres DSN congirations
 config = {
     "host": environment.RDS_HOST,
     "port": environment.RDS_PORT,

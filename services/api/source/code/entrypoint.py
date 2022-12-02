@@ -7,6 +7,8 @@ from app_lifecycle_hooks import (
 
 
 def run() -> None:
+    """Start an HTTP Server as the App Entrypoint"""
+
     server = HttpServer(
         on_startup=on_startup,
         on_shutdown=on_shutdown,

@@ -26,6 +26,6 @@ UPLOADDED_VIDEOS_PREFIX = os.environ['uploaded_videos_prefix']
 SUPPORTED_VIDEO_TYPES = set(json.loads(json.dumps(ast.literal_eval(os.environ['allowed_video_types_to_extension']))).keys())
 MAX_VIDEO_FILE_SIZE_IN_BYTES = int(float(os.environ['max_video_file_size_in_bytes']))
 
-def is_running_as_an_ecs_task() -> bool:
+def is_running_on_amazon_infrastructure() -> bool:
     return AWS_CONTAINER_CREDENTIALS_RELATIVE_URI is not None
 

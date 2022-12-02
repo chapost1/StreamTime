@@ -3,7 +3,10 @@ from typing import List, Dict
 from entities.videos import Video, UnprocessedVideo, SortKeys, VideoStages
 from uuid import UUID
 
+
 class VideosDbInterface(Protocol):
+    """Videos database class protocol"""
+
     async def find_video_stage(self, user_id: UUID, hash_id: UUID) -> VideoStages:
         """
         Find whether a video is actually exists or not

@@ -1,11 +1,21 @@
 from external_systems.data_access.rds.pg.connection.connection import Connection
+from external_systems.data_access.rds.abstract import VideosDB
 from typing import List, Dict
 from entities.videos import Video, UnprocessedVideo, SortKeys, VideoStages
 from external_systems.data_access.rds.pg.videos import tables
 from common.utils import nl
 from uuid import UUID
 
+
 class Videos:
+    f"""
+    Videos database class which implements the abstract protocol
+    Uses postgres as a concrete implementation
+
+    Abstract protocol docs:
+    {VideosDB.__doc__}
+    """
+
     async def find_video_stage(self, user_id: UUID, hash_id: UUID) -> VideoStages:
         stages = await Connection().query([
             (

@@ -3,13 +3,19 @@ from fastapi import Request, status, Response
 from fastapi.responses import JSONResponse
 import common.app_errors as app_errors
 
+
 def http_error(details: app_errors.AppError, status_code: status) -> Response:
+    """Retuens an HTTP Response based on the relevant structure"""
+
     if details is not None:
         return JSONResponse(content=details, status_code=status_code)
     else:
         return Response(content=details, status_code=status_code)
 
+
 async def app_errors_handler(request: Request, call_next: Callable):
+    """Catches application level errors and translates them into http errors"""
+
     try:
         return await call_next(request)
     except app_errors.NotFoundError as e:

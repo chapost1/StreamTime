@@ -26,6 +26,9 @@ def inject_authenticated_user_id(request: Request) -> None:
     )
 
 async def authenticate_user(request: Request, call_next: Callable):
+    """Authenticates user"""
+    # TODO: implement actual authentication logic
+
     inject_authenticated_user_id(request=request)
 
     return await call_next(request)
