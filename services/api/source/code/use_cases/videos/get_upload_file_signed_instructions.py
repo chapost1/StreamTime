@@ -23,7 +23,7 @@ def make_get_upload_video_signed_instructions(database: VideosDB, storage: Stora
         if file_content_type not in SUPPORTED_VIDEO_TYPES:
             raise InputError(f'unsupported video file type::{file_content_type}, try one of these: {SUPPORTED_VIDEO_TYPES}')
 
-        # assets the uniqueness of the new hash id
+        # asserts the uniqueness of the new hash id
         hash_id = await generate_new_video_hash_id_for_user(database=database, user_id=authenticated_user_id)
 
         object_key = f'{authenticated_user_id}/{hash_id}'
