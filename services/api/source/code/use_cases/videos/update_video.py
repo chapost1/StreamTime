@@ -32,7 +32,7 @@ def make_update_video(database: VideosDB) -> Callable[[UUID, Video, UUID], None]
             video.listing_time = calc_server_time()
             errors = required_fields_validator(video.dict(exclude_none=True), Video.REQUIRED_FIELDS_ON_LISTING)
             if errors is not None:
-                 raise InputError(details={
+                raise InputError(details={
                     'errors': errors
                 })
 
