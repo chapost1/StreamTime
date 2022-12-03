@@ -53,6 +53,7 @@ def make_delete_video(database: VideosDB, storage: Storage) -> Callable[[UUID, U
 
     # initialize delete actions and keep it as a closure in memory
     # TODO: remove complex delete actions when garbage collector service is ready
+    # all the logic in here should be changed to only call 'mark as delete' instead of [finding, dealing with multi handle types]
     delete_action_by_stage = {
       VideoStages.UNPROCESSED.value: make_delete_unprocessed_video_handler(database=database),
       VideoStages.READY.value: make_delete_video_on_ready_stage_handler(database=database, storage=storage),
