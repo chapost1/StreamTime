@@ -17,9 +17,9 @@ class UnprocessedVideos(UploadedVideos, Protocol):
         """Deletes unprocessed videos according to the applied conditions"""
 
     # override to support abstract return of self
-    def with_id(self, id: UUID) -> UnprocessedVideos:
+    def with_hash(self, id: UUID) -> UnprocessedVideos:
         """Restricts video hash_id"""
 
     # override to support abstract return of self
-    def of_user(self, user_id: UUID) -> UnprocessedVideos:
+    def owned_by(self, user_id: UUID) -> UnprocessedVideos:
         """Restricts videos owner (user)"""

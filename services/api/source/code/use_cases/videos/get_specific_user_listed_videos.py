@@ -26,9 +26,9 @@ def make_get_specific_user_listed_videos(database: VideosDatabase) -> Callable[[
 
         return await (
             database.videos()
-            .of_user(user_id=user_id)
-            .hide_unlisted(flag=True)
-            .allow_privates_of(user_id=authenticated_user_id)
+            .owned_by(user_id=user_id)
+            .filter_unlisted(flag=True)
+            .include_privates_of(user_id=authenticated_user_id)
             .paginate(pagination_index_is_smaller_than=pagination_index_is_smaller_than)
             .limit(limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT)
             .search()

@@ -16,9 +16,9 @@ def make_delete_video_on_ready_stage_handler(database: VideosDatabase, storage: 
     # get video meta for delete from S3 in case it is already preoccessed
     videos: List[Video] = await (
       database.videos()
-      .with_id(id=hash_id)
-      .of_user(user_id=user_id)
-      .allow_privates_of(user_id=user_id)
+      .with_hash(id=hash_id)
+      .owned_by(user_id=user_id)
+      .include_privates_of(user_id=user_id)
       .search()
     )
     if len(videos) < 1:
@@ -29,8 +29,8 @@ def make_delete_video_on_ready_stage_handler(database: VideosDatabase, storage: 
     # and another service may collect removed records and handle cleaning it up
     await (
       database.videos()
-      .with_id(id=hash_id)
-      .of_user(user_id=user_id)
+      .with_hash(id=hash_id)
+      .owned_by(user_id=user_id)
       .delete()
     )
     # delete from S3 [both video and thumbnail]
@@ -47,8 +47,8 @@ def make_delete_unprocessed_video_handler(database: VideosDatabase) -> Callable[
 
     unprocessed_videos: List[UnprocessedVideo] = await (
       database.unprocessd_videos()
-      .with_id(id=hash_id)
-      .of_user(user_id=user_id)
+      .with_hash(id=hash_id)
+      .owned_by(user_id=user_id)
       .search()
     )
 
@@ -62,8 +62,8 @@ def make_delete_unprocessed_video_handler(database: VideosDatabase) -> Callable[
     
     await (
       database.unprocessd_videos()
-      .with_id(id=hash_id)
-      .of_user(user_id=user_id)
+      .with_hash(id=hash_id)
+      .owned_by(user_id=user_id)
       .delete()
     )
 

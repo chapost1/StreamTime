@@ -17,9 +17,9 @@ def make_update_video(database: VideosDatabase) -> Callable[[UUID, Video, UUID],
 
         videos: List[Video] = await (
             database.videos()
-            .with_id(id=hash_id)
-            .of_user(user_id=authenticated_user_id)
-            .allow_privates_of(user_id=authenticated_user_id)
+            .with_hash(id=hash_id)
+            .owned_by(user_id=authenticated_user_id)
+            .include_privates_of(user_id=authenticated_user_id)
             .search()
         )
         if len(videos) < 1:
@@ -41,8 +41,8 @@ def make_update_video(database: VideosDatabase) -> Callable[[UUID, Video, UUID],
 
         await (
             database.videos()
-            .with_id(id=hash_id)
-            .of_user(user_id=authenticated_user_id)
+            .with_hash(id=hash_id)
+            .owned_by(user_id=authenticated_user_id)
             .update(to_update=to_update)
         )
 

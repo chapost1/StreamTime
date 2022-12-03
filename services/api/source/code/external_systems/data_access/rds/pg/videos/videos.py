@@ -30,6 +30,12 @@ class VideosPG(UploadedVideosPG):
     def build_query_conditions_params(self, base_conditions: List[str] = [], base_params: List[Any] = []) -> Tuple[List[str], List[Any]]:
         conditions, params = super().build_query_conditions_params(base_conditions=base_conditions, base_params=base_params)
 
+        # hide anything which is related to the excluded user_id
+        if self.excluded_user_id is not None:
+            conditions.append('user_id::text != %s::text')
+            params.append(self.excluded_user_id)
+
+
         # pagination index can appear also after user_id as it is an maintained index on pg side (user_id)
         if self.pagination_index_is_smaller_than is not None:
             conditions.append('pagination_index < %s')
@@ -55,12 +61,6 @@ class VideosPG(UploadedVideosPG):
         else:
             # do not allow privates by default
             conditions.append('is_private is not true')
-        
-
-        # hide anything which is related to the excluded user_id
-        if self.excluded_user_id is not None:
-            conditions.append('user_id::text != %s::text')
-            params.append(self.excluded_user_id)
         
         return conditions, params
 
@@ -108,16 +108,26 @@ class VideosPG(UploadedVideosPG):
         await super().update(to_update=to_update, stage=VideoStages.READY.value)
 
 
-    def exclude_user(self, user_id: UUID) -> Videos:
+    def not_owned_by(self, user_id: UUID) -> Videos:
         self.excluded_user_id = user_id
         return self
 
 
-    def allow_privates_of(self, user_id: UUID) -> Videos:
+    def include_privates_of(self, user_id: UUID) -> Videos:
         self.allowed_privates_of_user_id = user_id
         return self
 
 
+    def filter_unlisted(self, flag: bool = True) -> Videos:
+        self.unlisted_should_be_hidden = flag
+        return self
+
+
+    def filter_privates(self, flag: bool = True) -> Videos:
+        self.privates_should_be_hidden = flag
+        return self
+
+    
     def paginate(self, pagination_index_is_smaller_than: int) -> Videos:
         self.pagination_index_is_smaller_than = pagination_index_is_smaller_than
         return self
@@ -125,16 +135,6 @@ class VideosPG(UploadedVideosPG):
 
     def limit(self, limit: int) -> Videos:
         self.requested_limit = limit
-        return self
-
-
-    def hide_unlisted(self, flag: bool = True) -> Videos:
-        self.unlisted_should_be_hidden = flag
-        return self
-
-
-    def hide_privates(self, flag: bool = True) -> Videos:
-        self.privates_should_be_hidden = flag
         return self
 
 

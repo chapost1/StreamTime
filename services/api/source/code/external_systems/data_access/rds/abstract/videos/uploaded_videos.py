@@ -16,10 +16,10 @@ class UploadedVideos(Protocol):
         pass
 
 
-    def with_id(self, id: UUID) -> UploadedVideos:
+    def with_hash(self, id: UUID) -> UploadedVideos:
         """Restricts video hash_id"""
 
 
-    def of_user(self, user_id: UUID) -> UploadedVideos:
+    def owned_by(self, user_id: UUID) -> UploadedVideos:
         """Restricts videos owner (user)"""
 

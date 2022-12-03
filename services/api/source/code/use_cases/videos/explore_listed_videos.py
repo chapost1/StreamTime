@@ -23,9 +23,9 @@ def make_explore_listed_videos(database: VideosDatabase) -> Callable[[Union[UUID
 
         return await (
             database.videos()
-            .allow_privates_of(user_id=allow_privates_of_user_id)
-            .hide_unlisted(flag=True)
-            .exclude_user(user_id=excluded_user_id)
+            .not_owned_by(user_id=excluded_user_id)
+            .include_privates_of(user_id=allow_privates_of_user_id)
+            .filter_unlisted(flag=True)
             .paginate(pagination_index_is_smaller_than=pagination_index_is_smaller_than)
             .limit(limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT)
             .search()

@@ -21,12 +21,12 @@ class UploadedVideosPG:
     user_id: UUID = None
 
 
-    def with_id(self, id: UUID) -> UploadedVideos:
+    def with_hash(self, id: UUID) -> UploadedVideos:
         self.hash_id = id
         return self
 
 
-    def of_user(self, user_id: UUID) -> UploadedVideos:
+    def owned_by(self, user_id: UUID) -> UploadedVideos:
         self.user_id = user_id
         return self
 

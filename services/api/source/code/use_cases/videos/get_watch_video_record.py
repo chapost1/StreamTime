@@ -25,9 +25,9 @@ def make_get_watch_video_record(database: VideosDatabase, storage: Storage) -> C
 
         videos: List[Video] = await (
             database.videos()
-            .with_id(id=hash_id)
-            .of_user(user_id=user_id)
-            .allow_privates_of(user_id=authenticated_user_id)
+            .with_hash(id=hash_id)
+            .owned_by(user_id=user_id)
+            .include_privates_of(user_id=authenticated_user_id)
             .search()
         )
         if len(videos) < 1:
