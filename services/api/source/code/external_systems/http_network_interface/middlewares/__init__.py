@@ -5,10 +5,13 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from external_systems.http_network_interface.middlewares.errorhandling import app_errors_handler
 from external_systems.http_network_interface.middlewares.authentication import authenticate_user
 
+
 def attach_middlewares(
     app: Starlette,
     origins_whitelist: List[str] = ("*")
 ) -> None:
+    """Attach application's middlewares to any ASGI app which is passed as an argument"""
+
     # notice: order does matter, if we put cors before error handlers, the raise error will occur before the cors headers are added to response
     app.add_middleware(BaseHTTPMiddleware, dispatch=app_errors_handler)
 
