@@ -24,6 +24,7 @@ def make_get_authenticated_user_videos(database: VideosDB) -> Callable[[UUID], U
                 user_id=authenticated_user_id,
                 hide_private=False,
                 hide_unlisted=False,
+                # TODO: support pagination as an external param
                 pagination_index_is_smaller_than=None,
                 limit=None
             )
