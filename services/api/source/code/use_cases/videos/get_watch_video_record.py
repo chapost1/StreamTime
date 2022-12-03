@@ -24,7 +24,7 @@ def make_get_watch_video_record(database: VideosDB, storage: Storage) -> Callabl
         )
 
         videos: List[Video] = await (
-            database.get_videos_explorer()
+            database.videos()
             .id(id=hash_id)
             .of_user(user_id=user_id)
             .allow_privates_of(user_id=authenticated_user_id)

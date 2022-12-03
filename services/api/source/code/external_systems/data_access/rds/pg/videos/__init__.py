@@ -1,4 +1,4 @@
-from external_systems.data_access.rds.pg.videos.videos import Videos
+from external_systems.data_access.rds.pg.videos.videos import VideosPG
 
 # exports an instance of Videos class
-videos_db_client = Videos()
+videos_db_client = VideosPG()

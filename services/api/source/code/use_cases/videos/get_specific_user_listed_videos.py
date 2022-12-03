@@ -25,7 +25,7 @@ def make_get_specific_user_listed_videos(database: VideosDB) -> Callable[[Union[
         # TODO: validate if target user actually exists
 
         return await (
-            database.get_videos_explorer()
+            database.videos()
             .of_user(user_id=user_id)
             .hide_unlisted(flag=True)
             .allow_privates_of(user_id=authenticated_user_id)

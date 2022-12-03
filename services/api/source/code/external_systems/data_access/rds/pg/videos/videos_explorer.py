@@ -1,7 +1,7 @@
 from __future__ import annotations
 from external_systems.data_access.rds.pg.connection.connection import Connection
-from external_systems.data_access.rds.abstract.videos.videos_explorer import VideosExplorer
-from typing import List, Tuple, Callable
+from external_systems.data_access.rds.abstract.videos import VideosExplorer
+from typing import List, Tuple
 from entities.videos import Video
 from external_systems.data_access.rds.pg.videos import tables
 from common.utils import nl
@@ -17,8 +17,6 @@ class VideosExplorerPG:
     {VideosExplorer.__doc__}
     """
 
-    parse_function: Callable[[Tuple], Video]
-
     hash_id: UUID = None
     user_id: UUID = None
     excluded_user_id: UUID = None
@@ -27,10 +25,6 @@ class VideosExplorerPG:
     unlisted_should_be_hidden: bool = False
     privates_should_be_hidden: bool = False
     requested_limit: int = None
-
-
-    def __init__(self, parse_function: Callable[[Tuple], Video]) -> None:
-        self.parse_function = parse_function
 
 
     async def search(self) -> List[Video]:
@@ -106,7 +100,7 @@ class VideosExplorerPG:
             )
         ])
 
-        return list(map(self.parse_function, videos))
+        return list(map(self.__prase_db_records_into_classes, videos))
     
 
     def id(self, id: UUID) -> VideosExplorer:
@@ -147,3 +141,22 @@ class VideosExplorerPG:
     def hide_privates(self, flag: bool = True) -> VideosExplorer:
         self.privates_should_be_hidden = flag
         return self
+
+
+    def __prase_db_records_into_classes(self, video: Tuple) -> Video:
+        return Video(
+            hash_id=video[0],
+            user_id=video[1],
+            title=video[2],
+            description=video[3],
+            size_in_bytes=video[4],
+            duration_seconds=video[5],
+            video_type=video[6],
+            thumbnail_url=video[7],
+            _storage_object_key=video[8],
+            _storage_thumbnail_key=video[9],
+            upload_time=video[10],
+            is_private=video[11],
+            listing_time=video[12],
+            pagination_index=video[13]
+        )

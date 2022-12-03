@@ -17,11 +17,11 @@ def make_get_authenticated_user_videos(database: VideosDB) -> Callable[[UUID], U
         """
 
         unprocessed_videos, videos = await run_in_parallel(
-            database.get_user_unprocessed_videos(
-                user_id=authenticated_user_id
-            ),
+            database.unprocessd_videos()
+            .of_user(user_id=authenticated_user_id)
+            .search(),
             # TODO: USE & support pagination as an external param
-            database.get_videos_explorer()
+            database.videos()
             .of_user(user_id=authenticated_user_id)
             .allow_privates_of(user_id=authenticated_user_id)
             .search()

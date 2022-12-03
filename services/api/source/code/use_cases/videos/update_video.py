@@ -16,7 +16,7 @@ def make_update_video(database: VideosDB) -> Callable[[UUID, Video, UUID], None]
         # TODO: support new thumbnail selection
 
         videos: List[Video] = await (
-            database.get_videos_explorer()
+            database.videos()
             .id(id=hash_id)
             .of_user(user_id=authenticated_user_id)
             .allow_privates_of(user_id=authenticated_user_id)

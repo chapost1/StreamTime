@@ -15,7 +15,7 @@ def make_delete_video_on_ready_stage_handler(database: VideosDB, storage: Storag
 
     # get video meta for delete from S3 in case it is already preoccessed
     videos: List[Video] = await (
-      database.get_videos_explorer()
+      database.videos()
       .id(id=hash_id)
       .of_user(user_id=user_id)
       .allow_privates_of(user_id=user_id)
@@ -44,9 +44,19 @@ def make_delete_unprocessed_video_handler(database: VideosDB) -> Callable[[UUID,
   async def delete_unprocessed_video_handler(user_id: UUID, hash_id: UUID) -> None:
     """Deletes an unprocessed Video from database"""
 
-    video: UnprocessedVideo = await database.get_unprocessed_video(user_id=user_id, hash_id=hash_id)
+    unprocessed_videos: List[UnprocessedVideo] = await (
+      database.unprocessd_videos()
+      .id(id=hash_id)
+      .of_user(user_id=user_id)
+      .search()
+    )
 
-    if video.is_still_processing():
+    if len(unprocessed_videos) < 1:
+      raise NotFoundError()
+
+    unprocessed_video: UnprocessedVideo = unprocessed_videos[0]
+
+    if unprocessed_video.is_still_processing():
       raise TooEarlyError()
     
     await database.delete_video_by_stage(

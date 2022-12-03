@@ -1,8 +1,9 @@
 from typing import Protocol
-from typing import List, Dict
-from entities.videos import Video, UnprocessedVideo, VideoStages
+from typing import Dict
+from entities.videos import VideoStages
 from uuid import UUID
 from external_systems.data_access.rds.abstract.videos.videos_explorer import VideosExplorer
+from external_systems.data_access.rds.abstract.videos.unprocessed_videos_explorer import UnprocessedVideosExplorer
 
 
 class VideosDB(Protocol):
@@ -16,21 +17,15 @@ class VideosDB(Protocol):
         """
 
 
-    def get_videos_explorer(self) -> VideosExplorer:
+    def videos(self) -> VideosExplorer:
         """
         Gets new instance of videos explorer
         """
 
 
-    async def get_user_unprocessed_videos(self, user_id: str) -> List[UnprocessedVideo]:
+    def unprocessd_videos(self) -> UnprocessedVideosExplorer:
         """
-        Gets User Unprocess videos (failed or during processing)
-        """
-
-
-    async def get_unprocessed_video(self, user_id: UUID, hash_id: UUID) -> UnprocessedVideo:
-        """
-        Get specific unprocessed video
+        Gets new instance of unprocessed videos explorer
         """
 
 
