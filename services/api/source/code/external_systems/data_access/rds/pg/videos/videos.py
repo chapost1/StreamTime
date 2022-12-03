@@ -2,7 +2,7 @@ from __future__ import annotations
 from external_systems.data_access.rds.pg.connection.connection import Connection
 from external_systems.data_access.rds.abstract.videos import Videos
 from external_systems.data_access.rds.pg.videos.uploaded_videos import UploadedVideosPG
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Any
 from entities.videos import Video
 from entities.videos import VideoStages
 from external_systems.data_access.rds.pg.videos import tables
@@ -27,22 +27,21 @@ class VideosPG(UploadedVideosPG):
     requested_limit: int = None
 
 
-    async def search(self) -> List[Video]:
-        conditions, params = super().build_query_conditions_params()
+    def build_query_conditions_params(self, base_conditions: List[str] = [], base_params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        conditions, params = super().build_query_conditions_params(base_conditions=base_conditions, base_params=base_params)
 
         # pagination index can appear also after user_id as it is an maintained index on pg side (user_id)
         if self.pagination_index_is_smaller_than is not None:
-            if self.pagination_index_is_smaller_than < 1:
-                # pagination index range is [1, INT_MAX]
-                # therefore, smaller than 1 means return nothing
-                return []
             conditions.append('pagination_index < %s')
             params.append(self.pagination_index_is_smaller_than)
-        
+
+
+        # assert query will return listed videos only
         if self.unlisted_should_be_hidden:
-            # assert query will return listed videos only
             conditions.append('listing_time is not null')
 
+
+        # privates visibility control
         if self.privates_should_be_hidden:
             # force privates as hidden
             conditions.append('is_private is not true')
@@ -54,15 +53,23 @@ class VideosPG(UploadedVideosPG):
             params.append(self.allowed_privates_of_user_id)
             params.append(self.allowed_privates_of_user_id)
         else:
-            # do not allow privates at all
+            # do not allow privates by default
             conditions.append('is_private is not true')
         
-        if self.excluded_user_id is not None:
-            # hide anything which is related to the excluded user_id
-            conditions.append('user_id::text != %s::text')
-            params.append(self.excluded_user_id)    
 
-        # keep limit as the last param, as it is the last sql expression
+        # hide anything which is related to the excluded user_id
+        if self.excluded_user_id is not None:
+            conditions.append('user_id::text != %s::text')
+            params.append(self.excluded_user_id)
+        
+        return conditions, params
+
+
+    async def search(self) -> List[Video]:
+        conditions, params = self.build_query_conditions_params()
+
+        # keep limit as the last param
+        # it is the last sql expression and it is also a condition by itself
         params.append(self.requested_limit)
         
         videos = await Connection().query([
