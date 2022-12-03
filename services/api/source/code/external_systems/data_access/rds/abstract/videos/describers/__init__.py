@@ -1,3 +1,3 @@
-from external_systems.data_access.rds.abstract.videos.describers.described_uploaded_videos import DescribedUploadedVideos
-from external_systems.data_access.rds.abstract.videos.describers.described_unprocessed_videos import DescribedUnprocessedVideos
-from external_systems.data_access.rds.abstract.videos.describers.described_videos import DescribedVideos
+from external_systems.data_access.rds.abstract.videos.describers.unprocessed_videos import UploadedVideosDescriber
+from external_systems.data_access.rds.abstract.videos.describers.unprocessed_videos import UnprocessedVideosDescriber
+from external_systems.data_access.rds.abstract.videos.describers.videos import VideosDescriber

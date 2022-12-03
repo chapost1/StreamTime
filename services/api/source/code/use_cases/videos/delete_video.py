@@ -1,11 +1,14 @@
 from uuid import UUID
 from typing import Callable, List, Awaitable
-from external_systems.data_access.rds.abstract.videos import DescribedVideos
+from external_systems.data_access.rds.abstract.videos import VideosDescriber
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from common.app_errors import NotFoundError, TooEarlyError
 from entities.videos import VideoStages, Video, UnprocessedVideo
 from external_systems.data_access.storage.abstract import Storage
-from common.utils import run_in_parallel
+from common.utils import (
+  run_in_parallel,
+  find_one
+)
 
 
 def make_delete_video_on_ready_stage_handler(database: VideosDatabase, storage: Storage) -> Callable[[UUID, UUID], None]:
@@ -14,27 +17,25 @@ def make_delete_video_on_ready_stage_handler(database: VideosDatabase, storage: 
   async def delete_video_on_ready_stage_hadnler(user_id: UUID, hash_id: UUID) -> None:
     """Deletes a ready state Video from database and also it's assets from storage"""
 
-    described_videos: DescribedVideos = (
+    videos_describer: VideosDescriber = (
       database.describe_videos()
       .with_hash(id=hash_id)
       .owned_by(user_id=user_id)
       .include_privates_of(user_id=user_id)
     )
 
-    # get video meta for delete from S3 in case it is already preoccessed
-    videos: List[Video] = await described_videos.search()
+    # get video meta to delete assets from storage
+    video: Video = find_one(
+      items=await videos_describer.search()
+    )
 
-    if len(videos) < 1:
-      raise NotFoundError()
-
-    video: Video = videos[0]
     # first remove the video so in case of failure, at max the user won't have access to corrupted video record
     # and another service may collect removed records and handle cleaning it up
-    await described_videos.delete()
+    await videos_describer.delete()
 
-    # delete from S3 [both video and thumbnail]
-    await storage.delete_file(video._storage_object_key)
-    await storage.delete_file(video._storage_thumbnail_key)
+    # delete from storage [both video and thumbnail]
+    await storage.delete_file(item_relative_path=video._storage_object_key)
+    await storage.delete_file(item_relative_path=video._storage_thumbnail_key)
 
   return delete_video_on_ready_stage_hadnler
 
@@ -45,23 +46,20 @@ def make_delete_unprocessed_video_handler(database: VideosDatabase) -> Callable[
   async def delete_unprocessed_video_handler(user_id: UUID, hash_id: UUID) -> None:
     """Deletes an unprocessed Video from database"""
 
-    described_videos: DescribedVideos = (
+    unprocessed_vidoes_describer: VideosDescriber = (
       database.describe_unprocessd_videos()
       .with_hash(id=hash_id)
       .owned_by(user_id=user_id)
     )
 
-    unprocessed_videos: List[UnprocessedVideo] = await described_videos.search()
-
-    if len(unprocessed_videos) < 1:
-      raise NotFoundError()
-
-    unprocessed_video: UnprocessedVideo = unprocessed_videos[0]
+    unprocessed_video: UnprocessedVideo = find_one(
+      items=await unprocessed_vidoes_describer.search()
+    )
 
     if unprocessed_video.is_still_processing():
       raise TooEarlyError()
-    
-    await described_videos.delete()
+
+    await unprocessed_vidoes_describer.delete()
 
   return delete_unprocessed_video_handler
 

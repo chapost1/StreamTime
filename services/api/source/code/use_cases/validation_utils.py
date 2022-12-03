@@ -1,9 +1,13 @@
 from typing import Any, List, Union
 from uuid import UUID
 import common.constants as constants
+from common.app_errors import InputError
 
-def required_fields_validator(entity: Any, fields: List[str]) -> List[str]:
-    """Validates Entity holds the intended fields as properties"""
+def assert_required_fields(entity: Any, fields: List[str]) -> None:
+    """
+    Validates Entity holds the intended fields as properties
+    If not, raises an excepiton
+    """
 
     missing_fields = []
     for field in fields:
@@ -11,7 +15,11 @@ def required_fields_validator(entity: Any, fields: List[str]) -> List[str]:
             missing_fields.append(field)
     
     if 0 < len(missing_fields):
-        return list(map(lambda field: f'missing required field: {field}', missing_fields))
+        errors = list(map(lambda field: f'missing required field: {field}', missing_fields))
+        raise InputError(details={
+            'errors': errors
+        })
+
 
     return None
 

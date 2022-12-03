@@ -1,5 +1,5 @@
 from __future__ import annotations
-from external_systems.data_access.rds.abstract.videos.describers import DescribedUploadedVideos
+from external_systems.data_access.rds.abstract.videos.describers import UnprocessedVideosDescriber
 from external_systems.data_access.rds.pg.connection.connection import Connection
 from external_systems.data_access.rds.pg.videos import tables
 from entities.videos import VideoStages
@@ -8,25 +8,25 @@ from typing import Tuple, List, Any, Dict
 from common.utils import nl
 
 
-class DescribedUploadedVideosPG:
+class UploadedVideosDescriberPG:
     f"""
     DescribedUploadedVideos database class which implements the abstract protocol
     Uses postgres as a concrete implementation
 
     Abstract protocol docs:
-    {DescribedUploadedVideos.__doc__}
+    {UnprocessedVideosDescriber.__doc__}
     """
 
     hash_id: UUID = None
     user_id: UUID = None
 
 
-    def with_hash(self, id: UUID) -> DescribedUploadedVideos:
+    def with_hash(self, id: UUID) -> UnprocessedVideosDescriber:
         self.hash_id = id
         return self
 
 
-    def owned_by(self, user_id: UUID) -> DescribedUploadedVideos:
+    def owned_by(self, user_id: UUID) -> UnprocessedVideosDescriber:
         self.user_id = user_id
         return self
 
@@ -49,22 +49,22 @@ class DescribedUploadedVideosPG:
         return conditions, params
     
     
-    def build_update_statement(self, to_update: Dict, base_params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+    def build_update_statement(self, fields: Dict, base_params: List[Any] = []) -> Tuple[List[str], List[Any]]:
         params: List[Any] = []
         params.extend(base_params)
         update_statement = []
 
-        for field, value in to_update.items():
+        for field, value in fields.items():
             update_statement.append(f'{field} = %s')
             params.append(value)
 
         return update_statement, params
 
 
-    async def update(self, to_update: Dict, stage: VideoStages) -> None:
+    async def update(self, new_desired_state: Dict, stage: VideoStages) -> None:
         self.__assert_required_values_before_specific_video_query_execution()
 
-        update_statement, params = self.build_update_statement(to_update=to_update)
+        update_statement, params = self.build_update_statement(fields=new_desired_state)
 
         if len(update_statement) < 1:
             # nothing to update, skip

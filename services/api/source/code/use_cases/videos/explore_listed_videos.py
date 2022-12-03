@@ -2,7 +2,6 @@ from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
 from typing import List, Union, Callable, Optional
 from uuid import UUID
 from entities.videos import Video, VideosPage, NextPage
-from use_cases.validation_utils import is_anonymous_user
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 
 
@@ -18,15 +17,13 @@ def make_explore_listed_videos(database: VideosDatabase) -> Callable[[Union[UUID
 
         # if user wants to excldue its own videos while exploring, then mark it as excluded
         excluded_user_id = None if include_my else authenticated_user_id
-        # allow authenticated user to view it's own private videos
-        allow_privates_of_user_id = None if is_anonymous_user(user_id=authenticated_user_id) else authenticated_user_id
 
         next_page = NextPage.decode(next)
 
         videos: List[Video] = await (
-            database.videos()
+            database.describe_videos()
             .not_owned_by(user_id=excluded_user_id)
-            .include_privates_of(user_id=allow_privates_of_user_id)
+            .include_privates_of(user_id=authenticated_user_id)
             .filter_unlisted(flag=True)
             .paginate(pagination_index_is_smaller_than=next_page.pagination_index_is_smaller_than)
             .limit(limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT)

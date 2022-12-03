@@ -1,6 +1,7 @@
 import datetime
 import asyncio
 from typing import List, Any, Awaitable, Tuple
+from common.app_errors import NotFoundError
 
 
 def calc_server_time() -> datetime.datetime:
@@ -14,6 +15,15 @@ def nl() -> str:
     """Returns a new line character"""
 
     return '\n'
+
+
+def find_one(items: List[Any]) -> Any:
+    """Takes first element of list, if none, raises an exception"""
+
+    if len(items) < 1:
+        raise NotFoundError()
+
+    return items[0]
 
 
 async def run_in_parallel(*tasks: List[Awaitable]) -> Tuple[Any]:

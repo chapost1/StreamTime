@@ -1,7 +1,7 @@
 from __future__ import annotations
 from external_systems.data_access.rds.pg.connection.connection import Connection
-from external_systems.data_access.rds.abstract.videos import DescribedVideos
-from external_systems.data_access.rds.pg.videos.describers.uploaded_videos import DescribedUploadedVideosPG
+from external_systems.data_access.rds.abstract.videos import VideosDescriber
+from external_systems.data_access.rds.pg.videos.describers.uploaded_videos import UploadedVideosDescriberPG
 from typing import List, Tuple, Dict, Any
 from entities.videos import Video
 from entities.videos import VideoStages
@@ -10,13 +10,13 @@ from common.utils import nl
 from uuid import UUID
 
 
-class DescribedVideosPG(DescribedUploadedVideosPG):
+class VideosDescriberPG(UploadedVideosDescriberPG):
     f"""
     Videos database class which implements the abstract protocol
     Uses postgres as a concrete implementation
 
     Abstract protocol docs:
-    {DescribedVideos.__doc__}
+    {VideosDescriber.__doc__}
     """
 
     excluded_user_id: UUID = None
@@ -104,36 +104,36 @@ class DescribedVideosPG(DescribedUploadedVideosPG):
         await super().delete(stage=VideoStages.READY.value)
     
 
-    async def update(self, to_update: Dict) -> None:
-        await super().update(to_update=to_update, stage=VideoStages.READY.value)
+    async def update(self, new_desired_state: Dict) -> None:
+        await super().update(new_desired_state=new_desired_state, stage=VideoStages.READY.value)
 
 
-    def not_owned_by(self, user_id: UUID) -> DescribedVideosPG:
+    def not_owned_by(self, user_id: UUID) -> VideosDescriber:
         self.excluded_user_id = user_id
         return self
 
 
-    def include_privates_of(self, user_id: UUID) -> DescribedVideosPG:
+    def include_privates_of(self, user_id: UUID) -> VideosDescriber:
         self.allowed_privates_of_user_id = user_id
         return self
 
 
-    def filter_unlisted(self, flag: bool = True) -> DescribedVideosPG:
+    def filter_unlisted(self, flag: bool = True) -> VideosDescriber:
         self.unlisted_should_be_hidden = flag
         return self
 
 
-    def filter_privates(self, flag: bool = True) -> DescribedVideosPG:
+    def filter_privates(self, flag: bool = True) -> VideosDescriber:
         self.privates_should_be_hidden = flag
         return self
 
     
-    def paginate(self, pagination_index_is_smaller_than: int) -> DescribedVideosPG:
+    def paginate(self, pagination_index_is_smaller_than: int) -> VideosDescriber:
         self.pagination_index_is_smaller_than = pagination_index_is_smaller_than
         return self
     
 
-    def limit(self, limit: int) -> DescribedVideosPG:
+    def limit(self, limit: int) -> VideosDescriber:
         self.requested_limit = limit
         return self
 

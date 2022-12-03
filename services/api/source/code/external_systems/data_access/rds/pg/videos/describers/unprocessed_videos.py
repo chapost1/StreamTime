@@ -1,22 +1,21 @@
 from __future__ import annotations
 from external_systems.data_access.rds.pg.connection.connection import Connection
-from external_systems.data_access.rds.abstract.videos import DescribedUnprocessedVideos
-from external_systems.data_access.rds.pg.videos.describers.uploaded_videos import DescribedUploadedVideosPG
+from external_systems.data_access.rds.abstract.videos import UnprocessedVideosDescriber
+from external_systems.data_access.rds.pg.videos.describers.uploaded_videos import UploadedVideosDescriberPG
 from typing import List, Tuple
 from entities.videos import UnprocessedVideo
 from entities.videos import VideoStages
 from external_systems.data_access.rds.pg.videos import tables
 from common.utils import nl
-from uuid import UUID
 
 
-class DescribedUnprocessedVideosPG(DescribedUploadedVideosPG):
+class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
     f"""
     DescribedUnprocessedVideos database class which implements the abstract protocol
     Uses postgres as a concrete implementation
 
     Abstract protocol docs:
-    {DescribedUnprocessedVideos.__doc__}
+    {UnprocessedVideosDescriber.__doc__}
     """
 
     async def search(self) -> List[UnprocessedVideo]:
