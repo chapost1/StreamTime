@@ -1,8 +1,8 @@
 from typing import Protocol
 from entities.videos import VideoStages
 from uuid import UUID
-from external_systems.data_access.rds.abstract.videos.videos import Videos
-from external_systems.data_access.rds.abstract.videos.unprocessed_videos import UnprocessedVideos
+from external_systems.data_access.rds.abstract.videos.describers import DescribedVideos
+from external_systems.data_access.rds.abstract.videos.describers import DescribedUnprocessedVideos
 
 
 class VideosDatabase(Protocol):
@@ -15,12 +15,12 @@ class VideosDatabase(Protocol):
         - else, it will return it's current stage
         """
 
-    def videos(self) -> Videos:
+    def describe_videos(self) -> DescribedVideos:
         """
         Gets new instance of videos explorer
         """
 
-    def unprocessd_videos(self) -> UnprocessedVideos:
+    def describe_unprocessd_videos(self) -> DescribedUnprocessedVideos:
         """
         Gets new instance of unprocessed videos explorer
         """

@@ -27,7 +27,7 @@ def make_get_specific_user_listed_videos(database: VideosDatabase) -> Callable[[
         next_page = NextPage.decode(next)
 
         videos: List[Video] = await (
-            database.videos()
+            database.describe_videos()
             .owned_by(user_id=user_id)
             .filter_unlisted(flag=True)
             .include_privates_of(user_id=authenticated_user_id)

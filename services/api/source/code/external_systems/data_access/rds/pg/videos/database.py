@@ -1,9 +1,9 @@
 from external_systems.data_access.rds.pg.connection.connection import Connection
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
-from external_systems.data_access.rds.abstract.videos import Videos
-from external_systems.data_access.rds.abstract.videos import UnprocessedVideos
-from external_systems.data_access.rds.pg.videos.videos import VideosPG
-from external_systems.data_access.rds.pg.videos.unprocessed_videos import UnprocessedVideosPG
+from external_systems.data_access.rds.abstract.videos import DescribedVideos
+from external_systems.data_access.rds.abstract.videos import DescribedUnprocessedVideos
+from external_systems.data_access.rds.pg.videos.describers import DescribedVideosPG
+from external_systems.data_access.rds.pg.videos.describers import DescribedUnprocessedVideosPG
 from entities.videos import VideoStages
 from external_systems.data_access.rds.pg.videos import tables
 from uuid import UUID
@@ -44,9 +44,9 @@ class VideosDatabasePG:
         return list(map(lambda tup: tup[0], stages))
 
 
-    def videos(self) -> Videos:
-        return VideosPG()
+    def describe_videos(self) -> DescribedVideos:
+        return DescribedVideosPG()
     
 
-    def unprocessd_videos(self) -> UnprocessedVideos:
-        return UnprocessedVideosPG()
+    def describe_unprocessd_videos(self) -> DescribedUnprocessedVideos:
+        return DescribedUnprocessedVideosPG()

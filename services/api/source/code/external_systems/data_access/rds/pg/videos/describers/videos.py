@@ -1,7 +1,7 @@
 from __future__ import annotations
 from external_systems.data_access.rds.pg.connection.connection import Connection
-from external_systems.data_access.rds.abstract.videos import Videos
-from external_systems.data_access.rds.pg.videos.uploaded_videos import UploadedVideosPG
+from external_systems.data_access.rds.abstract.videos import DescribedVideos
+from external_systems.data_access.rds.pg.videos.describers.uploaded_videos import DescribedUploadedVideosPG
 from typing import List, Tuple, Dict, Any
 from entities.videos import Video
 from entities.videos import VideoStages
@@ -10,13 +10,13 @@ from common.utils import nl
 from uuid import UUID
 
 
-class VideosPG(UploadedVideosPG):
+class DescribedVideosPG(DescribedUploadedVideosPG):
     f"""
     Videos database class which implements the abstract protocol
     Uses postgres as a concrete implementation
 
     Abstract protocol docs:
-    {Videos.__doc__}
+    {DescribedVideos.__doc__}
     """
 
     excluded_user_id: UUID = None
@@ -108,32 +108,32 @@ class VideosPG(UploadedVideosPG):
         await super().update(to_update=to_update, stage=VideoStages.READY.value)
 
 
-    def not_owned_by(self, user_id: UUID) -> Videos:
+    def not_owned_by(self, user_id: UUID) -> DescribedVideosPG:
         self.excluded_user_id = user_id
         return self
 
 
-    def include_privates_of(self, user_id: UUID) -> Videos:
+    def include_privates_of(self, user_id: UUID) -> DescribedVideosPG:
         self.allowed_privates_of_user_id = user_id
         return self
 
 
-    def filter_unlisted(self, flag: bool = True) -> Videos:
+    def filter_unlisted(self, flag: bool = True) -> DescribedVideosPG:
         self.unlisted_should_be_hidden = flag
         return self
 
 
-    def filter_privates(self, flag: bool = True) -> Videos:
+    def filter_privates(self, flag: bool = True) -> DescribedVideosPG:
         self.privates_should_be_hidden = flag
         return self
 
     
-    def paginate(self, pagination_index_is_smaller_than: int) -> Videos:
+    def paginate(self, pagination_index_is_smaller_than: int) -> DescribedVideosPG:
         self.pagination_index_is_smaller_than = pagination_index_is_smaller_than
         return self
     
 
-    def limit(self, limit: int) -> Videos:
+    def limit(self, limit: int) -> DescribedVideosPG:
         self.requested_limit = limit
         return self
 

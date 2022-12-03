@@ -3,8 +3,8 @@ from typing import Protocol
 from uuid import UUID
 
 
-class UploadedVideos(Protocol):
-    """UploadedVideos database class protocol"""
+class DescribedUploadedVideos(Protocol):
+    """DescribedUploadedVideos database class protocol"""
 
     @property
     def hash_id(self) -> UUID:
@@ -16,10 +16,10 @@ class UploadedVideos(Protocol):
         pass
 
 
-    def with_hash(self, id: UUID) -> UploadedVideos:
+    def with_hash(self, id: UUID) -> DescribedUploadedVideos:
         """Restricts video hash_id"""
 
 
-    def owned_by(self, user_id: UUID) -> UploadedVideos:
+    def owned_by(self, user_id: UUID) -> DescribedUploadedVideos:
         """Restricts videos owner (user)"""
 

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from external_systems.data_access.rds.abstract.videos.uploaded_videos import UploadedVideos
+from external_systems.data_access.rds.abstract.videos.describers import DescribedUploadedVideos
 from external_systems.data_access.rds.pg.connection.connection import Connection
 from external_systems.data_access.rds.pg.videos import tables
 from entities.videos import VideoStages
@@ -8,25 +8,25 @@ from typing import Tuple, List, Any, Dict
 from common.utils import nl
 
 
-class UploadedVideosPG:
+class DescribedUploadedVideosPG:
     f"""
-    UploadedVideos database class which implements the abstract protocol
+    DescribedUploadedVideos database class which implements the abstract protocol
     Uses postgres as a concrete implementation
 
     Abstract protocol docs:
-    {UploadedVideos.__doc__}
+    {DescribedUploadedVideos.__doc__}
     """
 
     hash_id: UUID = None
     user_id: UUID = None
 
 
-    def with_hash(self, id: UUID) -> UploadedVideos:
+    def with_hash(self, id: UUID) -> DescribedUploadedVideos:
         self.hash_id = id
         return self
 
 
-    def owned_by(self, user_id: UUID) -> UploadedVideos:
+    def owned_by(self, user_id: UUID) -> DescribedUploadedVideos:
         self.user_id = user_id
         return self
 

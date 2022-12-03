@@ -24,7 +24,7 @@ def make_get_watch_video_record(database: VideosDatabase, storage: Storage) -> C
         )
 
         videos: List[Video] = await (
-            database.videos()
+            database.describe_videos()
             .with_hash(id=hash_id)
             .owned_by(user_id=user_id)
             .include_privates_of(user_id=authenticated_user_id)
