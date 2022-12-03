@@ -1,14 +1,14 @@
 from common.environment import SUPPORTED_VIDEO_TYPES
 from uuid import UUID
 from typing import Callable
-from external_systems.data_access.rds.abstract.videos import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from external_systems.data_access.storage.abstract import Storage
 from entities.storage import FileUploadSignedInstructions
 from use_cases.videos.utils import generate_new_video_hash_id_for_user
 from common.app_errors import InputError
 
 
-def make_get_upload_video_signed_instructions(database: VideosDB, storage: Storage) -> Callable[[UUID], FileUploadSignedInstructions]:
+def make_get_upload_video_signed_instructions(database: VideosDatabase, storage: Storage) -> Callable[[UUID], FileUploadSignedInstructions]:
     """Creates Get Upload Video Signed Instructions use case"""
 
     async def get_upload_video_signed_instructions(authenticated_user_id: UUID, file_content_type: str) -> FileUploadSignedInstructions:

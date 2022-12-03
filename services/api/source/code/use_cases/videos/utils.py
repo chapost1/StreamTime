@@ -1,11 +1,11 @@
 from uuid import UUID, uuid4
 from typing import Union
 from entities.videos import CrossUsersVisibilitySettings
-from external_systems.data_access.rds.abstract.videos import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from use_cases.validation_utils import is_same_user
 
 
-async def generate_new_video_hash_id_for_user(database: VideosDB, user_id: UUID) -> UUID:
+async def generate_new_video_hash_id_for_user(database: VideosDatabase, user_id: UUID) -> UUID:
     """Returns a unique video hash_id for particular user"""
 
     found = False

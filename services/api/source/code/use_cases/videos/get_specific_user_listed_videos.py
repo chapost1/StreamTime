@@ -2,10 +2,10 @@ from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
 from typing import List, Union, Callable
 from uuid import UUID
 from entities.videos import Video
-from external_systems.data_access.rds.abstract.videos import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDatabase
 
 
-def make_get_specific_user_listed_videos(database: VideosDB) -> Callable[[Union[UUID, str], UUID], List[Video]]:
+def make_get_specific_user_listed_videos(database: VideosDatabase) -> Callable[[Union[UUID, str], UUID], List[Video]]:
     """Creates Get Specific User Listed Videos use case"""
 
     async def get_specific_user_listed_videos(

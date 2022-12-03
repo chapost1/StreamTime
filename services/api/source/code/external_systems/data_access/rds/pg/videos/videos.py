@@ -1,101 +1,150 @@
+from __future__ import annotations
 from external_systems.data_access.rds.pg.connection.connection import Connection
-from external_systems.data_access.rds.abstract.videos import VideosDB
-from external_systems.data_access.rds.abstract.videos import VideosExplorer
-from external_systems.data_access.rds.abstract.videos import UnprocessedVideosExplorer
-from external_systems.data_access.rds.pg.videos.videos_explorer import VideosExplorerPG
-from external_systems.data_access.rds.pg.videos.unprocessed_videos_explorer import UnprocessedVideosExplorerPG
-from typing import Dict
+from external_systems.data_access.rds.abstract.videos import Videos
+from external_systems.data_access.rds.pg.videos.uploaded_videos import UploadedVideosPG
+from typing import List, Tuple, Dict
+from entities.videos import Video
 from entities.videos import VideoStages
 from external_systems.data_access.rds.pg.videos import tables
 from common.utils import nl
 from uuid import UUID
 
 
-class VideosPG:
+class VideosPG(UploadedVideosPG):
     f"""
     Videos database class which implements the abstract protocol
     Uses postgres as a concrete implementation
 
     Abstract protocol docs:
-    {VideosDB.__doc__}
+    {Videos.__doc__}
     """
 
-    async def find_video_stage(self, user_id: UUID, hash_id: UUID) -> VideoStages:
-        stages = await Connection().query([
-            (
-                f"""
-                SELECT stage FROM (
-                    SELECT '{VideoStages.UNPROCESSED.value}' as stage FROM {tables.UNPROCESSED_VIDEOS_TABLE}
-                    WHERE user_id = %s
-                    AND hash_id = %s
-                ) as unprocessed
-                UNION ALL
-                SELECT stage FROM (
-                    SELECT '{VideoStages.READY.value}' as stage FROM {tables.VIDEOS_TABLE}
-                    WHERE user_id = %s
-                    AND hash_id = %s
-                ) as ready;
-                """,
-                tuple([user_id, hash_id, user_id, hash_id])
-            )
-        ])
-
-        if len(stages) < 1:
-            return None
-
-        return list(map(lambda tup: tup[0], stages))
+    excluded_user_id: UUID = None
+    allowed_privates_of_user_id: UUID = None
+    pagination_index_is_smaller_than: int = None
+    unlisted_should_be_hidden: bool = False
+    privates_should_be_hidden: bool = False
+    requested_limit: int = None
 
 
-    def videos(self) -> VideosExplorer:
-        return VideosExplorerPG()
-    
+    async def search(self) -> List[Video]:
+        conditions, params = super().build_query_conditions_params()
 
-    def unprocessd_videos(self) -> UnprocessedVideosExplorer:
-        return UnprocessedVideosExplorerPG()
-
-
-    async def update_video(self, user_id: UUID, hash_id: UUID, to_update: Dict) -> None:
-        to_update_statement = []
-        params = []
-        for field, value in to_update.items():
-            to_update_statement.append(f'{field} = %s')
-            params.append(value)
+        # pagination index can appear also after user_id as it is an maintained index on pg side (user_id)
+        if self.pagination_index_is_smaller_than is not None:
+            if self.pagination_index_is_smaller_than < 1:
+                # pagination index range is [1, INT_MAX]
+                # therefore, smaller than 1 means return nothing
+                return []
+            conditions.append('pagination_index < %s')
+            params.append(self.pagination_index_is_smaller_than)
         
-        if len(to_update_statement) < 1:
-            # skip
-            return None
+        if self.unlisted_should_be_hidden:
+            # assert query will return listed videos only
+            conditions.append('listing_time is not null')
+
+        if self.privates_should_be_hidden:
+            # force privates as hidden
+            conditions.append('is_private is not true')
+        elif self.allowed_privates_of_user_id is not None:
+            # allow privates for specific user only
+            # if this is not the allowed user, show only public (not private)
+            # else, show for the auth user, anything
+            conditions.append('((user_id::text != %s::text AND is_private is not true) OR (user_id::text = %s::text))')
+            params.append(self.allowed_privates_of_user_id)
+            params.append(self.allowed_privates_of_user_id)
+        else:
+            # do not allow privates at all
+            conditions.append('is_private is not true')
         
-        where_condition = []
+        if self.excluded_user_id is not None:
+            # hide anything which is related to the excluded user_id
+            conditions.append('user_id::text != %s::text')
+            params.append(self.excluded_user_id)    
 
-        where_condition.append('user_id = %s')
-        params.append(user_id)
-
-        where_condition.append('hash_id = %s')
-        params.append(hash_id)
-
-        await Connection().execute([
+        # keep limit as the last param, as it is the last sql expression
+        params.append(self.requested_limit)
+        
+        videos = await Connection().query([
             (
-                f"""UPDATE {tables.VIDEOS_TABLE}
-                    SET {', '.join(to_update_statement)}
-                    WHERE {f'{nl()}AND '.join(where_condition)};""",
+                f"""SELECT 
+                        hash_id,
+                        user_id,
+                        title,
+                        description,
+                        size_in_bytes,
+                        duration_seconds,
+                        video_type,
+                        thumbnail_url,
+                        storage_object_key,
+                        storage_thumbnail_key,
+                        upload_time,
+                        is_private,
+                        listing_time,
+                        pagination_index
+                FROM {tables.VIDEOS_TABLE}
+                WHERE {f'{nl()}AND '.join(conditions)}
+                ORDER BY pagination_index DESC
+                LIMIT %s""",
                 tuple(params)
             )
         ])
 
-        return None
+        return list(map(self.__prase_db_records_into_classes, videos))
     
 
-    async def delete_video_by_stage(self, user_id: UUID, hash_id: UUID, stage: VideoStages) -> None:
-        table = tables.video_stages_to_table(stage)
-        
-        if table is None:
-            raise Exception(f'invalid video stage found. {user_id}/{hash_id} in stage [{stage}]')
+    async def delete(self) -> None:
+        await super().delete(stage=VideoStages.READY.value)
+    
 
-        await Connection().execute([
-            (
-                f"""DELETE FROM {table}
-                    WHERE user_id = %s
-                    AND hash_id = %s;""",
-                tuple([user_id, hash_id])
-            )
-        ])
+    async def update(self, to_update: Dict) -> None:
+        await super().update(to_update=to_update, stage=VideoStages.READY.value)
+
+
+    def exclude_user(self, user_id: UUID) -> Videos:
+        self.excluded_user_id = user_id
+        return self
+
+
+    def allow_privates_of(self, user_id: UUID) -> Videos:
+        self.allowed_privates_of_user_id = user_id
+        return self
+
+
+    def paginate(self, pagination_index_is_smaller_than: int) -> Videos:
+        self.pagination_index_is_smaller_than = pagination_index_is_smaller_than
+        return self
+    
+
+    def limit(self, limit: int) -> Videos:
+        self.requested_limit = limit
+        return self
+
+
+    def hide_unlisted(self, flag: bool = True) -> Videos:
+        self.unlisted_should_be_hidden = flag
+        return self
+
+
+    def hide_privates(self, flag: bool = True) -> Videos:
+        self.privates_should_be_hidden = flag
+        return self
+
+
+    def __prase_db_records_into_classes(self, video: Tuple) -> Video:
+        return Video(
+            hash_id=video[0],
+            user_id=video[1],
+            title=video[2],
+            description=video[3],
+            size_in_bytes=video[4],
+            duration_seconds=video[5],
+            video_type=video[6],
+            thumbnail_url=video[7],
+            _storage_object_key=video[8],
+            _storage_thumbnail_key=video[9],
+            upload_time=video[10],
+            is_private=video[11],
+            listing_time=video[12],
+            pagination_index=video[13]
+        )

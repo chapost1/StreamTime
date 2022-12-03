@@ -1,11 +1,11 @@
 from entities.videos import UserVideosList
-from external_systems.data_access.rds.abstract.videos import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from uuid import UUID
 from typing import Callable
 from common.utils import run_in_parallel
 
 
-def make_get_authenticated_user_videos(database: VideosDB) -> Callable[[UUID], UserVideosList]:
+def make_get_authenticated_user_videos(database: VideosDatabase) -> Callable[[UUID], UserVideosList]:
     """Creates Get Authenticated User Videos use case"""
 
     async def get_authenticated_user_videos(authenticated_user_id: UUID) -> UserVideosList:

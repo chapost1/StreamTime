@@ -1,5 +1,5 @@
 from uuid import UUID
-from external_systems.data_access.rds.abstract.videos import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from typing import Union, Callable, List
 from entities.videos import WatchVideoRecord, Video
 from common.app_errors import NotFoundError, AccessDeniedError
@@ -7,7 +7,7 @@ from external_systems.data_access.storage.abstract import Storage
 from use_cases.videos.utils import get_cross_users_visibility_settings
 
 
-def make_get_watch_video_record(database: VideosDB, storage: Storage) -> Callable[[Union[UUID, str], UUID, UUID], WatchVideoRecord]:
+def make_get_watch_video_record(database: VideosDatabase, storage: Storage) -> Callable[[Union[UUID, str], UUID, UUID], WatchVideoRecord]:
     """Creates Get Watch Video Record use case"""
 
     async def get_watch_video_record(authenticated_user_id: Union[UUID, str], user_id: UUID, hash_id: UUID) -> WatchVideoRecord:  
@@ -25,7 +25,7 @@ def make_get_watch_video_record(database: VideosDB, storage: Storage) -> Callabl
 
         videos: List[Video] = await (
             database.videos()
-            .id(id=hash_id)
+            .with_id(id=hash_id)
             .of_user(user_id=user_id)
             .allow_privates_of(user_id=authenticated_user_id)
             .search()

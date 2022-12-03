@@ -1,41 +1,47 @@
-from typing import Protocol
-from typing import Dict
-from entities.videos import VideoStages
+from __future__ import annotations
+from typing import Protocol, List, Dict
+from entities.videos import Video
 from uuid import UUID
-from external_systems.data_access.rds.abstract.videos.videos_explorer import VideosExplorer
-from external_systems.data_access.rds.abstract.videos.unprocessed_videos_explorer import UnprocessedVideosExplorer
+from external_systems.data_access.rds.abstract.videos.uploaded_videos import UploadedVideos
 
 
-class VideosDB(Protocol):
+class Videos(UploadedVideos, Protocol):
     """Videos database class protocol"""
 
-    async def find_video_stage(self, user_id: UUID, hash_id: UUID) -> VideoStages:
-        """
-        Find whether a video is actually exists or not
-        - if not, it will be None
-        - else, it will return it's current stage
-        """
+    # searchable
+    async def search(self) -> List[Video]:
+        """Searches videos according to the applied conditions"""
+    
+    # deletable
+    async def delete(self) -> None:
+        """Deletes videos according to the applied conditions"""
+    
+    # updatable
+    async def update(self, to_update: Dict) -> None:
+        """Updates videos according to the applied conditions"""
 
+    # override to support abstract return of self
+    def with_id(self, id: UUID) -> Videos:
+        """Restricts video hash_id"""
 
-    def videos(self) -> VideosExplorer:
-        """
-        Gets new instance of videos explorer
-        """
+    # override to support abstract return of self
+    def of_user(self, user_id: UUID) -> Videos:
+        """Restricts videos owner (user)"""
 
+    def exclude_user(self, user_id: UUID) -> Videos:
+        """Hides videos of certain user"""
 
-    def unprocessd_videos(self) -> UnprocessedVideosExplorer:
-        """
-        Gets new instance of unprocessed videos explorer
-        """
+    def allow_privates_of(self, user_id: UUID) -> Videos:
+        """Allows privates of specific user"""
 
+    def paginate(self, pagination_index_is_smaller_than: int) -> Videos:
+        """Sets pagination setting (next factor only)"""
+    
+    def limit(self, limit: int) -> Videos:
+        """Limits the returned amount of videos"""
 
-    async def update_video(self, user_id: UUID, hash_id: UUID, to_update: Dict) -> None:
-        """
-        Update specific video (listed/allready processed one)
-        """
+    def hide_unlisted(self, flag: bool = True) -> Videos:
+        """Hides any unlisted videos"""
 
-
-    async def delete_video_by_stage(self, user_id: UUID, hash_id: UUID, stage: VideoStages) -> NotImplementedError:
-        """
-        Removes a video record from the right table, by stage
-        """
+    def hide_privates(self, flag: bool = True) -> Videos:
+        """Hides any private videos"""

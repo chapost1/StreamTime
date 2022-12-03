@@ -3,10 +3,10 @@ from typing import List, Union, Callable, Optional
 from uuid import UUID
 from entities.videos import Video
 from use_cases.validation_utils import is_anonymous_user
-from external_systems.data_access.rds.abstract.videos import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDatabase
 
 
-def make_explore_listed_videos(database: VideosDB) -> Callable[[Union[UUID, str], Optional[bool]], List[Video]]:
+def make_explore_listed_videos(database: VideosDatabase) -> Callable[[Union[UUID, str], Optional[bool]], List[Video]]:
     """Creates Explore Listed Videos use case"""
 
     async def explore_listed_videos(
