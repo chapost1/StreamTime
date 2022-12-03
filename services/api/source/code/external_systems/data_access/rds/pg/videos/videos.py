@@ -41,6 +41,7 @@ class Videos:
 
         return list(map(lambda tup: tup[0], stages))
 
+
     async def get_listed_videos(
         self,
         allow_privates_of_user_id: UUID,
@@ -52,7 +53,7 @@ class Videos:
         visibility_conditions = []
         params = []
 
-        # pagination index should be first as it should truncate the query window lookup
+        # pagination index should be first as it should reduce the query window lookup
         if pagination_index_is_smaller_than is not None:
             if pagination_index_is_smaller_than < 1:
                 # pagination index range is [1, INT_MAX]
