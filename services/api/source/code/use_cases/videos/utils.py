@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 from typing import Union
 from entities.videos import CrossUsersVisibilitySettings
-from external_systems.data_access.rds.abstract import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDB
 from use_cases.validation_utils import is_same_user
 
 

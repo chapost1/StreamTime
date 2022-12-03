@@ -1,5 +1,5 @@
 from entities.videos import UserVideosList
-from external_systems.data_access.rds.abstract import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDB
 from uuid import UUID
 from typing import Callable
 from common.utils import run_in_parallel
@@ -20,14 +20,11 @@ def make_get_authenticated_user_videos(database: VideosDB) -> Callable[[UUID], U
             database.get_user_unprocessed_videos(
                 user_id=authenticated_user_id
             ),
-            database.get_user_videos(
-                user_id=authenticated_user_id,
-                hide_private=False,
-                hide_unlisted=False,
-                # TODO: support pagination as an external param
-                pagination_index_is_smaller_than=None,
-                limit=None
-            )
+            # TODO: USE & support pagination as an external param
+            database.get_videos_explorer()
+            .of_user(user_id=authenticated_user_id)
+            .allow_privates_of(user_id=authenticated_user_id)
+            .search()
         )
 
         return UserVideosList(

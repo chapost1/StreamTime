@@ -1,6 +1,6 @@
 from uuid import UUID
 from typing import Callable, List, Awaitable
-from external_systems.data_access.rds.abstract import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDB
 from common.app_errors import NotFoundError, TooEarlyError
 from entities.videos import VideoStages, Video, UnprocessedVideo
 from external_systems.data_access.storage.abstract import Storage
@@ -14,7 +14,17 @@ def make_delete_video_on_ready_stage_handler(database: VideosDB, storage: Storag
     """Deletes a ready state Video from database and also it's assets from storage"""
 
     # get video meta for delete from S3 in case it is already preoccessed
-    video: Video = await database.get_video(user_id=user_id, hash_id=hash_id)
+    videos: List[Video] = await (
+      database.get_videos_explorer()
+      .id(id=hash_id)
+      .of_user(user_id=user_id)
+      .allow_privates_of(user_id=user_id)
+      .search()
+    )
+    if len(videos) < 1:
+        raise NotFoundError()
+
+    video: Video = videos[0]
     # first remove the video so in case of failure, at max the user won't have access to corrupted video record
     # and another service may collect removed records and handle cleaning it up
     await database.delete_video_by_stage(

@@ -1,6 +1,6 @@
 from uuid import UUID
-from external_systems.data_access.rds.abstract import VideosDB
-from typing import Union, Callable
+from external_systems.data_access.rds.abstract.videos import VideosDB
+from typing import Union, Callable, List
 from entities.videos import WatchVideoRecord, Video
 from common.app_errors import NotFoundError, AccessDeniedError
 from external_systems.data_access.storage.abstract import Storage
@@ -23,10 +23,20 @@ def make_get_watch_video_record(database: VideosDB, storage: Storage) -> Callabl
             user_id=user_id
         )
 
-        video: Video = await database.get_video(user_id=user_id, hash_id=hash_id)
-        if video is None or \
-           not video.is_listed() and visibility_settings.hide_unlisted:
+        videos: List[Video] = await (
+            database.get_videos_explorer()
+            .id(id=hash_id)
+            .of_user(user_id=user_id)
+            .allow_privates_of(user_id=authenticated_user_id)
+            .search()
+        )
+        if len(videos) < 1:
             raise NotFoundError()
+
+        video: Video = videos[0]
+
+        if not video.is_listed() and visibility_settings.hide_unlisted:
+            raise AccessDeniedError()
         
         if video.is_private and visibility_settings.hide_private:
             raise AccessDeniedError()

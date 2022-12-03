@@ -3,7 +3,7 @@ from typing import List, Union, Callable, Optional, Tuple
 from uuid import UUID
 from entities.videos import Video
 from use_cases.validation_utils import is_anonymous_user
-from external_systems.data_access.rds.abstract import VideosDB
+from external_systems.data_access.rds.abstract.videos import VideosDB
 
 
 def get_explore_visibility_settings(authenticated_user_id: Union[UUID, str], include_my: bool) -> Tuple[UUID, UUID]:
@@ -49,11 +49,14 @@ def make_explore_listed_videos(database: VideosDB) -> Callable[[Union[UUID, str]
             include_my=include_my
         )
 
-        return await database.get_listed_videos(
-            allow_privates_of_user_id=allow_privates_of_user_id,
-            exclude_user_id=exclude_user_id,
-            pagination_index_is_smaller_than=pagination_index_is_smaller_than,
-            limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT
+        return await (
+            database.get_videos_explorer()
+            .allow_privates_of(user_id=allow_privates_of_user_id)
+            .hide_unlisted(flag=True)
+            .exclude_user(user_id=exclude_user_id)
+            .paginate(pagination_index_is_smaller_than=pagination_index_is_smaller_than)
+            .limit(limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT)
+            .search()
         )
 
     return explore_listed_videos

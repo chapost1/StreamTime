@@ -2,8 +2,7 @@ from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
 from typing import List, Union, Callable
 from uuid import UUID
 from entities.videos import Video
-from external_systems.data_access.rds.abstract import VideosDB
-from use_cases.videos.utils import get_cross_users_visibility_settings
+from external_systems.data_access.rds.abstract.videos import VideosDB
 
 
 def make_get_specific_user_listed_videos(database: VideosDB) -> Callable[[Union[UUID, str], UUID], List[Video]]:
@@ -25,18 +24,14 @@ def make_get_specific_user_listed_videos(database: VideosDB) -> Callable[[Union[
 
         # TODO: validate if target user actually exists
 
-        visibility_settings = get_cross_users_visibility_settings(
-            authenticated_user_id=authenticated_user_id,
-            user_id=user_id
-        )
-
-        return await database.get_user_videos(
-            user_id=user_id,
-            hide_private=visibility_settings.hide_private,
-            # even if that is the same user, this call is for listed videos only
-            hide_unlisted=True,
-            pagination_index_is_smaller_than=pagination_index_is_smaller_than,
-            limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT
+        return await (
+            database.get_videos_explorer()
+            .of_user(user_id=user_id)
+            .hide_unlisted(flag=True)
+            .allow_privates_of(user_id=authenticated_user_id)
+            .paginate(pagination_index_is_smaller_than=pagination_index_is_smaller_than)
+            .limit(limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT)
+            .search()
         )
 
     return get_specific_user_listed_videos

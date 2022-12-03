@@ -1,7 +1,7 @@
 from entities.videos import Video
 from uuid import UUID
-from typing import Callable
-from external_systems.data_access.rds.abstract import VideosDB
+from typing import Callable, List
+from external_systems.data_access.rds.abstract.videos import VideosDB
 from use_cases.validation_utils import required_fields_validator
 from common.utils import calc_server_time
 from common.app_errors import (InputError, NotFoundError)
@@ -15,9 +15,17 @@ def make_update_video(database: VideosDB) -> Callable[[UUID, Video, UUID], None]
 
         # TODO: support new thumbnail selection
 
-        existing_video: Video = await database.get_video(user_id=authenticated_user_id, hash_id=hash_id)
-        if existing_video is None:
+        videos: List[Video] = await (
+            database.get_videos_explorer()
+            .id(id=hash_id)
+            .of_user(user_id=authenticated_user_id)
+            .allow_privates_of(user_id=authenticated_user_id)
+            .search()
+        )
+        if len(videos) < 1:
             raise NotFoundError()
+
+        existing_video: Video = videos[0]
 
         if not existing_video.is_listed():
             # assert requried fields for new listing are not missing
