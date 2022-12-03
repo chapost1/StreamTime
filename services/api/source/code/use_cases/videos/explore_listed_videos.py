@@ -1,3 +1,4 @@
+from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
 from typing import List, Union, Callable, Optional, Tuple
 from uuid import UUID
 from entities.videos import Video
@@ -36,7 +37,11 @@ def get_explore_visibility_settings(authenticated_user_id: Union[UUID, str], inc
 def make_explore_listed_videos(database: VideosDB) -> Callable[[Union[UUID, str], Optional[bool]], List[Video]]:
     """Creates Explore Listed Videos use case"""
 
-    async def explore_listed_videos(authenticated_user_id: Union[UUID, str], include_my: Optional[bool] = False) -> List[Video]:
+    async def explore_listed_videos(
+        authenticated_user_id: Union[UUID, str],
+        pagination_index_is_smaller_than: int,
+        include_my: Optional[bool] = False
+    ) -> List[Video]:
         """Gets Listed Videos"""
         
         exclude_user_id, allow_privates_of_user_id = get_explore_visibility_settings(
@@ -46,7 +51,9 @@ def make_explore_listed_videos(database: VideosDB) -> Callable[[Union[UUID, str]
 
         return await database.get_listed_videos(
             allow_privates_of_user_id=allow_privates_of_user_id,
-            exclude_user_id=exclude_user_id
+            exclude_user_id=exclude_user_id,
+            pagination_index_is_smaller_than=pagination_index_is_smaller_than,
+            limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT
         )
 
     return explore_listed_videos

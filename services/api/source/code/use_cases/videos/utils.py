@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 from typing import Union
-from entities.videos import SortKeys, CrossUsersVisibilitySettings
+from entities.videos import CrossUsersVisibilitySettings
 from external_systems.data_access.rds.abstract import VideosDB
 from use_cases.validation_utils import is_same_user
 
@@ -28,14 +28,11 @@ def get_cross_users_visibility_settings(authenticated_user_id: Union[UUID, str],
     if is_same_user(authenticated_user_id, user_id):
         hide_private = False
         hide_unlisted = False
-        sort_key = SortKeys.upload_time
     else:
         hide_private = True
         hide_unlisted = True
-        sort_key = SortKeys.listing_time
     
     return CrossUsersVisibilitySettings(
         hide_private=hide_private,
-        hide_unlisted=hide_unlisted,
-        sort_key=sort_key
+        hide_unlisted=hide_unlisted
     )

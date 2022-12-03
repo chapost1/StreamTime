@@ -1,7 +1,7 @@
 from external_systems.data_access.rds.pg.connection.connection import Connection
 from external_systems.data_access.rds.abstract import VideosDB
 from typing import List, Dict
-from entities.videos import Video, UnprocessedVideo, SortKeys, VideoStages
+from entities.videos import Video, UnprocessedVideo, VideoStages
 from external_systems.data_access.rds.pg.videos import tables
 from common.utils import nl
 from uuid import UUID
@@ -41,25 +41,53 @@ class Videos:
 
         return list(map(lambda tup: tup[0], stages))
 
-    async def get_listed_videos(self, allow_privates_of_user_id: UUID, exclude_user_id: UUID) -> List[Video]:
-        conditions = []
+    async def get_listed_videos(
+        self,
+        allow_privates_of_user_id: UUID,
+        exclude_user_id: UUID,
+        pagination_index_is_smaller_than: int,
+        limit: int
+    ) -> List[Video]:
+        base_conditions = []
+        visibility_conditions = []
         params = []
+
+        # pagination index should be first as it should truncate the query window lookup
+        if pagination_index_is_smaller_than is not None:
+            if pagination_index_is_smaller_than < 1:
+                # pagination index range is [1, INT_MAX]
+                # therefore, smaller than 1 means return nothing
+                return []
+            base_conditions.append('pagination_index < %s')
+            params.append(pagination_index_is_smaller_than)
+        
+        # assert query will return listed videos only
+        base_conditions.append('listing_time is not null')
+
         if allow_privates_of_user_id is not None:
+            # authenticated user
             # allow private visibility:
             # if this is not the allowed user, show only public (not private)
             # else, show for the auth user, anything
-            conditions.append('((user_id != %s AND is_private is not true) OR (user_id = %s))')
+            visibility_conditions.append('((user_id != %s AND is_private is not true) OR (user_id = %s))')
             params.append(allow_privates_of_user_id)
             params.append(allow_privates_of_user_id)
+        else:
+            # anonymous user, do not allow privates at all
+            visibility_conditions.append('is_private is not true')
         
         if exclude_user_id is not None:
             # hide anything which is related to the excluded user_id
-            conditions.append('user_id != %s')
+            visibility_conditions.append('user_id != %s')
             params.append(exclude_user_id)
+        
+
+        # keep limit as the last param, as it is the last sql expression
+        params.append(limit)
 
         videos = await Connection().query([
             (
-                f"""SELECT 
+                f"""SELECT
                         hash_id,
                         user_id,
                         title,
@@ -72,11 +100,13 @@ class Videos:
                         storage_thumbnail_key,
                         upload_time,
                         is_private,
-                        listing_time
+                        listing_time,
+                        pagination_index
                 FROM {tables.VIDEOS_TABLE}
-                WHERE listing_time is not null
-                AND ({f'{nl()}AND '.join(conditions)})
-                ORDER BY listing_time DESC""",
+                WHERE {f'{nl()}AND '.join(base_conditions)}
+                AND ({f'{nl()}AND '.join(visibility_conditions)})
+                ORDER BY pagination_index DESC
+                LIMIT %s""",
                 tuple(params)
             )
         ])
@@ -94,7 +124,8 @@ class Videos:
             _storage_thumbnail_key=video[9],
             upload_time=video[10],
             is_private=video[11],
-            listing_time=video[12]
+            listing_time=video[12],
+            pagination_index=video[13]
         ), videos))
 
 
@@ -121,13 +152,34 @@ class Videos:
         ), videos))
 
 
-    async def get_user_videos(self, user_id: UUID, hide_private: bool, hide_unlisted: bool, sort_key: SortKeys) -> List[UnprocessedVideo]:
+    async def get_user_videos(
+        self,
+        user_id: UUID,
+        hide_private: bool,
+        hide_unlisted: bool,
+        pagination_index_is_smaller_than: int,
+        limit: int
+    ) -> List[UnprocessedVideo]:
         conditions = ['user_id = %s']
         params = [user_id]
+
+        # pagination index can appear also after user_id as it is an maintained index on pg side (user_id)
+        if pagination_index_is_smaller_than is not None:
+            if pagination_index_is_smaller_than < 1:
+                # pagination index range is [1, INT_MAX]
+                # therefore, smaller than 1 means return nothing
+                return []
+            conditions.append('pagination_index < %s')
+            params.append(pagination_index_is_smaller_than)
+
         if hide_private:
             conditions.append('is_private is not true')
+
         if hide_unlisted:
             conditions.append('listing_time is not null')
+
+        # keep limit as the last param, as it is the last sql expression
+        params.append(limit)
 
         videos = await Connection().query([
             (
@@ -144,10 +196,12 @@ class Videos:
                         storage_thumbnail_key,
                         upload_time,
                         is_private,
-                        listing_time
+                        listing_time,
+                        pagination_index
                 FROM {tables.VIDEOS_TABLE}
                 WHERE {f'{nl()}AND '.join(conditions)}
-                ORDER BY {sort_key.value} DESC""",
+                ORDER BY pagination_index DESC
+                LIMIT %s""",
                 tuple(params)
             )
         ])
@@ -165,7 +219,8 @@ class Videos:
             _storage_thumbnail_key=video[9],
             upload_time=video[10],
             is_private=video[11],
-            listing_time=video[12]
+            listing_time=video[12],
+            pagination_index=video[13]
         ), videos))
 
 
@@ -212,7 +267,8 @@ class Videos:
                         storage_thumbnail_key,
                         upload_time,
                         is_private,
-                        listing_time
+                        listing_time,
+                        pagination_index
                 FROM {tables.VIDEOS_TABLE}
                 WHERE user_id = %s
                 AND hash_id = %s""",
@@ -237,7 +293,8 @@ class Videos:
             _storage_thumbnail_key=video[9],
             upload_time=video[10],
             is_private=video[11],
-            listing_time=video[12]
+            listing_time=video[12],
+            pagination_index=video[13]
         )
 
 

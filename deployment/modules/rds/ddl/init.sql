@@ -30,6 +30,7 @@ DROP TABLE IF EXISTS videos CASCADE;
 CREATE TABLE videos (
     hash_id uuid NOT NULL,
     user_id uuid NOT NULL,
+    pagination_index serial,
     title varchar(128) NOT NULL DEFAULT 'Draft',
     description text,
     size_in_bytes int NOT NULL DEFAULT 0,
@@ -47,7 +48,9 @@ CREATE TABLE videos (
 
 CREATE INDEX idx_videos_user_id ON videos(user_id);
 
-CREATE INDEX idx_videos_hash_id ON videos(hash_id);
+CREATE INDEX idx_videos_user_id_hash_id ON videos(user_id, hash_id);
+
+CREATE INDEX idx_videos_pagination_index ON videos(pagination_index);
 
 INSERT INTO users (id, username, email, first_name, last_name, password)
 VALUES ('ae6d14eb-d222-4967-98d9-60a7cc2d7891', 'dummy', 'foo@bar.com', 'foo', 'bar', 'secret');

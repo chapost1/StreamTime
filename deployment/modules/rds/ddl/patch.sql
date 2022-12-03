@@ -1,9 +1,6 @@
-INSERT INTO users (id, username, email, first_name, last_name, password)
-VALUES ('ae6d14eb-d222-4967-98d9-60a7cc2d7891', 'dummy', 'foo@bar.com', 'foo', 'bar', 'secret');
+-- INSERT INTO users (id, username, email, first_name, last_name, password)
+-- VALUES ('ae6d14eb-d222-4967-98d9-60a7cc2d7891', 'dummy', 'foo@bar.com', 'foo', 'bar', 'secret');
 
--- INSERT INTO unprocessed_videos(hash_id, user_id, upload_time, failure_reason)
--- VALUES('be6d14eb-d222-4967-98d9-60a7cc2d7891', 'ae6d14eb-d222-4967-98d9-60a7cc2d7891', '2022-11-10T16:44:40.050259+00:00', 'Corrupted video');
+-- insert into unprocessed_videos (hash_id, user_id, upload_time, failure_reason) values ('19e14f7b-4b90-456a-9883-87be71e09bf2', 'ae6d14eb-d222-4967-98d9-60a7cc2d7891', '2022-11-28T20:18:30.406479+00:00', 'Corrupted/Invalid file');
 
-
--- INSERT INTO videos(hash_id, user_id, title, description, size_in_bytes, duration_seconds, video_type, thumbnail_url, storage_object_key, upload_time, is_private, listing_time)
--- VALUES('ae6d14eb-d222-4967-98d9-60a7cc2d7891', 'ae6d14eb-d222-4967-98d9-60a7cc2d7891', 'Draft', 'Something short', 0, 0, 'mp4', 'http://image.com', 'vid_path.mp4', '2022-11-10T16:44:40.050259+00:00', false, '2022-11-10T16:50:40.050259+00:00');
+-- insert into videos (hash_id, user_id, upload_time, size_in_bytes, duration_seconds, thumbnail_url, video_type, is_private, listing_time, storage_thumbnail_key, storage_object_key) values ('0031d946-dae4-4e70-b09c-f1daaa0b464b', 'ae6d14eb-d222-4967-98d9-60a7cc2d7891', '2022-11-28T20:18:37.406479+00:00', 123, 500, 'https://i.ytimg.com/vi/b7DrwqoHAGA/hqdefault.jpg', 'video/mp4', false, null, 'booyaka_booyaka', 'another_key');

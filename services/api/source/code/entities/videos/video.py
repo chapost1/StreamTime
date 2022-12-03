@@ -15,6 +15,7 @@ class Video(UploadedVideo):
     ALLOWED_UPDATE_FIELDS: ClassVar[Set[str]] = ALLOWED_UPDATE_FIELDS
 
     # per instance
+    pagination_index: Optional[int]
     title: Optional[str]
     description: Optional[str]
     size_in_bytes: Optional[int]

@@ -1,4 +1,4 @@
-from entities.videos import UserVideosList, SortKeys
+from entities.videos import UserVideosList
 from external_systems.data_access.rds.abstract import VideosDB
 from uuid import UUID
 from typing import Callable
@@ -24,7 +24,8 @@ def make_get_authenticated_user_videos(database: VideosDB) -> Callable[[UUID], U
                 user_id=authenticated_user_id,
                 hide_private=False,
                 hide_unlisted=False,
-                sort_key=SortKeys.upload_time
+                pagination_index_is_smaller_than=None,
+                limit=None
             )
         )
 

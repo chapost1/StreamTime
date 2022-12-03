@@ -1,6 +1,6 @@
 from typing import Protocol
 from typing import List, Dict
-from entities.videos import Video, UnprocessedVideo, SortKeys, VideoStages
+from entities.videos import Video, UnprocessedVideo, VideoStages
 from uuid import UUID
 
 
@@ -14,7 +14,13 @@ class VideosDbInterface(Protocol):
         - else, it will return it's current stage
         """
 
-    async def get_listed_videos(self, allow_privates_of_user_id: UUID, exclude_user_id: UUID) -> List[Video]:
+    async def get_listed_videos(
+        self,
+        allow_privates_of_user_id: UUID,
+        exclude_user_id: UUID,
+        pagination_index_is_smaller_than: int,
+        limit: int
+    ) -> List[Video]:
         """
         Gets listed videos
         - allows privates only for specific user_id (to support authenticated user)
@@ -26,7 +32,14 @@ class VideosDbInterface(Protocol):
         Gets User Unprocess videos (failed or during processing)
         """
     
-    async def get_user_videos(self, user_id: UUID, hide_private: bool, hide_unlisted: bool, sort_key: SortKeys) -> List[UnprocessedVideo]:
+    async def get_user_videos(
+        self,
+        user_id: UUID,
+        hide_private: bool,
+        hide_unlisted: bool,
+        pagination_index_is_smaller_than: int,
+        limit: int
+    ) -> List[UnprocessedVideo]:
         """
         Gets User videos
         - supports hiding listed/privates to protect user assets from unauthorized
