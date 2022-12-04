@@ -13,7 +13,16 @@ if [[ "$is_new_build_needed" -eq 42 ]]; then
 
     cd ./source
 
-    docker build -t stream-time-api:latest .
+    docker build -t stream-time-api:latest . &
+    pid2=$!
+    wait $pid2
+    is_docker_build_succeeded=$?
+    if [[ "$is_docker_build_succeeded" -eq 0 ]]; then
+        exit 0;
+    else
+        echo "$service docker build failed";
+        exit 1;
+    fi
 
     cd ..
 elif [[ $is_new_build_needed -eq 0 ]]; then

@@ -177,9 +177,24 @@ if is_valid_command "$command"; then
             # run necessary builds
 
             # lambda layars
-            ../lambdas/layers/build_layers.sh
+            ../lambdas/layers/build_layers.sh &
+            pid1=$!
+            wait $pid1
+            is_build_failed=$?
+            if [[ "$is_build_failed" -eq 1 ]]; then
+                echo "failed to build lambda layers";
+                exit 1;
+            fi
             # services
-            ../services/build_services.sh
+            ../services/build_services.sh &
+            pid2=$!
+            wait $pid2
+            is_build_failed=$?
+            if [[ "$is_build_failed" -eq 1 ]]; then
+                echo "failed to build services";
+                exit 1;
+            fi
+
         fi
 
         aws configure set aws_access_key_id $aws_access_key

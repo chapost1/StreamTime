@@ -9,5 +9,22 @@ if (! docker ps 2>&1>/dev/null); then
     exit 1;
 fi
 
+
 # execute all create_layer scripts
-find . -name create_layer.sh -exec bash {} \;
+find . -type f -name create_layer.sh -exec sh -c '
+  for file do
+    if ! sh $file; then
+      echo 1 >> ./layers_creation_errors.txt
+      kill -s PIPE "$PPID"
+      exit 1
+    fi
+  done' sh {} +;
+
+
+if [ -f ./layers_creation_errors.txt ]; then
+    rm -rf ./layers_creation_errors.txt
+    exit 1;
+fi
+
+rm -rf ./layers_creation_errors.txt
+exit 0;

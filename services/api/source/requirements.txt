@@ -5,6 +5,7 @@ aiopg==1.4.0
 aiosignal==1.3.1
 anyio==3.6.2
 async-timeout==4.0.2
+asyncmock==0.4.2
 asynctest==0.13.0
 attrs==22.1.0
 botocore==1.27.59
@@ -25,6 +26,7 @@ itsdangerous==2.1.2
 Jinja2==3.1.2
 jmespath==1.0.1
 MarkupSafe==2.1.1
+mock==4.0.3
 multidict==6.0.2
 orjson==3.8.1
 packaging==21.3
