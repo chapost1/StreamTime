@@ -10,6 +10,7 @@ if (! docker ps 2>&1>/dev/null); then
 fi
 
 
+rm -rf ./build_errors.txt
 # execute all build scripts
 find . -type f -name build.sh -exec sh -c '
   for file do

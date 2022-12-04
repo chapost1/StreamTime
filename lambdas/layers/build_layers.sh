@@ -10,6 +10,7 @@ if (! docker ps 2>&1>/dev/null); then
 fi
 
 
+rm -rf ./layers_creation_errors.txt
 # execute all create_layer scripts
 find . -type f -name create_layer.sh -exec sh -c '
   for file do
