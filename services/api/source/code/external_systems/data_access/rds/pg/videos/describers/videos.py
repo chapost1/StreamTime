@@ -56,12 +56,12 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
 
 
     def build_excluded_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return super().build_property_conditions_params(
+        return super().build_property_conditions_params_all_values(
             raw_params=self.excluded_user_ids,
-            statement='user_id::text != %s::text',
-            stitching_expression='AND',
-            base_conditions=conditions,
-            base_params=params
+            col_name='user_id',
+            exclude=True,
+            conditions=conditions,
+            params=params
         )
 
 
@@ -85,15 +85,19 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
         # by default privates are disabled
         if self.allow_privates_globally:
             ...
-        else:
+        elif 0 < len(self.allowed_privates_of_user_ids):
             # allow privates for specified users
-            conditions, params = super().build_property_conditions_params(
-                raw_params=self.allowed_privates_of_user_ids,
-                statement='CASE WHEN user_id::text = %s::text THEN true ELSE (is_private is not true)::bool END',
-                stitching_expression='AND',
-                base_conditions=conditions,
-                base_params=params
-            )
+            conditions = conditions.copy()
+            params = params.copy()
+
+            s = []
+            for param in self.allowed_privates_of_user_ids:
+                s.append(f'%s::text')
+                params.append(param)
+            # need to be strict regarding whether it is an allowed user or it should be determined by privacy
+            statement = f"CASE WHEN user_id::text in ({', '.join(s)}) THEN true ELSE (is_private is not true)::bool END"
+            conditions.append(statement)
+
         return conditions, params
 
 

@@ -48,45 +48,47 @@ class UploadedVideosDescriberPG:
 
 
     def build_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return self.build_property_conditions_params(
+        return self.build_property_conditions_params_all_values(
             raw_params=self.user_ids,
-            statement='user_id::text = %s::text',
-            stitching_expression='OR',
-            base_conditions=conditions,
-            base_params=params
+            col_name='user_id',
+            conditions=conditions,
+            params=params
         )
 
 
     def build_hash_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return self.build_property_conditions_params(
+        return self.build_property_conditions_params_all_values(
             raw_params=self.hash_ids,
-            statement='hash_id::text = %s::text',
-            stitching_expression='OR',
-            base_conditions=conditions,
-            base_params=params
+            col_name='hash_id',
+            conditions=conditions,
+            params=params
         )
 
 
-    def build_property_conditions_params(
+    def build_property_conditions_params_all_values(
         self,
         raw_params: List[Any],
-        statement: str,
-        stitching_expression: str,
-        base_conditions: List[str] = [],
-        base_params: List[Any] = []
-    ) -> Tuple[List[str], List[Any]]:
-        conditions: List[str] = []
-        conditions.extend(base_conditions)
+        col_name: str,
+        casting_type: str = 'text',
+        exclude: bool = False,
+        conditions: List[str] = [],
         params: List[Any] = []
-        params.extend(base_params)
+    ) -> Tuple[List[str], List[Any]]:
+        if len(raw_params) < 1:
+            return conditions, params
 
-        property_conditions = []
+        conditions = conditions.copy()
+        params = params.copy()
+
+        s = []
         for param in raw_params:
-            conditions.append(statement)
+            s.append(f'%s::{casting_type}')
             params.append(param)
+        
+        pre_in_expression = 'not' if exclude else ''
 
-        if 0 < len(property_conditions):
-            conditions.append(f"({f'{nl()}{stitching_expression} '.join(property_conditions)})")
+        statement=f"{col_name}::{casting_type} {pre_in_expression} in ({', '.join(s)})"
+        conditions.append(statement)
 
         return conditions, params
 
