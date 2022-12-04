@@ -21,6 +21,11 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
     async def search(self) -> List[UnprocessedVideo]:
         conditions, params = super().build_query_conditions_params()
 
+        # default to true to prevent query crash for invalid WHERE syntax where conditions are empty
+        where_condition = 'true'
+        if 0 < len(conditions):
+            where_condition = f'{nl()}AND '.join(conditions)
+
         videos = await Connection().query([
             (
                 f"""SELECT
@@ -29,7 +34,7 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
                         upload_time,
                         failure_reason
                 FROM {tables.UNPROCESSED_VIDEOS_TABLE}
-                WHERE {f'{nl()}AND '.join(conditions)}
+                WHERE {where_condition}
                 ORDER BY upload_time DESC""",
                 tuple(params)
             )

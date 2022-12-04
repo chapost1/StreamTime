@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Protocol
+from typing import Protocol, List
 from uuid import UUID
 
 
@@ -11,12 +11,12 @@ class UploadedVideosDescriber(Protocol):
     """
 
     @property
-    def hash_id(self) -> UUID:
+    def hash_id(self) -> List[UUID]:
         pass
 
 
     @property
-    def video_id(self) -> UUID:
+    def video_id(self) -> List[UUID]:
         pass
 
 

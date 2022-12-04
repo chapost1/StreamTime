@@ -41,7 +41,7 @@ class VideosDescriber(UploadedVideosDescriber, Protocol):
     def filter_unlisted(self, flag: bool = True) -> VideosDescriber:
         """Filters out any unlisted videos"""
 
-    def filter_privates(self, flag: bool = True) -> VideosDescriber:
+    def unfilter_privates(self, flag: bool = True) -> VideosDescriber:
         """Filters out any private videos"""
 
     def paginate(self, pagination_index_is_smaller_than: int) -> VideosDescriber:

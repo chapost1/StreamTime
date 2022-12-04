@@ -17,39 +17,83 @@ class UploadedVideosDescriberPG:
     {UnprocessedVideosDescriber.__doc__}
     """
 
-    hash_id: UUID = None
-    user_id: UUID = None
+    hash_ids: List[UUID]
+    user_ids: List[UUID]
+
+
+    def __init__(self) -> None:
+        self.hash_ids = []
+        self.user_ids = []
 
 
     def with_hash(self, id: UUID) -> UnprocessedVideosDescriber:
-        self.hash_id = id
+        if id is not None:
+            self.hash_ids.append(id)
         return self
 
 
     def owned_by(self, user_id: UUID) -> UnprocessedVideosDescriber:
-        self.user_id = user_id
+        if user_id is not None:
+            self.user_ids.append(user_id)
         return self
 
 
-    def build_query_conditions_params(self, base_conditions: List[str] = [], base_params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+    def build_query_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        # user_id is an index and therefore it is a good first filter condition
+        conditions, params = self.build_user_ids_conditions_params(conditions=conditions, params=params)
+
+        conditions, params = self.build_hash_ids_conditions_params(conditions=conditions, params=params)
+
+        return conditions, params
+
+
+    def build_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        return self.build_property_conditions_params(
+            raw_params=self.user_ids,
+            statement='user_id::text = %s::text',
+            stitching_expression='OR',
+            base_conditions=conditions,
+            base_params=params
+        )
+
+
+    def build_hash_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        return self.build_property_conditions_params(
+            raw_params=self.hash_ids,
+            statement='hash_id::text = %s::text',
+            stitching_expression='OR',
+            base_conditions=conditions,
+            base_params=params
+        )
+
+
+    def build_property_conditions_params(
+        self,
+        raw_params: List[Any],
+        statement: str,
+        stitching_expression: str,
+        base_conditions: List[str] = [],
+        base_params: List[Any] = []
+    ) -> Tuple[List[str], List[Any]]:
         conditions: List[str] = []
         conditions.extend(base_conditions)
         params: List[Any] = []
         params.extend(base_params)
 
-        if self.user_id is not None:
-            # user_id is an index and therefore it is a good first filter condition
-            conditions.append('user_id::text = %s::text')
-            params.append(self.user_id)
-        
-        if self.hash_id is not None:
-            conditions.append('hash_id::text = %s::text')
-            params.append(self.hash_id)
+        property_conditions = []
+        for param in raw_params:
+            conditions.append(statement)
+            params.append(param)
+
+        if 0 < len(property_conditions):
+            conditions.append(f"({f'{nl()}{stitching_expression} '.join(property_conditions)})")
 
         return conditions, params
+
     
-    
-    def build_update_statement(self, fields: Dict, base_params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+    def build_update_statement(self, fields: Dict, base_params: List[Any] = None) -> Tuple[List[str], List[Any]]:
+        if base_params is None:
+            base_params = []
         params: List[Any] = []
         params.extend(base_params)
         update_statement = []
@@ -101,17 +145,18 @@ class UploadedVideosDescriberPG:
 
 
     def __assert_required_values_before_specific_video_query_execution(self) -> None:
-        if self.user_id is None:
-            raise ValueError('delete query: user_id is None')
+        if len(self.user_ids) < 1 or self.user_ids[0] is None:
+            raise ValueError('delete query: user_id is missing')
 
-        if self.hash_id is None:
-            raise ValueError('delete query: hash_id is None')
+        if len(self.hash_ids) < 1 or self.hash_ids[0] is None:
+            raise ValueError('delete query: hash_id is missing')
 
 
     def __get_table_of_uploaded_video_by_stage(self, stage: VideoStages) -> str:
         table = tables.video_stages_to_table(stage)
         
         if table is None:
-            raise Exception(f'invalid uploaded video stage found. {self.user_id}/{self.hash_id} in stage [{stage}]')
+            identifiers = f'user_ids={self.user_ids}, hash_ids={self.hash_ids}'
+            raise Exception(f'invalid uploaded video stage found for identifiers=[{identifiers}]. stage: [{stage}]')
 
         return table

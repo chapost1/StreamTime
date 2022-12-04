@@ -19,58 +19,95 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
     {VideosDescriber.__doc__}
     """
 
-    excluded_user_id: UUID = None
-    allowed_privates_of_user_id: UUID = None
-    pagination_index_is_smaller_than: int = None
-    unlisted_should_be_hidden: bool = False
-    privates_should_be_hidden: bool = False
-    requested_limit: int = None
+    excluded_user_ids: List[UUID]
+    allowed_privates_of_user_ids: List[UUID]
+    pagination_index_is_smaller_than: int
+    unlisted_should_be_hidden: bool
+    allow_privates_globally: bool
+    requested_limit: int
 
 
-    def build_query_conditions_params(self, base_conditions: List[str] = [], base_params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        conditions, params = super().build_query_conditions_params(base_conditions=base_conditions, base_params=base_params)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.excluded_user_ids = []
+        self.allowed_privates_of_user_ids = []
+        self.pagination_index_is_smaller_than = None
+        self.unlisted_should_be_hidden = False
+        self.allow_privates_globally = False
+        self.requested_limit = None
 
-        # hide anything which is related to the excluded user_id
-        if self.excluded_user_id is not None:
-            conditions.append('user_id::text != %s::text')
-            params.append(self.excluded_user_id)
 
+    def build_query_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        conditions, params = super().build_query_conditions_params(conditions=conditions, params=params)
+
+        # ignore anything which is related to the excluded user ids
+        conditions, params = self.build_excluded_user_ids_conditions_params(conditions=conditions, params=params)
 
         # pagination index can appear also after user_id as it is an maintained index on pg side (user_id)
+        conditions, params = self.build_pagination_conditions_params(conditions=conditions, params=params)
+
+        # assert query will return listed videos only
+        conditions, params = self.build_listing_conditions_params(conditions=conditions, params=params)
+
+        # privates visibility control
+        conditions, params = self.build_privacy_conditions_params(conditions=conditions, params=params)
+
+        return conditions, params
+
+
+    def build_excluded_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        return super().build_property_conditions_params(
+            raw_params=self.excluded_user_ids,
+            statement='user_id::text != %s::text',
+            stitching_expression='AND',
+            base_conditions=conditions,
+            base_params=params
+        )
+
+
+    def build_pagination_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        conditions = conditions.copy()
+        params = params.copy()
         if self.pagination_index_is_smaller_than is not None:
             conditions.append('pagination_index < %s')
             params.append(self.pagination_index_is_smaller_than)
+        return conditions, params
+    
 
-
-        # assert query will return listed videos only
+    def build_listing_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        conditions = conditions.copy()
         if self.unlisted_should_be_hidden:
             conditions.append('listing_time is not null')
+        return conditions, params
 
 
-        # privates visibility control
-        if self.privates_should_be_hidden:
-            # force privates as hidden
-            conditions.append('is_private is not true')
-        elif self.allowed_privates_of_user_id is not None:
-            # allow privates for specific user only
-            # if this is not the allowed user, show only public (not private)
-            # else, show for the auth user, anything
-            conditions.append('((user_id::text != %s::text AND is_private is not true) OR (user_id::text = %s::text))')
-            params.append(self.allowed_privates_of_user_id)
-            params.append(self.allowed_privates_of_user_id)
+    def build_privacy_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        # by default privates are disabled
+        if self.allow_privates_globally:
+            ...
         else:
-            # do not allow privates by default
-            conditions.append('is_private is not true')
-        
+            # allow privates for specified users
+            conditions, params = super().build_property_conditions_params(
+                raw_params=self.allowed_privates_of_user_ids,
+                statement='CASE WHEN user_id::text = %s::text THEN true ELSE (is_private is not true)::bool END',
+                stitching_expression='AND',
+                base_conditions=conditions,
+                base_params=params
+            )
         return conditions, params
 
 
     async def search(self) -> List[Video]:
         conditions, params = self.build_query_conditions_params()
 
-        # keep limit as the last param
+        # keep limit as the last param, and use it only on select statement
         # it is the last sql expression and it is also a condition by itself
         params.append(self.requested_limit)
+
+        # default to true to prevent query crash for invalid WHERE syntax where conditions are empty
+        where_condition = 'true'
+        if 0 < len(conditions):
+            where_condition = f'{nl()}AND '.join(conditions)
         
         videos = await Connection().query([
             (
@@ -90,7 +127,7 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
                         listing_time,
                         pagination_index
                 FROM {tables.VIDEOS_TABLE}
-                WHERE {f'{nl()}AND '.join(conditions)}
+                WHERE {where_condition}
                 ORDER BY pagination_index DESC
                 LIMIT %s""",
                 tuple(params)
@@ -109,12 +146,14 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
 
 
     def not_owned_by(self, user_id: UUID) -> VideosDescriber:
-        self.excluded_user_id = user_id
+        if user_id is not None:
+            self.excluded_user_ids.append(user_id)
         return self
 
 
     def include_privates_of(self, user_id: UUID) -> VideosDescriber:
-        self.allowed_privates_of_user_id = user_id
+        if user_id is not None:
+            self.allowed_privates_of_user_ids.append(user_id)
         return self
 
 
@@ -123,8 +162,8 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
         return self
 
 
-    def filter_privates(self, flag: bool = True) -> VideosDescriber:
-        self.privates_should_be_hidden = flag
+    def unfilter_privates(self, flag: bool = True) -> VideosDescriber:
+        self.allow_privates_globally = flag
         return self
 
     
