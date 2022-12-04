@@ -7,6 +7,21 @@ AWS based solution of simple video drive.
 
 Part of a CS degree course <strong>(EASS)</strong> final project.
 
+You can find more of this course porjects <a href="https://github.com/EASS-HIT-PART-A-2022-CLASS-II">here.</a>
+
+## Features:
+
+The user functionalities which are currently supported include:
+
+:gem: Upload / Delete your videos
+
+:gem: Mark your videos as private so only you can see them, or public and share it with friends
+
+:gem: Watch yours / others public videos
+
+:gem: Explore videos of other users
+
+
 ## Status:
 
 POC :soon: MVP
@@ -151,3 +166,12 @@ foo@bar:~ (main) $ ./deployment/terraform.sh --command apply \
 &nbsp;&nbsp; :black_square_button: Web api authentication management
 
 &nbsp;&nbsp; :black_square_button: Web app authentication UI
+
+
+## Contact
+
+Project owner:
+> <a href="https://github.com/chapost1"><kbd><img src="https://avatars.githubusercontent.com/u/39523779?s=25"/></kbd></a> &nbsp; Shahar Tal
+>
+> [Github](https://github.com/chapost1) | [LinkedIn](https://www.linkedin.com/in/shahar-tal-4aa887166/) 
+
