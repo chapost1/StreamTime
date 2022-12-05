@@ -38,3 +38,7 @@ class Video(UploadedVideo):
     
     def is_listed(self) -> bool:
         return self.listing_time is not None
+    
+
+    def is_not_listed(self) -> bool:
+        return not self.is_listed()

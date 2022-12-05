@@ -1,9 +1,8 @@
 from uuid import UUID
 from entities.videos import Video
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
-from common.utils import find_one
 from use_cases.db_operation_utils.abstract import (
-    SearchDbFn,
+    SearchOneDbFn,
     UpdateDbFn
 )
 from use_cases.videos.update_video.abstract_internals import (
@@ -17,7 +16,7 @@ from use_cases.videos.update_video.abstract_internals import (
 async def use_case(
     # creation scope
     database: VideosDatabase,
-    search_db_fn: SearchDbFn,
+    search_one_db_fn: SearchOneDbFn,
     update_db_fn: UpdateDbFn,
     describe_db_videos_fn: DescribeDbVideosFn,
     prepare_new_listing_before_publish_fn: PrepareNewListingBeforePublishFn,
@@ -37,12 +36,11 @@ async def use_case(
         hash_id=hash_id
     )
 
-    existing_video: Video = find_one(
-        items=await search_db_fn(searchable=db_videos_describer)
+    existing_video: Video = await search_one_db_fn(
+        searchable=db_videos_describer
     )
 
-    is_not_listed = not existing_video.is_listed()
-    if is_not_listed:
+    if existing_video.is_not_listed():
         video = prepare_new_listing_before_publish_fn(video=video)
 
     await update_db_fn(

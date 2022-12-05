@@ -5,11 +5,10 @@ from typing import Union
 from entities.videos import WatchVideoRecord, Video
 from common.app_errors import AccessDeniedError
 from external_systems.data_access.storage.abstract import Storage
-from common.utils import find_one
 from external_systems.data_access.rds.abstract.common_protocols import (
     Searchable
 )
-from use_cases.db_operation_utils.abstract import SearchDbFn
+from use_cases.db_operation_utils.abstract import SearchOneDbFn
 from use_cases.videos.get_watch_video_record.abstract_internals import (
     DescribeDbVideosFn,
     IsAccessAllowedFn
@@ -20,7 +19,7 @@ async def use_case(
     # creation scope
     database: VideosDatabase,
     storage: Storage,
-    search_db_fn: SearchDbFn,
+    search_one_db_fn: SearchOneDbFn,
     describe_db_videos_fn: DescribeDbVideosFn,
     is_access_allowed_fn: IsAccessAllowedFn,
     # usage scope
@@ -42,8 +41,8 @@ async def use_case(
         hash_id=hash_id
     )
 
-    video: Video = find_one(
-        items=await search_db_fn(searchable=db_videos_describer)
+    video: Video = await search_one_db_fn(
+        searchable=db_videos_describer
     )
 
     is_access_denied = not is_access_allowed_fn(
