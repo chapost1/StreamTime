@@ -1,16 +1,17 @@
 from typing import Union, Optional
+from functools import partial
 from fastapi import APIRouter, Depends, status
 from uuid import UUID
 from entities.videos import VideosPage
 from external_systems.data_access.rds.pg.videos import videos_db_client
 from external_systems.http_network_interface.request_state_utils.auth.auth_guards import any_user
-from use_cases.videos.get_specific_user_listed_videos import make_get_specific_user_listed_videos
+from use_cases.videos.get_specific_user_listed_videos import get_specific_user_listed_videos_use_case
 
 router = APIRouter()
 
 
 # get specific user videos
-get_specific_user_listed_videos_uc = make_get_specific_user_listed_videos(database=videos_db_client)
+get_specific_user_listed_videos_uc = partial(get_specific_user_listed_videos_use_case, database=videos_db_client)
 #
 @router.get('/{user_id}', response_model=VideosPage, response_model_exclude_none=True, responses={
     status.HTTP_404_NOT_FOUND: {}

@@ -5,7 +5,7 @@ from entities.videos import Video, UserVideosList
 from external_systems.http_network_interface.request_state_utils.auth.auth_guards import authenticated_user
 from external_systems.data_access.rds.pg.videos import videos_db_client
 from external_systems.data_access.storage.s3.videos import videos_s3_client
-from use_cases.videos.get_authenticated_user_videos import make_get_authenticated_user_videos
+from use_cases.videos.get_authenticated_user_videos import get_authenticated_user_videos_use_case
 from use_cases.videos.update_video import update_video_use_case
 from use_cases.videos.delete_video import make_delete_video
 
@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 # get authenticated user videos
-get_authenticated_user_videos_uc = make_get_authenticated_user_videos(database=videos_db_client)
+get_authenticated_user_videos_uc = partial(get_authenticated_user_videos_use_case, database=videos_db_client)
 #
 @router.get("/", response_model=UserVideosList, response_model_exclude_none=True, responses={
     status.HTTP_401_UNAUTHORIZED: {}

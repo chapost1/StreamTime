@@ -1,10 +1,6 @@
-from typing import Union, Protocol, Tuple
+from typing import Union, Tuple
 from uuid import UUID
-
-
-class IsAnonymouseUserFn(Protocol):
-    def __call__(self, user_id: Union[UUID, str]) -> bool:
-        ...
+from use_cases.validation_utils.abstract import IsAnonymouseUserFn
 
 
 def get_visibility_settings(

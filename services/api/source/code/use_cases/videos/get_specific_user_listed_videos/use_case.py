@@ -1,15 +1,15 @@
-from typing import Union, Optional, Protocol, List, Tuple
+from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
+from typing import List, Union, Protocol
 from uuid import UUID
-from entities.videos import VideosPage, Video, NextPage
-from entities.videos.abstract_protocols import (
-    NextPageTextDecoder,
-    NextVideosPageCalculator
-)
+from entities.videos import Video, VideosPage, NextPage
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from external_systems.data_access.rds.abstract.common_protocols import (
     Searchable
 )
-from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
+from entities.videos.abstract_protocols import (
+    NextPageTextDecoder,
+    NextVideosPageCalculator
+)
 from use_cases.db_operation_utils.abstract import SearchDbFn
 
 
@@ -17,16 +17,11 @@ class DescribeVideosFn(Protocol):
     def __call__(
         self,
         database: VideosDatabase,
-        user_id_to_ignore: UUID,
-        authenticated_user_to_allow_privates: UUID,
+        authenticated_user_id: UUID,
+        user_id: UUID,
         pagination_index_is_smaller_than: int,
         page_limit: int
     ) -> Searchable:
-        ...
-
-
-class GetVisibilitySettingsFn(Protocol):
-    def __call__(self, authenticated_user_id: Union[UUID, str], include_my: bool) -> Tuple[UUID, UUID]:
         ...
 
 
@@ -35,27 +30,30 @@ async def use_case(
     database: VideosDatabase,
     search_db_fn: SearchDbFn,
     describe_videos_fn: DescribeVideosFn,
-    get_visibility_settings_fn: GetVisibilitySettingsFn,
     next_page_text_decoder: NextPageTextDecoder,
     next_videos_page_calculator: NextVideosPageCalculator,
     # usage scope
     authenticated_user_id: Union[UUID, str],
-    next: str,
-    include_my: Optional[bool] = False
+    user_id: UUID,
+    next: str
 ) -> VideosPage:
-    """Gets Listed Videos"""
+    """
+    Gets Specific User Listed Videos
+    i.e: when some user want to see another user videos in particular
+            one should not be able to see unlisted videos of others
+            and if it is the same user, this call is intended to help the user know
+            how it's own 'page' looks for another users.
+            otherwise, he can use get_authenticated_user call instead
+    """
 
-    user_id_to_ignore, authenticated_user_to_allow_privates = get_visibility_settings_fn(
-        authenticated_user_id=authenticated_user_id,
-        include_my=include_my
-    )
+    # TODO: validate if target user actually exists
 
     next_page: NextPage = next_page_text_decoder.decode(b64=next)
 
     videos_describer: Searchable = describe_videos_fn(
         database=database,
-        user_id_to_ignore=user_id_to_ignore,
-        authenticated_user_to_allow_privates=authenticated_user_to_allow_privates,
+        authenticated_user_id=authenticated_user_id,
+        user_id=user_id,
         pagination_index_is_smaller_than=next_page.pagination_index_is_smaller_than,
         page_limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT
     )

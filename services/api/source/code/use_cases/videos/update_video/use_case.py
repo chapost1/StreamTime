@@ -7,6 +7,10 @@ from external_systems.data_access.rds.abstract.common_protocols import (
 )
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from common.utils import find_one
+from use_cases.db_operation_utils.abstract import (
+    SearchDbFn,
+    UpdateDbFn
+)
 
 
 class SearchableUpdatable(Searchable, Updatable, Protocol):
@@ -32,10 +36,14 @@ class ParseVideoIntoStateDictFn(Protocol):
 
 
 async def use_case(
+    # creation scope
     database: VideosDatabase,
+    search_db_fn: SearchDbFn,
+    update_db_fn: UpdateDbFn,
     describe_videos_fn: DescribeVideosFn,
     prepare_new_listing_before_publish_fn: PrepareNewListingBeforePublishFn,
     parse_video_into_state_dict_fn: ParseVideoIntoStateDictFn,
+    # usage scope
     authenticated_user_id: UUID,
     video: Video,
     hash_id: UUID
@@ -51,13 +59,16 @@ async def use_case(
     )
 
     existing_video: Video = find_one(
-        items=await videos_describer.search()
+        items=await search_db_fn(searchable=videos_describer)
     )
 
     is_not_listed = not existing_video.is_listed()
     if is_not_listed:
         video = prepare_new_listing_before_publish_fn(video=video)
-    
-    new_desired_state = parse_video_into_state_dict_fn(video=video)
 
-    await videos_describer.update(new_desired_state=new_desired_state)
+    await update_db_fn(
+        updatable=videos_describer,
+        new_desired_state=parse_video_into_state_dict_fn(
+            video=video
+        )
+    )
