@@ -1,8 +1,16 @@
 from functools import partial
-from .explore_listed_videos import explore_listed_videos as __explore_listed_videos
-from .search_videos import search_videos
-from .next_videos_page import next_videos_page
+from .use_case import use_case
+from entities.videos import NextPage, VideosPage
+from .describe_logic import describe
+from .visibility_settings import get_visibility_settings as __get_visibility_settings
+from use_cases.validation_utils import is_anonymous_user
 
-next_videos_page_fn = partial(next_videos_page, search_videos_fn=search_videos)
+get_visibility_settings = partial(__get_visibility_settings, is_anonymous_user_fn=is_anonymous_user)
 
-explore_listed_videos = partial(__explore_listed_videos, next_videos_page_fn=next_videos_page_fn)
+explore_listed_videos_use_case = partial(
+    use_case,
+    describe_videos_fn=describe,
+    get_visibility_settings_fn=get_visibility_settings,
+    next_page_text_decoder=NextPage,
+    next_videos_page_calculator=VideosPage
+)

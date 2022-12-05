@@ -1,11 +1,12 @@
 from fastapi import APIRouter, status, Depends
+from functools import partial
 from uuid import UUID
 from entities.videos import Video, UserVideosList
 from external_systems.http_network_interface.request_state_utils.auth.auth_guards import authenticated_user
 from external_systems.data_access.rds.pg.videos import videos_db_client
 from external_systems.data_access.storage.s3.videos import videos_s3_client
 from use_cases.videos.get_authenticated_user_videos import make_get_authenticated_user_videos
-from use_cases.videos.update_video import make_update_video
+from use_cases.videos.update_video import update_video_use_case
 from use_cases.videos.delete_video import make_delete_video
 
 router = APIRouter()
@@ -26,7 +27,7 @@ async def get_authenticated_user_videos(
 
 
 # update a video
-update_video_uc = make_update_video(database=videos_db_client)
+update_video_uc = partial(update_video_use_case, database=videos_db_client)
 #
 @router.put("/{hash_id}", status_code=status.HTTP_204_NO_CONTENT, responses={
     status.HTTP_401_UNAUTHORIZED: {},

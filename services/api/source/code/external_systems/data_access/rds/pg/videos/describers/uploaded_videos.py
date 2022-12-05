@@ -93,11 +93,9 @@ class UploadedVideosDescriberPG:
         return conditions, params
 
     
-    def build_update_statement(self, fields: Dict, base_params: List[Any] = None) -> Tuple[List[str], List[Any]]:
-        if base_params is None:
-            base_params = []
-        params: List[Any] = []
-        params.extend(base_params)
+    def build_update_statement(self, fields: Dict, params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        params = params.copy()
+
         update_statement = []
 
         for field, value in fields.items():
@@ -116,7 +114,7 @@ class UploadedVideosDescriberPG:
             # nothing to update, skip
             return None
 
-        conditions, params = self.build_query_conditions_params(base_params=params)
+        conditions, params = self.build_query_conditions_params(params=params)
         
         table = self.__get_table_of_uploaded_video_by_stage(stage=stage)
 
