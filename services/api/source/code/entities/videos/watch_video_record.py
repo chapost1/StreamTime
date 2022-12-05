@@ -1,9 +1,7 @@
-from dataclasses import dataclass
-from pydantic import HttpUrl
+from pydantic import BaseModel, HttpUrl
 from entities.videos.video import Video
 
 
-@dataclass
-class WatchVideoRecord:
+class WatchVideoRecord(BaseModel):
     watchable_url: HttpUrl
     video: Video

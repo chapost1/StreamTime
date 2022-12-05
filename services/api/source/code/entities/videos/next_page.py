@@ -11,22 +11,22 @@ class NextPage(BaseModel):
     @staticmethod
     def decode(b64: str) -> NextPage:
         """Transform from base64 to isntance"""
+        def inputError():
+            raise InputError(details={
+                'error': 'invalid next page'
+            })
+
         if b64 is None:
             return NextPage()
 
         try:
-            s = base64.b64decode(b64)
-            dictionary = json.loads(s)
+            dictionary = json.loads(base64.urlsafe_b64decode(b64.encode()).decode())
             self: NextPage = NextPage(**dictionary)
         except Exception:
-            raise InputError(details={
-                'error': 'invalid next page'
-            })
-        
+            inputError()
+
         if self.pagination_index_is_smaller_than is None:
-            raise InputError(details={
-                'error': 'invalid next page'
-            })
+            inputError()
 
         return self
 
@@ -34,5 +34,4 @@ class NextPage(BaseModel):
     def encode(self) -> str:
         """Returns a base64 form of self"""
         dictionary = self.dict()
-        s = json.dumps(dictionary)
-        return base64.b64encode(s.encode('utf-8'))
+        return base64.urlsafe_b64encode(json.dumps(dictionary).encode()).decode()

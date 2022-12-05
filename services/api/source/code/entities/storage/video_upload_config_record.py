@@ -1,8 +1,7 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
 from typing import List
 
 
-@dataclass
-class VideoUploadConfigRecord:
+class VideoUploadConfigRecord(BaseModel):
     max_size_in_bytes: int
     valid_file_types: List[str]
