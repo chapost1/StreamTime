@@ -32,8 +32,18 @@ class Video(UploadedVideo):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._storage_object_key = kwargs.get('_storage_object_key', None)
-        self._storage_thumbnail_key = kwargs.get('_storage_thumbnail_key', None)
+        self._storage_object_key = kwargs.get('storage_object_key', None)
+        self._storage_thumbnail_key = kwargs.get('storage_thumbnail_key', None)
+
+
+    @property
+    def storage_object_key(self) -> str:
+        return self._storage_object_key
+
+
+    @property
+    def storage_thumbnail_key(self) -> str:
+        return self._storage_thumbnail_key
 
     
     def is_listed(self) -> bool:

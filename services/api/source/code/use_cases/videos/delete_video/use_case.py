@@ -34,8 +34,8 @@ def make_delete_video_on_ready_stage_handler(database: VideosDatabase, storage: 
     await videos_describer.delete()
 
     # delete from storage [both video and thumbnail]
-    await storage.delete_file(item_relative_path=video._storage_object_key)
-    await storage.delete_file(item_relative_path=video._storage_thumbnail_key)
+    await storage.delete_file(item_relative_path=video.storage_object_key)
+    await storage.delete_file(item_relative_path=video.storage_thumbnail_key)
 
   return delete_video_on_ready_stage_hadnler
 

@@ -14,14 +14,14 @@ def test_video_can_be_initialized_without_arguments():
 
 def test_private_key_storage_object_key_can_be_initialized():
     storage_object_key = 'some_value'
-    vid = Video(_storage_object_key=storage_object_key)
-    assert vid._storage_object_key == storage_object_key
+    vid = Video(storage_object_key=storage_object_key)
+    assert vid.storage_object_key == storage_object_key
 
 
 def test_private_key_storage_object_key_can_be_initialized():
     storage_thumbnail_key = 'some_value'
-    vid = Video(_storage_thumbnail_key=storage_thumbnail_key)
-    assert vid._storage_thumbnail_key == storage_thumbnail_key
+    vid = Video(storage_thumbnail_key=storage_thumbnail_key)
+    assert vid.storage_thumbnail_key == storage_thumbnail_key
 
 
 def test_is_listed_is_false_when_listing_time_is_null():
