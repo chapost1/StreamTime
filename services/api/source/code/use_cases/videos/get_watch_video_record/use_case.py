@@ -1,7 +1,7 @@
 from uuid import UUID
 from common.constants import MAXIMUM_SECONDS_TILL_PRESIGNED_URL_EXPIRATION
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
-from typing import Union, Protocol
+from typing import Union
 from entities.videos import WatchVideoRecord, Video
 from common.app_errors import AccessDeniedError
 from external_systems.data_access.storage.abstract import Storage
@@ -10,27 +10,10 @@ from external_systems.data_access.rds.abstract.common_protocols import (
     Searchable
 )
 from use_cases.db_operation_utils.abstract import SearchDbFn
-
-
-class DescribeVideosFn(Protocol):
-    def __call__(
-        self,
-        database: VideosDatabase,
-        authenticated_user_id: UUID,
-        user_id: UUID,
-        hash_id: UUID
-    ) -> Searchable:
-        ...
-
-
-class IsAccessAllowedFn(Protocol):
-    def __call__(
-        self,
-        authenticated_user_id: Union[UUID, str],
-        owner_user_id: UUID,
-        is_private: bool
-    ) -> bool:
-        ...
+from use_cases.videos.get_watch_video_record.abstract_internals import (
+    DescribeDbVideosFn,
+    IsAccessAllowedFn
+)
 
 
 async def use_case(
@@ -38,7 +21,7 @@ async def use_case(
     database: VideosDatabase,
     storage: Storage,
     search_db_fn: SearchDbFn,
-    describe_videos_fn: DescribeVideosFn,
+    describe_db_videos_fn: DescribeDbVideosFn,
     is_access_allowed_fn: IsAccessAllowedFn,
     # usage scope
     authenticated_user_id: Union[UUID, str],
@@ -52,7 +35,7 @@ async def use_case(
     It is needed to grant premission to access (watch) to the video assets storage
     """
 
-    videos_describer: Searchable = describe_videos_fn(
+    db_videos_describer: Searchable = describe_db_videos_fn(
         database=database,
         authenticated_user_id=authenticated_user_id,
         user_id=user_id,
@@ -60,7 +43,7 @@ async def use_case(
     )
 
     video: Video = find_one(
-        items=await search_db_fn(searchable=videos_describer)
+        items=await search_db_fn(searchable=db_videos_describer)
     )
 
     is_access_denied = not is_access_allowed_fn(

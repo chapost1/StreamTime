@@ -1,4 +1,4 @@
-from typing import Union, Optional, Protocol, List, Tuple
+from typing import Union, Optional, List
 from uuid import UUID
 from entities.videos import VideosPage, Video, NextPage
 from entities.videos.abstract_protocols import (
@@ -11,30 +11,17 @@ from external_systems.data_access.rds.abstract.common_protocols import (
 )
 from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
 from use_cases.db_operation_utils.abstract import SearchDbFn
-
-
-class DescribeVideosFn(Protocol):
-    def __call__(
-        self,
-        database: VideosDatabase,
-        user_id_to_ignore: UUID,
-        authenticated_user_to_allow_privates: UUID,
-        pagination_index_is_smaller_than: int,
-        page_limit: int
-    ) -> Searchable:
-        ...
-
-
-class GetVisibilitySettingsFn(Protocol):
-    def __call__(self, authenticated_user_id: Union[UUID, str], include_my: bool) -> Tuple[UUID, UUID]:
-        ...
+from use_cases.videos.explore_listed_videos.abstract_internals import (
+    DescribeDbVideosFn,
+    GetVisibilitySettingsFn
+)
 
 
 async def use_case(
     # creation scope
     database: VideosDatabase,
     search_db_fn: SearchDbFn,
-    describe_videos_fn: DescribeVideosFn,
+    describe_db_videos_fn: DescribeDbVideosFn,
     get_visibility_settings_fn: GetVisibilitySettingsFn,
     next_page_text_decoder: NextPageTextDecoder,
     next_videos_page_calculator: NextVideosPageCalculator,
@@ -52,7 +39,7 @@ async def use_case(
 
     next_page: NextPage = next_page_text_decoder.decode(b64=next)
 
-    videos_describer: Searchable = describe_videos_fn(
+    db_videos_describer: Searchable = describe_db_videos_fn(
         database=database,
         user_id_to_ignore=user_id_to_ignore,
         authenticated_user_to_allow_privates=authenticated_user_to_allow_privates,
@@ -60,7 +47,7 @@ async def use_case(
         page_limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT
     )
 
-    videos: List[Video] = await search_db_fn(searchable=videos_describer)
+    videos: List[Video] = await search_db_fn(searchable=db_videos_describer)
 
     return VideosPage(
         videos=videos,

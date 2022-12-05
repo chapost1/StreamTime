@@ -11,25 +11,16 @@ from entities.videos.abstract_protocols import (
     NextVideosPageCalculator
 )
 from use_cases.db_operation_utils.abstract import SearchDbFn
-
-
-class DescribeVideosFn(Protocol):
-    def __call__(
-        self,
-        database: VideosDatabase,
-        authenticated_user_id: UUID,
-        user_id: UUID,
-        pagination_index_is_smaller_than: int,
-        page_limit: int
-    ) -> Searchable:
-        ...
+from use_cases.videos.get_specific_user_listed_videos.abstract_internals import (
+    DescribeDbVideosFn
+)
 
 
 async def use_case(
     # creation scope
     database: VideosDatabase,
     search_db_fn: SearchDbFn,
-    describe_videos_fn: DescribeVideosFn,
+    describe_db_videos_fn: DescribeDbVideosFn,
     next_page_text_decoder: NextPageTextDecoder,
     next_videos_page_calculator: NextVideosPageCalculator,
     # usage scope
@@ -50,7 +41,7 @@ async def use_case(
 
     next_page: NextPage = next_page_text_decoder.decode(b64=next)
 
-    videos_describer: Searchable = describe_videos_fn(
+    db_videos_describer: Searchable = describe_db_videos_fn(
         database=database,
         authenticated_user_id=authenticated_user_id,
         user_id=user_id,
@@ -58,7 +49,7 @@ async def use_case(
         page_limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT
     )
 
-    videos: List[Video] = await search_db_fn(searchable=videos_describer)
+    videos: List[Video] = await search_db_fn(searchable=db_videos_describer)
 
     return VideosPage(
         videos=videos,

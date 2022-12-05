@@ -1,18 +1,11 @@
 from uuid import UUID
-from typing import Protocol
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from external_systems.data_access.storage.abstract import Storage
 from entities.storage import FileUploadSignedInstructions
-
-
-class AssertFileContentTypeFn(Protocol):
-    def __call__(self, file_content_type: str) -> None:
-        ...
-
-
-class GenerateNewVideoHashIdFn(Protocol):
-    async def __call__(self, database: VideosDatabase, user_id: UUID) -> UUID:
-        ...
+from use_cases.videos.get_upload_file_signed_instructions.abstract_internals import (
+    AssertFileContentTypeFn,
+    GenerateNewVideoHashIdFn
+)
 
 
 async def use_case(

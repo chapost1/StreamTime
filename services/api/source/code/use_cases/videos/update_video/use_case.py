@@ -1,38 +1,17 @@
 from uuid import UUID
-from typing import Protocol, Dict
 from entities.videos import Video
-from external_systems.data_access.rds.abstract.common_protocols import (
-    Searchable,
-    Updatable
-)
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from common.utils import find_one
 from use_cases.db_operation_utils.abstract import (
     SearchDbFn,
     UpdateDbFn
 )
-
-
-class SearchableUpdatable(Searchable, Updatable, Protocol):
-    pass
-
-
-class DescribeVideosFn(Protocol):
-    def __call__(
-        self,
-        database: VideosDatabase,
-        hash_id: UUID,
-        authenticated_user_id: UUID
-    ) -> SearchableUpdatable:
-        ...
-
-
-class PrepareNewListingBeforePublishFn(Protocol):
-    def __call__(self, video: Video) -> Video: ...
-
-
-class ParseVideoIntoStateDictFn(Protocol):
-    def __call__(self, video: Video) -> Dict: ...
+from use_cases.videos.update_video.abstract_internals import (
+    SearchableUpdatable,
+    DescribeDbVideosFn,
+    PrepareNewListingBeforePublishFn,
+    ParseVideoIntoStateDictFn
+)
 
 
 async def use_case(
@@ -40,7 +19,7 @@ async def use_case(
     database: VideosDatabase,
     search_db_fn: SearchDbFn,
     update_db_fn: UpdateDbFn,
-    describe_videos_fn: DescribeVideosFn,
+    describe_db_videos_fn: DescribeDbVideosFn,
     prepare_new_listing_before_publish_fn: PrepareNewListingBeforePublishFn,
     parse_video_into_state_dict_fn: ParseVideoIntoStateDictFn,
     # usage scope
@@ -52,14 +31,14 @@ async def use_case(
 
     # TODO: support new thumbnail selection
 
-    videos_describer: SearchableUpdatable = describe_videos_fn(
+    db_videos_describer: SearchableUpdatable = describe_db_videos_fn(
         database=database,
         authenticated_user_id=authenticated_user_id,
         hash_id=hash_id
     )
 
     existing_video: Video = find_one(
-        items=await search_db_fn(searchable=videos_describer)
+        items=await search_db_fn(searchable=db_videos_describer)
     )
 
     is_not_listed = not existing_video.is_listed()
@@ -67,7 +46,7 @@ async def use_case(
         video = prepare_new_listing_before_publish_fn(video=video)
 
     await update_db_fn(
-        updatable=videos_describer,
+        updatable=db_videos_describer,
         new_desired_state=parse_video_into_state_dict_fn(
             video=video
         )
