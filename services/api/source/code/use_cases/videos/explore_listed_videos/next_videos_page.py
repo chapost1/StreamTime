@@ -1,4 +1,4 @@
-from typing import List, Awaitable, Protocol
+from typing import List, Protocol
 from uuid import UUID
 from entities.videos import Video, VideosPage, NextPage
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
@@ -17,7 +17,7 @@ class SearchVideosFn(Protocol):
 
 async def next_videos_page(
     database: VideosDatabase,
-    search_videos_fn: Awaitable,
+    search_videos_fn: SearchVideosFn,
     next: str,
     user_id_to_ignore: UUID,
     authenticated_user_to_allow_privates: UUID
