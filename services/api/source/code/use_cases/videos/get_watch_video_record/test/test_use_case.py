@@ -75,7 +75,7 @@ async def test_raise_access_denied_if_not_same_user_and_private():
     )
 
     # execute
-    with pytest.raises(expected_exception=AccessDeniedError):
+    try:
         await use_case(
             # creation scope
             database=None,
@@ -88,3 +88,8 @@ async def test_raise_access_denied_if_not_same_user_and_private():
             user_id=user_id,
             hash_id=hash_id
         )
+        # should not succeed
+        assert 1 == 2
+    except AccessDeniedError:
+        # as expected
+        assert 1 == 1
