@@ -57,7 +57,7 @@ async def use_case(
     # we want to let users to see any videos which day have permissions to
     # therefore, we need to create a signed link to let the user watch the asset
     watchable_url = await storage.get_file_signed_url(
-        item_relative_path=video._storage_object_key,
+        item_relative_path=video.storage_object_key,
         signature_duration_seconds=MAXIMUM_SECONDS_TILL_PRESIGNED_URL_EXPIRATION
     )
 
