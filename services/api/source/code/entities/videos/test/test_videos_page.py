@@ -26,7 +26,7 @@ def test_calc_next_page_will_return_an_encoded_next_page_with_minimal_pagination
     max_boundary = 65535
     min_pi = max_boundary + 1
     for _ in range(0, random.randint(5, 25)):
-        local_min = random.randrange(1, max_boundary)
+        local_min = random.randint(1, max_boundary)
         if local_min < min_pi:
             min_pi = local_min
         videos.append(Video(pagination_index=local_min))
