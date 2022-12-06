@@ -2,7 +2,7 @@ from entities.videos.video import Video
 from common.utils import calc_server_time
 import pytest
 from pydantic import ValidationError
-from random import randint
+import random
 
 
 def test_video_can_be_initialized_without_arguments():
@@ -42,7 +42,7 @@ def test_listing_time_wont_accept_invalid_datetime():
 
 
 def test_pagination_index_argument_existence():
-    pagination_index = randint(0, 100)
+    pagination_index = random.randint(0, 100)
     vid = Video(pagination_index=pagination_index)
     assert vid.pagination_index == pagination_index
 
@@ -66,13 +66,13 @@ def test_video_type_argument_existence():
 
 
 def test_size_in_bytes_argument_existence():
-    size_in_bytes = randint(0, 100)
+    size_in_bytes = random.randint(0, 100)
     vid = Video(size_in_bytes=size_in_bytes)
     assert vid.size_in_bytes == size_in_bytes
 
 
 def test_description_argument_existence():
-    duration_seconds = randint(0, 100)
+    duration_seconds = random.randint(0, 100)
     vid = Video(duration_seconds=duration_seconds)
     assert vid.duration_seconds == duration_seconds
 

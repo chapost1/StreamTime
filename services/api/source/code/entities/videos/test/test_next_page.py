@@ -1,11 +1,11 @@
 from entities.videos.next_page import NextPage
 import pytest
 from common.app_errors import InputError
-from random import randint
+import random
 
 
 def test_encode_returns_a_next_as_str():
-    next_page = NextPage(pagination_index_is_smaller_than=randint(1, 100))
+    next_page = NextPage(pagination_index_is_smaller_than=random.randint(1, 100))
     assert isinstance(next_page.encode(), str) == True
 
 
@@ -27,7 +27,7 @@ def test_decode_raise_an_exception_if_str_is_valid_next_page_but_empty_one():
 
 def test_decode_should_return_a_valid_next_page_if_str_is_completely_valid_one():
     # this test is also includes an encode decode flow in it
-    random_number = randint(1, 100)
+    random_number = random.randint(1, 100)
     next_page = NextPage(pagination_index_is_smaller_than=random_number)
     next_page_string = next_page.encode()
     valid_next_page = NextPage.decode(b64=next_page_string)
