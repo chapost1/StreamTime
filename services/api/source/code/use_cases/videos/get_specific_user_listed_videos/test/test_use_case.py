@@ -1,12 +1,9 @@
 from typing import List, Any
-from use_cases.videos.explore_listed_videos.use_case import use_case
-from entities.videos import VideosPage, Video, NextPage
+from use_cases.videos.get_specific_user_listed_videos.use_case import use_case
+from entities.videos import Video, VideosPage, NextPage
 from uuid import uuid4
-from use_cases.videos.explore_listed_videos.get_visibility_settings import get_visibility_settings
 from use_cases.db_operation_utils.concrete import search_db
 import pytest
-from functools import partial
-from use_cases.validation_utils.concrete import is_anonymous_user
 
 
 @pytest.mark.asyncio
@@ -33,15 +30,16 @@ async def test_returns_expected_structure_with_returned_values_in_internals():
 
     # execute
     result = await use_case(
+        # creation scope
         database=None,
         search_db_fn=search_db,
-        get_visibility_settings_fn=partial(get_visibility_settings, is_anonymous_user_fn=is_anonymous_user),
+        describe_db_videos_fn=lambda *args, **kwargs: Searchable(),
         next_page_text_decoder=NextPageTextDecoder(),
-        describe_db_videos_fn=lambda *args, **kwds: Searchable(),
         next_videos_page_calculator=NextVideosPageCalculator(),
+        # usage scope
         authenticated_user_id=uuid4(),
-        next=None,
-        include_my=False
+        user_id=uuid4(),
+        next=None
     )
 
     assert result == VideosPage(

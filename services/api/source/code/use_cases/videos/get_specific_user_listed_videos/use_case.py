@@ -1,5 +1,5 @@
 from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
-from typing import List, Union, Protocol
+from typing import List, Union
 from uuid import UUID
 from entities.videos import Video, VideosPage, NextPage
 from external_systems.data_access.rds.abstract.videos import VideosDatabase

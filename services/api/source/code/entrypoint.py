@@ -13,8 +13,7 @@ def run() -> None:
         on_startup=on_startup,
         on_shutdown=on_shutdown,
         origins_whitelist=[
-            environment.UI_HOST_URL,
-            'http://localhost:4200', # temp
+            environment.UI_HOST_URL
         ]
     )
     server.listen(

@@ -26,10 +26,7 @@ def get_db_describer_to_return_vidoe_on_search(video: Video):
         async def search(self) -> List[Any]:
             return [video]
 
-    class DescribeDbVideosFn:
-        def __call__(self, *args, **kwds) -> Searchable:
-            return Searchable()
-    return DescribeDbVideosFn()
+    return lambda *args, **kwds: Searchable()
 
 
 @pytest.mark.asyncio
