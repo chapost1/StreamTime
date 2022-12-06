@@ -16,12 +16,11 @@ class S3:
     {Storage.__doc__}
     """
 
-    def __init__(self, boto3: Boto3, context: Context):
-        self.boto3 = boto3
+    def __init__(self, context: Context):
         self.context = context
 
     def __get_client(self):
-        return self.boto3.session().create_client(
+        return Boto3().session().create_client(
             's3',
             region_name=environment.AWS_REGION
         )
