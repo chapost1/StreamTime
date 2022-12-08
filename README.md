@@ -49,15 +49,14 @@ This diagram is intended to show the relationship between the system components 
 
 ![Video Upload Use Case Sequence Diagram](./assets/diagrams/video_upload_use_case_seq_diagram.jpg)
 
-### Web Api Service Diagram
+### Web server API Readme
 
-#### Heavily influenced by Robert C. Martin (Uncle Bob), <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">The Clean Architecture</a>
+To read about the Web server Design, [click here](./services/api/README.md)
 
-This Diagram should explain the relation between the app layers.
 
-![Web Api Service Diagram](./services/api/abstract_web_api_architecture_diagram.jpg)
+## How To Use
 
-## Prerequisites
+### Prerequisites
 
 #### Ensure the following are installed:
 
