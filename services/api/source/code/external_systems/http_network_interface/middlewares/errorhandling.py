@@ -1,10 +1,10 @@
-from typing import Callable
+from typing import Callable, Dict
 from fastapi import Request, status, Response
 from fastapi.responses import JSONResponse
 import common.app_errors as app_errors
 
 
-def http_error(details: app_errors.AppError, status_code: status) -> Response:
+def http_error(details: Dict, status_code: status) -> Response:
     """Retuens an HTTP Response based on the relevant structure"""
 
     if details is not None:
