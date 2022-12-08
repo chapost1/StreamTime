@@ -7,12 +7,15 @@ import datetime
 # otherwise, they will remain empty
 REQUIRED_FIELDS_ON_LISTING = ['title', 'description']
 # a set of fields which are allowed to update by design
-ALLOWED_UPDATE_FIELDS = {'title', 'description', 'listing_time', 'is_private'}
+ALLOWED_UPDATE_FIELDS_FOR_LISTED_VIDEOS = {'title', 'description', 'is_private'}
+ALLOWED_UPDATE_FIELDS_FOR_NEW_LISTING = ALLOWED_UPDATE_FIELDS_FOR_LISTED_VIDEOS.union({'listing_time'})
+
 
 class Video(UploadedVideo):
     # static
     REQUIRED_FIELDS_ON_LISTING: ClassVar[List[str]] = REQUIRED_FIELDS_ON_LISTING
-    ALLOWED_UPDATE_FIELDS: ClassVar[Set[str]] = ALLOWED_UPDATE_FIELDS
+    ALLOWED_UPDATE_FIELDS_FOR_NEW_LISTING: ClassVar[Set[str]] = ALLOWED_UPDATE_FIELDS_FOR_NEW_LISTING
+    ALLOWED_UPDATE_FIELDS_FOR_LISTED_VIDEOS: ClassVar[Set[str]] = ALLOWED_UPDATE_FIELDS_FOR_LISTED_VIDEOS
 
     # per instance
     pagination_index: Optional[int]

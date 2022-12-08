@@ -99,5 +99,8 @@ def test_required_fields_property():
     assert Video.REQUIRED_FIELDS_ON_LISTING == ['title', 'description']
 
 
-def test_allowed_update_fields_property():
-    assert Video.ALLOWED_UPDATE_FIELDS == {'title', 'description', 'listing_time', 'is_private'}
+def test_allowed_update_fields_for_new_listing_property():
+    assert Video.ALLOWED_UPDATE_FIELDS_FOR_NEW_LISTING == {'title', 'description', 'listing_time', 'is_private'}
+
+def test_allowed_update_fields_for_listed_property():
+    assert Video.ALLOWED_UPDATE_FIELDS_FOR_LISTED_VIDEOS == {'title', 'description', 'is_private'}
