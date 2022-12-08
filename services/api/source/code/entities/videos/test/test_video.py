@@ -12,6 +12,12 @@ def test_video_can_be_initialized_without_arguments():
     assert vid is not None
 
 
+def test_private_key_pagination_index_can_be_initialized():
+    pagination_index = random.randint(0, 100000)
+    vid = Video(pagination_index=pagination_index)
+    assert vid.pagination_index == pagination_index
+
+
 def test_private_key_storage_object_key_can_be_initialized():
     storage_object_key = 'some_value'
     vid = Video(storage_object_key=storage_object_key)

@@ -18,7 +18,6 @@ class Video(UploadedVideo):
     ALLOWED_UPDATE_FIELDS_FOR_LISTED_VIDEOS: ClassVar[Set[str]] = ALLOWED_UPDATE_FIELDS_FOR_LISTED_VIDEOS
 
     # per instance
-    pagination_index: Optional[int]
     title: Optional[str]
     description: Optional[str]
     size_in_bytes: Optional[int]
@@ -30,13 +29,22 @@ class Video(UploadedVideo):
     class Config:
         underscore_attrs_are_private = True
     
+    _pagination_index: Optional[int]
     _storage_object_key: Optional[str]
     _storage_thumbnail_key: Optional[str]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # privates
+        self._pagination_index = kwargs.get('pagination_index', None)
         self._storage_object_key = kwargs.get('storage_object_key', None)
         self._storage_thumbnail_key = kwargs.get('storage_thumbnail_key', None)
+
+
+    @property
+    def pagination_index(self) -> str:
+        return self._pagination_index
 
 
     @property
