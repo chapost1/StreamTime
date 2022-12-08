@@ -1,14 +1,18 @@
 
 from common.singleton import Singleton
+from external_systems.data_access.rds.pg.connection.abstract.conncetion import ConnectionProtocol
 from typing import List, Tuple, Any, Union
 import aiopg
 
 
 class Connection(metaclass=Singleton):
-    """
+    f"""
     Singleton PG Connection client class which supports async operations
 
     It uses connection pool to avoid TCP hand-shake on every database operation
+
+    Abstract protocol docs:
+    {ConnectionProtocol.__doc__}
     """
 
     __slots__ = (

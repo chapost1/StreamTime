@@ -1,6 +1,6 @@
 from __future__ import annotations
 from external_systems.data_access.rds.abstract.videos.describers import UnprocessedVideosDescriber
-from external_systems.data_access.rds.pg.connection.connection import Connection
+from external_systems.data_access.rds.pg.abstract_internals import GetConnectionFunction
 from external_systems.data_access.rds.pg.videos import tables
 from entities.videos import VideoStages
 from uuid import UUID
@@ -17,11 +17,14 @@ class UploadedVideosDescriberPG:
     {UnprocessedVideosDescriber.__doc__}
     """
 
+    get_connection_fn: GetConnectionFunction
+
     hash_ids: List[UUID]
     user_ids: List[UUID]
 
 
-    def __init__(self) -> None:
+    def __init__(self, get_connection_fn: GetConnectionFunction) -> None:
+        self.get_connection_fn = get_connection_fn
         self.hash_ids = []
         self.user_ids = []
 
@@ -118,7 +121,7 @@ class UploadedVideosDescriberPG:
         
         table = self.__get_table_of_uploaded_video_by_stage(stage=stage)
 
-        await Connection().execute([
+        await self.get_connection_fn().execute([
             (
                 f"""UPDATE {table}
                     SET {', '.join(update_statement)}
@@ -135,7 +138,7 @@ class UploadedVideosDescriberPG:
         
         conditions, params = self.build_query_conditions_params()
 
-        await Connection().execute([
+        await self.get_connection_fn().execute([
             (
                 f"""DELETE FROM {table}
                     WHERE {f'{nl()}AND '.join(conditions)}""",

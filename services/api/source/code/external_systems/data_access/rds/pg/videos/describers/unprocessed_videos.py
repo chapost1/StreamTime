@@ -1,5 +1,4 @@
 from __future__ import annotations
-from external_systems.data_access.rds.pg.connection.connection import Connection
 from external_systems.data_access.rds.abstract.videos import UnprocessedVideosDescriber
 from external_systems.data_access.rds.pg.videos.describers.uploaded_videos import UploadedVideosDescriberPG
 from typing import List, Tuple
@@ -18,6 +17,10 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
     {UnprocessedVideosDescriber.__doc__}
     """
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+
     async def search(self) -> List[UnprocessedVideo]:
         conditions, params = super().build_query_conditions_params()
 
@@ -26,7 +29,7 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
         if 0 < len(conditions):
             where_condition = f'{nl()}AND '.join(conditions)
 
-        videos = await Connection().query([
+        videos = await self.get_connection_fn().query([
             (
                 f"""SELECT
                         hash_id,
