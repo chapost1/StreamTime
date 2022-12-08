@@ -43,8 +43,13 @@ class Video(UploadedVideo):
 
 
     @property
-    def pagination_index(self) -> str:
+    def pagination_index(self) -> int:
         return self._pagination_index
+
+
+    @pagination_index.setter
+    def pagination_index(self, pagination_index: int) -> None:
+        self._pagination_index = pagination_index
 
 
     @property
@@ -52,9 +57,19 @@ class Video(UploadedVideo):
         return self._storage_object_key
 
 
+    @storage_object_key.setter
+    def storage_object_key(self, storage_object_key: str) -> None:
+        self._storage_object_key = storage_object_key
+
+
     @property
     def storage_thumbnail_key(self) -> str:
         return self._storage_thumbnail_key
+
+
+    @storage_thumbnail_key.setter
+    def storage_thumbnail_key(self, storage_thumbnail_key: str) -> None:
+        self._storage_thumbnail_key = storage_thumbnail_key
 
     
     def is_listed(self) -> bool:
