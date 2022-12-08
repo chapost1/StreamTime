@@ -1,4 +1,4 @@
-from use_cases.db_operation_utils.concrete import update_db
+from use_cases.db_operation_utils.concrete import update_in_database
 from typing import Dict
 import pytest
 from common.app_errors import AppError
@@ -10,7 +10,7 @@ async def test_should_return_none_on_successful_update():
         async def update(self, new_desired_state: Dict) -> None:
             return None
     
-    assert await update_db(updatable=SuccessulUpdate(), new_desired_state={}) is None
+    assert await update_in_database(updatable=SuccessulUpdate(), new_desired_state={}) is None
 
 
 @pytest.mark.asyncio
@@ -20,7 +20,7 @@ async def test_should_propagate_exception():
             raise AppError()
     
     try:
-        await update_db(updatable=ExceptionalUpdate(), new_desired_state={})
+        await update_in_database(updatable=ExceptionalUpdate(), new_desired_state={})
         # should not reach
         assert 2 == 1
     except AppError as ae:
@@ -33,7 +33,7 @@ async def test_should_fail_if_new_desired_state_dict_is_not_given():
         async def update(self) -> None:
             return None
     try:
-        await update_db(updatable=UpdateClass())
+        await update_in_database(updatable=UpdateClass())
         # should not reach
         assert 2 == 1
     except TypeError:
@@ -52,6 +52,6 @@ async def test_should_pass_new_desired_state_to_update_class():
     mock = Updatable()
 
     arg = {'message': 'hello world!'}
-    await update_db(updatable=mock, new_desired_state=arg)
+    await update_in_database(updatable=mock, new_desired_state=arg)
 
     assert mock.side_effect == arg

@@ -1,4 +1,4 @@
-from use_cases.db_operation_utils.concrete import search_db
+from use_cases.db_operation_utils.concrete import search_in_database
 from typing import List, Any
 import random
 import pytest
@@ -12,7 +12,7 @@ async def test_returns_a_list_as_the_searchable_returns():
         async def search(self) -> List[Any]:
             return mock
     
-    assert await search_db(searchable=NormalSearchable()) == mock
+    assert await search_in_database(searchable=NormalSearchable()) == mock
 
 
 @pytest.mark.asyncio
@@ -22,7 +22,7 @@ async def test_if_searchable_raise_an_exception_it_is_propagated():
             raise AppError()
     
     try:
-        await search_db(searchable=ExceptionalSearchable())
+        await search_in_database(searchable=ExceptionalSearchable())
         # should not reach
         assert 2 == 1
     except AppError as ae:

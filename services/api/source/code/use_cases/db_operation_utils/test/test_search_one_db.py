@@ -1,4 +1,4 @@
-from use_cases.db_operation_utils.concrete import search_one_db
+from use_cases.db_operation_utils.concrete import search_one_in_database
 import random
 import pytest
 from typing import List, Any
@@ -16,7 +16,7 @@ async def test_returns_first_element_of_list():
         async def search(self) -> List[Any]:
             return mock
 
-    result = await search_one_db(searchable=NormalSearchable())
+    result = await search_one_in_database(searchable=NormalSearchable())
 
     assert result == first
 
@@ -28,7 +28,7 @@ async def test_if_searchable_raise_an_exception_it_is_propagated():
             raise AppError()
     
     try:
-        await search_one_db(searchable=ExceptionalSearchable())
+        await search_one_in_database(searchable=ExceptionalSearchable())
         # should not reach
         assert 2 == 1
     except AppError as ae:
@@ -42,7 +42,7 @@ async def test_raise_not_found_exception_if_list_is_empty():
             return []
     
     try:
-        await search_one_db(searchable=EmptySearchable())
+        await search_one_in_database(searchable=EmptySearchable())
         # should not reach
         assert 2 == 1
     except NotFoundError as ae:

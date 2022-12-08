@@ -10,19 +10,19 @@ from external_systems.data_access.rds.abstract.common_protocols import (
     Searchable
 )
 from common.constants import LISTED_VIDEOS_QUERY_PAGE_LIMIT
-from use_cases.db_operation_utils.abstract import SearchDbFn
+from use_cases.db_operation_utils.abstract import SearchInDatabaseFunction
 from use_cases.videos.explore_listed_videos.abstract_internals import (
-    DescribeDbVideosFn,
-    GetVisibilitySettingsFn
+    DescribeVideosInDatabaseFunction,
+    GetVisibilitySettingsFunction
 )
 
 
 async def use_case(
     # creation scope
     database: VideosDatabase,
-    search_db_fn: SearchDbFn,
-    describe_db_videos_fn: DescribeDbVideosFn,
-    get_visibility_settings_fn: GetVisibilitySettingsFn,
+    search_in_database_fn: SearchInDatabaseFunction,
+    describe_videos_in_database_fn: DescribeVideosInDatabaseFunction,
+    get_visibility_settings_fn: GetVisibilitySettingsFunction,
     next_page_text_decoder: NextPageTextDecoder,
     next_videos_page_calculator: NextVideosPageCalculator,
     # usage scope
@@ -39,7 +39,7 @@ async def use_case(
 
     next_page: NextPage = next_page_text_decoder.decode(b64=next)
 
-    db_videos_describer: Searchable = describe_db_videos_fn(
+    db_videos_describer: Searchable = describe_videos_in_database_fn(
         database=database,
         user_id_to_ignore=user_id_to_ignore,
         authenticated_user_to_allow_privates=authenticated_user_to_allow_privates,
@@ -47,7 +47,7 @@ async def use_case(
         page_limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT
     )
 
-    videos: List[Video] = await search_db_fn(searchable=db_videos_describer)
+    videos: List[Video] = await search_in_database_fn(searchable=db_videos_describer)
 
     return VideosPage(
         videos=videos,

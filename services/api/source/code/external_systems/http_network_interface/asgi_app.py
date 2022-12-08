@@ -3,11 +3,11 @@ from typing import Awaitable, Protocol, List
 from fastapi import FastAPI
 
 
-class AttachMiddlewaresFn(Protocol):
+class AttachMiddlewaresFunction(Protocol):
     def __call__(self, app: Starlette, origins_whitelist: List[str]) -> None: ...
 
 
-class AttachRoutersFn(Protocol):
+class AttachRoutersFunction(Protocol):
     def __call__(self, app: Starlette) -> None: ...
 
 
@@ -15,8 +15,8 @@ def create_new_asgi_app(
     origins_whitelist: List[str],
     on_startup: Awaitable,
     on_shutdown: Awaitable,
-    attach_middlewares_fn: AttachMiddlewaresFn,
-    attach_routers_fn: AttachRoutersFn
+    attach_middlewares_fn: AttachMiddlewaresFunction,
+    attach_routers_fn: AttachRoutersFunction
 ) -> Starlette:
     """
     Creates an ASGI app

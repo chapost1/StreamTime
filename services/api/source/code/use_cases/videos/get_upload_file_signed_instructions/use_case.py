@@ -3,8 +3,8 @@ from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from external_systems.data_access.storage.abstract import Storage
 from entities.storage import FileUploadSignedInstructions
 from use_cases.videos.get_upload_file_signed_instructions.abstract_internals import (
-    AssertFileContentTypeFn,
-    GenerateNewVideoHashIdFn
+    AssertFileContentTypeFunction,
+    GenerateNewVideoHashIdFunction
 )
 
 
@@ -12,8 +12,8 @@ async def use_case(
     # creation scope
     database: VideosDatabase,
     storage: Storage,
-    assert_file_content_type_fn: AssertFileContentTypeFn,
-    generate_new_video_hash_id_fn: GenerateNewVideoHashIdFn,
+    assert_file_content_type_fn: AssertFileContentTypeFunction,
+    generate_new_video_hash_id_fn: GenerateNewVideoHashIdFunction,
     # usage scope
     authenticated_user_id: UUID,
     file_content_type: str

@@ -10,17 +10,17 @@ from entities.videos.abstract_protocols import (
     NextPageTextDecoder,
     NextVideosPageCalculator
 )
-from use_cases.db_operation_utils.abstract import SearchDbFn
+from use_cases.db_operation_utils.abstract import SearchInDatabaseFunction
 from use_cases.videos.get_specific_user_listed_videos.abstract_internals import (
-    DescribeDbVideosFn
+    DescribeVideosInDatabaseFunction
 )
 
 
 async def use_case(
     # creation scope
     database: VideosDatabase,
-    search_db_fn: SearchDbFn,
-    describe_db_videos_fn: DescribeDbVideosFn,
+    search_in_database_fn: SearchInDatabaseFunction,
+    describe_videos_in_database_fn: DescribeVideosInDatabaseFunction,
     next_page_text_decoder: NextPageTextDecoder,
     next_videos_page_calculator: NextVideosPageCalculator,
     # usage scope
@@ -41,7 +41,7 @@ async def use_case(
 
     next_page: NextPage = next_page_text_decoder.decode(b64=next)
 
-    db_videos_describer: Searchable = describe_db_videos_fn(
+    db_videos_describer: Searchable = describe_videos_in_database_fn(
         database=database,
         authenticated_user_id=authenticated_user_id,
         user_id=user_id,
@@ -49,7 +49,7 @@ async def use_case(
         page_limit=LISTED_VIDEOS_QUERY_PAGE_LIMIT
     )
 
-    videos: List[Video] = await search_db_fn(searchable=db_videos_describer)
+    videos: List[Video] = await search_in_database_fn(searchable=db_videos_describer)
 
     return VideosPage(
         videos=videos,

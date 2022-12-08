@@ -12,7 +12,7 @@ class SearchableUpdatable(Searchable, Updatable, Protocol):
     pass
 
 
-class DescribeDbVideosFn(Protocol):
+class DescribeVideosInDatabaseFunction(Protocol):
     def __call__(
         self,
         database: VideosDatabase,
@@ -22,11 +22,11 @@ class DescribeDbVideosFn(Protocol):
         ...
 
 
-class PrepareNewListingBeforePublishFn(Protocol):
+class PrepareNewListingBeforePublishFunction(Protocol):
     def __call__(self, video: Video) -> Video:
         ...
 
 
-class ParseVideoIntoStateDictFn(Protocol):
+class ParseVideoIntoStateDictFunction(Protocol):
     def __call__(self, video: Video) -> Dict:
         ...

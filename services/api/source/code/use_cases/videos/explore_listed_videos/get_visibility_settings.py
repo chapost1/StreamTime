@@ -1,11 +1,11 @@
 from typing import Union, Tuple
 from uuid import UUID
-from use_cases.validation_utils.abstract import IsAnonymouseUserFn
+from use_cases.validation_utils.abstract import IsAnonymouseUserFunction
 
 
 def get_visibility_settings(
     # creation scope
-    is_anonymous_user_fn: IsAnonymouseUserFn,
+    is_anonymous_user_fn: IsAnonymouseUserFunction,
     # usage scope
     authenticated_user_id: Union[UUID, str],
     include_my: bool,

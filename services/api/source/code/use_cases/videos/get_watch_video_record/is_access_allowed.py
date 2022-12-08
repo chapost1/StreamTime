@@ -1,11 +1,11 @@
 from uuid import UUID
 from typing import Union
-from use_cases.validation_utils.abstract import IsSameUserFn
+from use_cases.validation_utils.abstract import IsSameUserFunction
 
 
 def is_access_allowed(
     # creation scope
-    is_same_user_fn: IsSameUserFn,
+    is_same_user_fn: IsSameUserFunction,
     # usage scope
     authenticated_user_id: Union[UUID, str],
     owner_user_id: UUID,

@@ -6,7 +6,7 @@ from external_systems.data_access.rds.abstract.common_protocols import (
 )
 
 
-class DescribeDbVideosFn(Protocol):
+class DescribeVideosInDatabaseFunction(Protocol):
     def __call__(
         self,
         database: VideosDatabase,
@@ -17,7 +17,7 @@ class DescribeDbVideosFn(Protocol):
         ...
 
 
-class IsAccessAllowedFn(Protocol):
+class IsAccessAllowedFunction(Protocol):
     def __call__(
         self,
         authenticated_user_id: Union[UUID, str],

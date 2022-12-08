@@ -8,10 +8,10 @@ from external_systems.data_access.storage.abstract import Storage
 from external_systems.data_access.rds.abstract.common_protocols import (
     Searchable
 )
-from use_cases.db_operation_utils.abstract import SearchOneDbFn
+from use_cases.db_operation_utils.abstract import SearchOneInDatabaseFunction
 from use_cases.videos.get_watch_video_record.abstract_internals import (
-    DescribeDbVideosFn,
-    IsAccessAllowedFn
+    DescribeVideosInDatabaseFunction,
+    IsAccessAllowedFunction
 )
 
 
@@ -19,9 +19,9 @@ async def use_case(
     # creation scope
     database: VideosDatabase,
     storage: Storage,
-    search_one_db_fn: SearchOneDbFn,
-    describe_db_videos_fn: DescribeDbVideosFn,
-    is_access_allowed_fn: IsAccessAllowedFn,
+    search_one_in_database_fn: SearchOneInDatabaseFunction,
+    describe_videos_in_database_fn: DescribeVideosInDatabaseFunction,
+    is_access_allowed_fn: IsAccessAllowedFunction,
     # usage scope
     authenticated_user_id: Union[UUID, str],
     user_id: UUID,
@@ -34,14 +34,14 @@ async def use_case(
     It is needed to grant premission to access (watch) to the video assets storage
     """
 
-    db_videos_describer: Searchable = describe_db_videos_fn(
+    db_videos_describer: Searchable = describe_videos_in_database_fn(
         database=database,
         authenticated_user_id=authenticated_user_id,
         user_id=user_id,
         hash_id=hash_id
     )
 
-    video: Video = await search_one_db_fn(
+    video: Video = await search_one_in_database_fn(
         searchable=db_videos_describer
     )
 

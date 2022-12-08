@@ -1,7 +1,7 @@
 from entities.videos import WatchVideoRecord, Video
 from common.constants import MAXIMUM_SECONDS_TILL_PRESIGNED_URL_EXPIRATION
 from common.app_errors import AccessDeniedError
-from use_cases.db_operation_utils.concrete import search_one_db
+from use_cases.db_operation_utils.concrete import search_one_in_database
 from external_systems.data_access.storage.storage_test_client import StorageTestClient
 from functools import partial
 from typing import List, Any
@@ -43,8 +43,8 @@ async def test_returns_expected_structure_with_returned_values_in_internals():
         # creation scope
         database=None,
         storage=storage,
-        search_one_db_fn=search_one_db,
-        describe_db_videos_fn=get_db_describer_to_return_vidoe_on_search(video=video),
+        search_one_in_database_fn=search_one_in_database,
+        describe_videos_in_database_fn=get_db_describer_to_return_vidoe_on_search(video=video),
         is_access_allowed_fn=partial(is_access_allowed, is_same_user_fn=is_same_user),
         # usage scope
         authenticated_user_id=user_id,
@@ -80,8 +80,8 @@ async def test_raise_access_denied_if_not_same_user_and_private():
             # creation scope
             database=None,
             storage=storage,
-            search_one_db_fn=search_one_db,
-            describe_db_videos_fn=get_db_describer_to_return_vidoe_on_search(video=video),
+            search_one_in_database_fn=search_one_in_database,
+            describe_videos_in_database_fn=get_db_describer_to_return_vidoe_on_search(video=video),
             is_access_allowed_fn=partial(is_access_allowed, is_same_user_fn=is_same_user),
             # usage scope
             authenticated_user_id=uuid4(),
