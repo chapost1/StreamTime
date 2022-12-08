@@ -55,7 +55,7 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
 
 
     def build_excluded_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return super().build_property_conditions_params_all_values(
+        return super().build_property_conditions_params(
             raw_params=self.excluded_user_ids,
             col_name='user_id',
             exclude=True,

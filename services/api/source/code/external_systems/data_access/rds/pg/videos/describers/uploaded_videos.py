@@ -51,7 +51,7 @@ class UploadedVideosDescriberPG:
 
 
     def build_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return self.build_property_conditions_params_all_values(
+        return self.build_property_conditions_params(
             raw_params=self.user_ids,
             col_name='user_id',
             conditions=conditions,
@@ -60,7 +60,7 @@ class UploadedVideosDescriberPG:
 
 
     def build_hash_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return self.build_property_conditions_params_all_values(
+        return self.build_property_conditions_params(
             raw_params=self.hash_ids,
             col_name='hash_id',
             conditions=conditions,
@@ -68,7 +68,7 @@ class UploadedVideosDescriberPG:
         )
 
 
-    def build_property_conditions_params_all_values(
+    def build_property_conditions_params(
         self,
         raw_params: List[Any],
         col_name: str,
@@ -90,7 +90,15 @@ class UploadedVideosDescriberPG:
         
         pre_in_expression = 'not' if exclude else ''
 
-        statement=f"{col_name}::{casting_type} {pre_in_expression} in ({', '.join(s)})"
+        statement_building_blocks = [
+            f'{col_name}::{casting_type}',
+            pre_in_expression,
+            'in',
+            f"({', '.join(s)})"
+        ]
+
+        statement = ' '.join(filter(None, statement_building_blocks))
+
         conditions.append(statement)
 
         return conditions, params
@@ -109,7 +117,7 @@ class UploadedVideosDescriberPG:
 
 
     async def update(self, new_desired_state: Dict, stage: VideoStages) -> None:
-        self.__assert_required_values_before_specific_video_query_execution()
+        self.assert_required_values_before_specific_video_query_execution()
 
         update_statement, params = self.build_update_statement(fields=new_desired_state)
 
@@ -119,43 +127,47 @@ class UploadedVideosDescriberPG:
 
         conditions, params = self.build_query_conditions_params(params=params)
         
-        table = self.__get_table_of_uploaded_video_by_stage(stage=stage)
+        table = self.get_table_of_uploaded_video_by_stage(stage=stage)
 
         await self.get_connection_fn().execute([
             (
-                f"""UPDATE {table}
-                    SET {', '.join(update_statement)}
-                    WHERE {f'{nl()}AND '.join(conditions)};""",
+                nl().join([
+                   f'UPDATE {table}',
+                   f"SET {', '.join(update_statement)}",
+                   f"WHERE {f'{nl()}AND '.join(conditions)}"
+                ]),
                 tuple(params)
             )
         ])
 
 
     async def delete(self, stage: VideoStages) -> None:
-        self.__assert_required_values_before_specific_video_query_execution()
+        self.assert_required_values_before_specific_video_query_execution()
         
-        table = self.__get_table_of_uploaded_video_by_stage(stage=stage)
+        table = self.get_table_of_uploaded_video_by_stage(stage=stage)
         
         conditions, params = self.build_query_conditions_params()
 
         await self.get_connection_fn().execute([
             (
-                f"""DELETE FROM {table}
-                    WHERE {f'{nl()}AND '.join(conditions)}""",
+                nl().join([
+                   f'DELETE FROM {table}',
+                   f"WHERE {f'{nl()}AND '.join(conditions)}"
+                ]),
                 tuple(params)
             )
         ])
 
 
-    def __assert_required_values_before_specific_video_query_execution(self) -> None:
-        if len(self.user_ids) < 1 or self.user_ids[0] is None:
+    def assert_required_values_before_specific_video_query_execution(self) -> None:
+        if len(self.user_ids) < 1:
             raise ValueError('delete query: user_id is missing')
 
-        if len(self.hash_ids) < 1 or self.hash_ids[0] is None:
+        if len(self.hash_ids) < 1:
             raise ValueError('delete query: hash_id is missing')
 
 
-    def __get_table_of_uploaded_video_by_stage(self, stage: VideoStages) -> str:
+    def get_table_of_uploaded_video_by_stage(self, stage: VideoStages) -> str:
         table = tables.video_stages_to_table(stage)
         
         if table is None:
