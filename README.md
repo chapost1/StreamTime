@@ -13,13 +13,13 @@ You can find more of this course porjects <a href="https://github.com/EASS-HIT-P
 
 The user functionalities which are currently supported include:
 
-:gem: Upload / Delete your videos
+:gem: Upload / Delete your videos.
 
-:gem: Mark your videos as private so only you can see them, or public and share it with friends
+:gem: Control whether your videos are private or public so others can watch them.
 
-:gem: Watch yours / others public videos
+:gem: Watch yours / others public videos.
 
-:gem: Explore videos of other users
+:gem: Explore videos of other users.
 
 
 ## Status:
