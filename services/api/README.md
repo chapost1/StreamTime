@@ -27,10 +27,12 @@ Key notes:
 
 :key: More technically, the routers are just a map between HTTP calls and use cases functions.
 
-    The best way to understand the API is to spin up the service.
+### API HTTP Endpoints
+
+    The best way to understand the API HTTP Endpoints is to spin up the service.
     Then, look at the Swagger page which can be found on the /docs endpoint
 
-Alternatively, if you don't want to spin up the service, you can read about it [here](./openapi.md) using a simpler markdown version.
+Alternatively, if you don't want to spin up the service, you can read about it <strong>[here](./openapi.md)</strong> using a simpler markdown version.
 
 ### Where can I find the Routers in the source code?
 
