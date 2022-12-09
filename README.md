@@ -49,9 +49,11 @@ This diagram is intended to show the relationship between the system components 
 
 ![Video Upload Use Case Sequence Diagram](./assets/diagrams/video_upload_use_case_seq_diagram.jpg)
 
-### Web server API Readme
+### API Web Server Service Diagram
 
-To read about the Web server Design, [click here](./services/api/README.md)
+To read more about the API Web Server Design, [click here](./services/api/README.md)
+
+![Api Web Server Service Diagram](./services/api/abstract_web_api_architecture_diagram.jpg)
 
 
 ## How To Use
