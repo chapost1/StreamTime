@@ -9,7 +9,7 @@ from common.utils import nl
 
 
 class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
-    f"""
+    """
     DescribedUnprocessedVideos database class
     Uses postgres as a concrete implementation
     """

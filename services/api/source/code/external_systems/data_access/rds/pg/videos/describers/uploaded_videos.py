@@ -8,7 +8,7 @@ from common.utils import nl
 
 
 class UploadedVideosDescriberPG:
-    f"""
+    """
     DescribedUploadedVideos database class
     Uses postgres as a concrete implementation
     """

@@ -149,6 +149,7 @@ class VideosDatabasePG:
             .delete()
         )
 
+
     def _describe_videos(self) -> VideosDescriberPG:
         return VideosDescriberPG(get_connection_fn=self.get_connection_fn)
     

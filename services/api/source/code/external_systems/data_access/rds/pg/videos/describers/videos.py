@@ -9,7 +9,7 @@ from uuid import UUID
 
 
 class VideosDescriberPG(UploadedVideosDescriberPG):
-    f"""
+    """
     VideosDescriber database class
     Uses postgres as a concrete implementation
     """
