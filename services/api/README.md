@@ -1,17 +1,18 @@
 ## API Web Server Service
 
-#### Heavily influenced by Robert C. Martin (Uncle Bob), <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">The Clean Architecture</a>
+### Table of Contents
+- [Design](#design)
+- [Routers](#routers)
+- [Use Cases](#use_cases)
+- [Data Access](#data_access)
 
-### Service Diagram
+### Service Diagram  <a name="design"></a>
+
+#### Heavily influenced by Robert C. Martin (Uncle Bob), <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">The Clean Architecture</a>
 
 This Diagram should explain the relation between the app layers.
 
 ![Api Web Server Service Diagram](./abstract_web_api_architecture_diagram.jpg)
-
-### Table of Contents
-- [Routers](#routers)
-- [Use Cases](#use_cases)
-- [Data Access](#data_access)
 
 
 ## Routers  <a name="routers"></a>
