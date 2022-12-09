@@ -1,12 +1,11 @@
 from typing import Protocol, List, Dict, Tuple, Optional
 from entities.videos import VideoStages, Video, UnprocessedVideo
 from uuid import UUID
-from external_systems.data_access.rds.abstract.videos.describers import VideosDescriber
-from external_systems.data_access.rds.abstract.videos.describers import UnprocessedVideosDescriber
 
 
 class VideosDatabase(Protocol):
     """VideosDatabase database class protocol"""
+
 
     async def find_video_stage(self, user_id: UUID, hash_id: UUID) -> VideoStages:
         """
@@ -69,14 +68,4 @@ class VideosDatabase(Protocol):
     ) -> None:
         """
         Deletes an unprocessed video of specified user if exists
-        """
-
-    def describe_videos(self) -> VideosDescriber:
-        """
-        Gets new instance of videos describer
-        """
-
-    def describe_unprocessd_videos(self) -> UnprocessedVideosDescriber:
-        """
-        Gets new instance of unprocessed videos describer
         """

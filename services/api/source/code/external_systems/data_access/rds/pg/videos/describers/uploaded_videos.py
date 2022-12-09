@@ -1,5 +1,4 @@
 from __future__ import annotations
-from external_systems.data_access.rds.abstract.videos.describers import UnprocessedVideosDescriber
 from external_systems.data_access.rds.pg.abstract_internals import GetConnectionFunction
 from external_systems.data_access.rds.pg.videos import tables
 from entities.videos import VideoStages
@@ -10,11 +9,8 @@ from common.utils import nl
 
 class UploadedVideosDescriberPG:
     f"""
-    DescribedUploadedVideos database class which implements the abstract protocol
+    DescribedUploadedVideos database class
     Uses postgres as a concrete implementation
-
-    Abstract protocol docs:
-    {UnprocessedVideosDescriber.__doc__}
     """
 
     get_connection_fn: GetConnectionFunction
@@ -29,13 +25,13 @@ class UploadedVideosDescriberPG:
         self.user_ids = []
 
 
-    def with_hash(self, id: UUID) -> UnprocessedVideosDescriber:
+    def with_hash(self, id: UUID) -> UploadedVideosDescriberPG:
         if id is not None:
             self.hash_ids.append(id)
         return self
 
 
-    def owned_by(self, user_id: UUID) -> UnprocessedVideosDescriber:
+    def owned_by(self, user_id: UUID) -> UploadedVideosDescriberPG:
         if user_id is not None:
             self.user_ids.append(user_id)
         return self

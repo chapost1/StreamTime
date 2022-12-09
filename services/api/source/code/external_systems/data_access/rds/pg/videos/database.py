@@ -1,6 +1,4 @@
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
-from external_systems.data_access.rds.abstract.videos import VideosDescriber
-from external_systems.data_access.rds.abstract.videos import UnprocessedVideosDescriber
 from external_systems.data_access.rds.pg.videos.describers import VideosDescriberPG
 from external_systems.data_access.rds.pg.videos.describers import UnprocessedVideosDescriberPG
 from external_systems.data_access.rds.pg.abstract_internals import GetConnectionFunction
@@ -151,9 +149,9 @@ class VideosDatabasePG:
             .delete()
         )
 
-    def _describe_videos(self) -> VideosDescriber:
+    def _describe_videos(self) -> VideosDescriberPG:
         return VideosDescriberPG(get_connection_fn=self.get_connection_fn)
     
 
-    def _describe_unprocessd_videos(self) -> UnprocessedVideosDescriber:
+    def _describe_unprocessd_videos(self) -> UnprocessedVideosDescriberPG:
         return UnprocessedVideosDescriberPG(get_connection_fn=self.get_connection_fn)
