@@ -13,6 +13,47 @@ def get_connection_mock(return_value: Any = None, side_effect: Exception = None)
     return ConnectionMock(return_value=return_value, side_effect=side_effect)
 
 
+def test_case():
+    uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    val_name = 'dummy'
+    casting_type = 'text'
+    expression = uv.cast(val_name=val_name, casting_type='text')
+    assert expression == f'CAST ( ({val_name}) AS {casting_type} )'
+
+
+def test_case_no_cases_should_return_falsy_case_so_default_will_be_used():
+    uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    statement = uv.case(
+        cases=[],
+        default='false'
+    )
+
+    assert statement == 'CASE WHEN false THEN null ELSE false END'
+
+
+def test_case_no_default_should_be_truthy():
+    uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    statement = uv.case(
+        cases=[],
+        default=None
+    )
+
+    assert statement == 'CASE WHEN false THEN null ELSE true END'
+
+
+def test_case_should_be_build_as_expected():
+    uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    statement = uv.case(
+        cases=[
+            tuple(['condition_2', 'then_2']),
+            tuple(['condition_1', 'then_1'])
+        ],
+        default='null'
+    )
+
+    assert statement == 'CASE WHEN condition_2 THEN then_2 WHEN condition_1 THEN then_1 ELSE null END'
+
+
 def test_build_property_conditions_params_does_not_affect_base_if_raw_is_empty():
     base_conditions = [uuid4()]
     base_params = [random.randint(0, 1000)]
@@ -55,7 +96,7 @@ def test_build_property_conditions_params_returns_expected_value():
 
     assert conditions == [
         dummy_first_condition, dummy_second_condition,
-        f'{col_name}::{default_casting_type} in (%s::{default_casting_type}, %s::{default_casting_type})'
+        f"{uv.cast(val_name=col_name, casting_type=default_casting_type)} in ({uv.cast(val_name='%s', casting_type=default_casting_type)}, {uv.cast(val_name='%s', casting_type=default_casting_type)})"
     ]
 
     assert params == [
@@ -80,7 +121,7 @@ def test_build_property_conditions_params_returns_expected_value_with_exclude_as
     )
 
     assert conditions == [
-        f'{col_name}::{casting_type} not in (%s::{casting_type})'
+        f"{uv.cast(val_name=col_name, casting_type=casting_type)} not in ({uv.cast(val_name='%s', casting_type=casting_type)})"
     ]
 
     assert params == [random_param]
@@ -96,7 +137,7 @@ def test_build_hash_ids_conditions_params_returns_expected_values():
     conditions, params = uv.build_hash_ids_conditions_params()
 
     assert conditions == [
-        f'hash_id::text in (%s::text, %s::text)'
+        f"{uv.cast(val_name='hash_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')})"
     ]
 
     assert params == [uid_1, uid_2]
@@ -127,7 +168,7 @@ def test_build_user_ids_conditions_params_returns_expected_values():
     conditions, params = uv.build_user_ids_conditions_params()
 
     assert conditions == [
-        f'user_id::text in (%s::text, %s::text)'
+        f"{uv.cast(val_name='user_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')})"
     ]
 
     assert params == [uid_1, uid_2]
@@ -258,8 +299,8 @@ async def test_update_calls_with_expected_steps():
             nl().join([
                 f'UPDATE {mock_table_name}',
                 'SET hello = %s, a = %s, c = %s',
-                'WHERE user_id::text in (%s::text)',
-                'AND hash_id::text in (%s::text)'
+                f"WHERE {uv.cast(val_name='user_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')})",
+                f"AND {uv.cast(val_name='hash_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')})"
             ]),
             tuple(['world', 'b', 4, user_id, hash_id])
         )
@@ -291,8 +332,8 @@ async def test_delete_calls_with_expected_steps():
         (
             nl().join([
                 f'DELETE FROM {mock_table_name}',
-                'WHERE user_id::text in (%s::text)',
-                'AND hash_id::text in (%s::text)'
+                f"WHERE {uv.cast(val_name='user_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')})",
+                f"AND {uv.cast(val_name='hash_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')})"
             ]),
             tuple([user_id, hash_id])
         )

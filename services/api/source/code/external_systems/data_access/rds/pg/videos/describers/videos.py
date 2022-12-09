@@ -91,10 +91,19 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
 
             s = []
             for param in self.allowed_privates_of_user_ids:
-                s.append(f'%s::text')
+                s.append(self.cast(val_name='%s', casting_type='text'))
                 params.append(param)
-            # need to be strict regarding whether it is an allowed user or it should be determined by privacy
-            statement = f"CASE WHEN user_id::text in ({', '.join(s)}) THEN true ELSE (is_private is not true)::bool END"
+
+            # need to be strict regarding whether it is an allowed user or it should be determined by privacy            
+            statement = self.case(
+                cases=[
+                    # for all users are in allowed privates, return true
+                    (f"{self.cast(val_name='user_id', casting_type='text')} in ({', '.join(s)})", 'true'),
+                ],
+                # default is true only if private is not true (means: it is public)
+                default=f"{self.cast(val_name='is_private is not true', casting_type='bool')}"
+            )
+
             conditions.append(statement)
 
         return conditions, params

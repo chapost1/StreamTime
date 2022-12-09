@@ -85,13 +85,13 @@ class UploadedVideosDescriberPG:
 
         s = []
         for param in raw_params:
-            s.append(f'%s::{casting_type}')
+            s.append(self.cast(val_name='%s', casting_type=casting_type))
             params.append(param)
         
         pre_in_expression = 'not' if exclude else ''
 
         statement_building_blocks = [
-            f'{col_name}::{casting_type}',
+            self.cast(val_name=col_name, casting_type=casting_type),
             pre_in_expression,
             'in',
             f"({', '.join(s)})"
@@ -102,8 +102,34 @@ class UploadedVideosDescriberPG:
         conditions.append(statement)
 
         return conditions, params
+    
+
+    def cast(self, val_name: str, casting_type: str) -> str:
+        return f'CAST ( ({val_name}) AS {casting_type} )'
 
     
+    def case(self, cases: List[Tuple[str, str]], default: str) -> str:
+        statement = ['CASE']
+
+        if cases is None:
+            cases = []
+        if len(cases) < 1:
+            cases.append(tuple(['false', 'null']))
+
+        if default is None:
+            default = 'true'
+
+        for case in cases:
+            statement.append(f'WHEN {case[0]}')
+            statement.append(f'THEN {case[1]}')
+        
+        statement.append(f'ELSE {default}')
+
+        statement.append('END')
+
+        return ' '.join(statement)
+
+
     def build_update_statement(self, fields: Dict, params: List[Any] = []) -> Tuple[List[str], List[Any]]:
         params = params.copy()
 
