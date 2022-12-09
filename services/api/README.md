@@ -74,7 +74,7 @@ A simplified version of the tree output beside to the entrypoint.py file:
         |-- update_video
 ```
 
-Each Use case is built as another directory and contains the followings:
+Each Use case is a directory by itself and contains the followings:
 - use_case.py: file which contains a use_case() funciton, which is the logic itself.
 - test folder: unit tests for the specific use case.
 - helpers (optional): helper functions which are needed to perform the use case
