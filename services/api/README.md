@@ -74,17 +74,14 @@ A simplified version of the tree output beside to the entrypoint.py file:
         |-- update_video
 ```
 
-Each Use case is built as another directory which has the followings:
+Each Use case is built as another directory and contains the followings:
 - use_case.py: file which contains a use_case() funciton, which is the logic itself.
-- test folder: unit tests for the specific use case and its helper functions.
-- certain python files: basically helper functions which are needed to perform the use case
+- test folder: unit tests for the specific use case.
+- helpers (optional): helper functions which are needed to perform the use case
   these files are seperated for these purposes:
   - help maintain the use case simpler, so that it can use them as a black box.
   - be able to mock them and isolate the use case when testing it.
-- db_describe_logic.py: not used in every use case. it's purposes is:
-  - encapsulates the logic for calling the data access layer in the correct manner, it is seperated so it can be mocked easily.
-  - it Creates a Database Describer object, which is discussed in the Data Access Layer section.
-- __ init __ .py: is important because we can stitch the use case with its helpers before exporting it so any other layer can import it.
+- __ init __ .py: is used to stitch the use case with its helpers before exporting it so any other layer can import it.
 
 
 For example, the update_video use case directory in lower resolution:
@@ -92,11 +89,13 @@ For example, the update_video use case directory in lower resolution:
 ```sh
 |-- update_video
     |-- __init__.py
-    |-- abstract_internals.py
-    |-- db_describe_logic.py
-    |-- listed_videos_preparations.py
-    |-- new_listing_preparations.py
-    |-- parse_video_into_state_dict.py
+    |-- helpers
+        |-- __init__.py
+        |-- test
+        |-- abstract.py
+        |-- listed_videos_preparations.py
+        |-- new_listing_preparations.py
+        |-- parse_video_into_state_dict.py
     |-- test
     |-- use_case.py
 ```
@@ -119,17 +118,19 @@ A simplified version of the tree output beside to the entrypoint.py file:
 |   |   |-- storage
 ```
 
-It worth to mention, currently the Use Cases layer uses the RDS abstract protocol using something which is called a "Database Describer"
+Currently the Concrete RDS implementation is Postgresql
 
-It's code can be found under the abstract directory of the RDS.
+It worth to mention, that its implementation uses a class which is called a "Describer"
 
-It is in general sort of a builder pattern which is related to the specific app domain (i.e: videos) and its properties.
+It's code can be found under the pg directory of the RDS for any domain's entity.
+
+It is in general sort of a builder pattern which is related to the specific app domain entity (i.e: videos) and its properties.
 
 > Similar to ORM but more dedicated to the application domain and logic.
 
-It lets the user (i.e: Use Cases layer) to build certain queries dynamically without the need to create special function dedicated for this query in the Data Access layer, and yet to abstract the nitty-gritty parts from the DAL user.
+It lets the user (i.e: the get method of the videos database class) to build certain queries dynamically based on the arguments it pass to the describer, without the need to repeat writing similar logics for many use case's queries.
 
-It's syntax may be similar to this (usage example in the use case layer):
+It's syntax may be similar to this:
 
 ```python
 database.describe_videos()
@@ -138,6 +139,7 @@ database.describe_videos()
 .include_privates_of(user_id=authenticated_user_id)
 .paginate(pagination_index_is_smaller_than=pagination_index_is_smaller_than)
 .limit(limit=page_limit)
+.search()
 ```
 
 Notice that, as mentioned the syntax is related to the domain itself, it "describes" to the database how the records should look like.
@@ -146,24 +148,20 @@ Afterwards, it's possible to do some supported operations, such as Search, or De
 
 > Each domain entity has its own Describers (i.e: Videos)
 
-The abstract protocols can be found here (relative to the DAL directroy):
+The describers classes can be found here (relative to the DAL directroy):
 
 ```sh
 |-- __init__.py
 |-- rds
-|   |-- abstract
+|   |-- pg
 |   |   |-- __init__.py
-|   |   |-- common_protocols.py
 |   |   |-- videos
 |   |       |-- __init__.py
 |   |       |-- database.py
 |   |       `-- describers # here
 |   |           |-- __init__.py
+|   |           |-- test
 |   |           |-- unprocessed_videos.py
 |   |           |-- uploaded_videos.py
 |   |           |-- videos.py
 ```
-
-Notice that, the concrete implementations, i.e: of Postgres, can be found on the same files hierarchy under the pg directory.
-
-it should be found on the path: (data_access/rds/pg)
