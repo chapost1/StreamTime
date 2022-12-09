@@ -1,10 +1,13 @@
-from use_cases.videos.update_video.new_listing_preparations import prepare_new_listing_before_publish
 from common.app_errors import InputError
 from entities.videos import Video
 from common.utils import calc_server_time
 from uuid import uuid4
 import pytest
 from mock import patch
+from use_cases.videos.update_video.helpers.new_listing_preparations import (
+    prepare_new_listing_before_publish
+)
+
 
 def new_video() -> Video:
     return Video(

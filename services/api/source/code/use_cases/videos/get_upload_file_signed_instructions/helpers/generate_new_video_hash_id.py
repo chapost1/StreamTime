@@ -10,7 +10,10 @@ async def generate_new_video_hash_id(database: VideosDatabase, user_id: UUID) ->
     while not found:
         # should happen once on average due to probability
         hash_id = uuid4()
-        video_stage = await database.find_video_stage(user_id=user_id, hash_id=hash_id)
+        video_stage = await database.find_video_stage(
+            user_id=user_id,
+            hash_id=hash_id
+        )
         if video_stage is None:
             break
         attempts_left -= 1

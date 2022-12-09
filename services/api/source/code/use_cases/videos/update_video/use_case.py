@@ -1,13 +1,8 @@
 from uuid import UUID
 from entities.videos import Video
+from common.utils import find_one
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
-from use_cases.db_operation_utils.abstract import (
-    SearchOneInDatabaseFunction,
-    UpdateInDatabaseFunction
-)
-from use_cases.videos.update_video.abstract_internals import (
-    SearchableUpdatable,
-    DescribeVideosInDatabaseFunction,
+from use_cases.videos.update_video.helpers.abstract import (
     PrepareNewListingBeforePublishFunction,
     PrepareListedRecordBeforeUpdateFunction,
     ParseVideoIntoStateDictFunction
@@ -17,9 +12,6 @@ from use_cases.videos.update_video.abstract_internals import (
 async def use_case(
     # creation scope
     database: VideosDatabase,
-    search_one_in_database_fn: SearchOneInDatabaseFunction,
-    update_in_database_fn: UpdateInDatabaseFunction,
-    describe_videos_in_database_fn: DescribeVideosInDatabaseFunction,
     prepare_new_listing_before_publish_fn: PrepareNewListingBeforePublishFunction,
     prepare_listed_record_before_update_fn: PrepareListedRecordBeforeUpdateFunction,
     parse_video_into_state_dict_fn: ParseVideoIntoStateDictFunction,
@@ -32,14 +24,14 @@ async def use_case(
 
     # TODO: support new thumbnail selection
 
-    db_videos_describer: SearchableUpdatable = describe_videos_in_database_fn(
-        database=database,
-        authenticated_user_id=authenticated_user_id,
-        hash_id=hash_id
+    videos, _ = await database.get_videos(
+        include_user_id=authenticated_user_id,
+        include_hash_id=hash_id,
+        include_privates_of_user_id=authenticated_user_id
     )
 
-    existing_video: Video = await search_one_in_database_fn(
-        searchable=db_videos_describer
+    existing_video: Video = find_one(
+        items=videos
     )
 
     if existing_video.is_not_listed():
@@ -47,9 +39,12 @@ async def use_case(
     else:
         video = prepare_listed_record_before_update_fn(video=video)
 
-    await update_in_database_fn(
-        updatable=db_videos_describer,
-        new_desired_state=parse_video_into_state_dict_fn(
-            video=video
-        )
+    new_desired_state = parse_video_into_state_dict_fn(
+        video=video
+    )
+
+    await database.update_video(
+        user_id=authenticated_user_id,
+        hash_id=hash_id,
+        new_desired_state=new_desired_state
     )

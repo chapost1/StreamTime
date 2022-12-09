@@ -3,12 +3,10 @@ from common.constants import MAXIMUM_SECONDS_TILL_PRESIGNED_URL_EXPIRATION
 from common.app_errors import AccessDeniedError
 from use_cases.db_operation_utils.concrete import search_one_in_database
 from external_systems.data_access.storage.storage_test_client import StorageTestClient
-from functools import partial
 from typing import List, Any
 from uuid import uuid4
 import pytest
-from use_cases.validation_utils.concrete import is_same_user
-from use_cases.videos.get_watch_video_record.is_access_allowed import is_access_allowed
+from use_cases.videos.get_watch_video_record.helpers import is_access_allowed
 from use_cases.videos.get_watch_video_record import use_case
 
 user_id = uuid4()
@@ -45,7 +43,7 @@ async def test_returns_expected_structure_with_returned_values_in_internals():
         storage=storage,
         search_one_in_database_fn=search_one_in_database,
         describe_videos_in_database_fn=get_db_describer_to_return_vidoe_on_search(video=video),
-        is_access_allowed_fn=partial(is_access_allowed, is_same_user_fn=is_same_user),
+        is_access_allowed_fn=is_access_allowed,
         # usage scope
         authenticated_user_id=user_id,
         user_id=user_id,
@@ -82,7 +80,7 @@ async def test_raise_access_denied_if_not_same_user_and_private():
             storage=storage,
             search_one_in_database_fn=search_one_in_database,
             describe_videos_in_database_fn=get_db_describer_to_return_vidoe_on_search(video=video),
-            is_access_allowed_fn=partial(is_access_allowed, is_same_user_fn=is_same_user),
+            is_access_allowed_fn=is_access_allowed,
             # usage scope
             authenticated_user_id=uuid4(),
             user_id=user_id,

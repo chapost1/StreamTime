@@ -3,7 +3,9 @@ from uuid import (
     uuid4
 )
 import pytest
-from use_cases.videos.get_upload_file_signed_instructions.generate_new_video_hash_id import generate_new_video_hash_id
+from use_cases.videos.get_upload_file_signed_instructions.helpers.generate_new_video_hash_id import (
+    generate_new_video_hash_id
+)
 
 
 @pytest.mark.asyncio

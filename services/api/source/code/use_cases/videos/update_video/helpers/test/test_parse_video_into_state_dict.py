@@ -1,7 +1,9 @@
 from entities.videos import Video
 from uuid import uuid4
 from mock import patch
-from use_cases.videos.update_video.parse_video_into_state_dict import parse_video_into_state_dict
+from use_cases.videos.update_video.helpers.parse_video_into_state_dict import (
+    parse_video_into_state_dict
+)
 
 
 @patch('entities.videos.Video.ALLOWED_UPDATE_FIELDS_FOR_NEW_LISTING', {})

@@ -34,4 +34,4 @@ def test_calc_next_page_will_return_an_encoded_next_page_with_minimal_pagination
     encoded_next_page = VideosPage.calc_next_page(videos=videos)
     next_page = NextPage.decode(b64=encoded_next_page)
     
-    assert next_page.pagination_index_is_smaller_than == min_pi
+    assert next_page.minimum_pagination_index == min_pi

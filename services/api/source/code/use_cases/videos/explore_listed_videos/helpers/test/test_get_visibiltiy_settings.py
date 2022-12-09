@@ -1,5 +1,7 @@
 from uuid import uuid4
-from use_cases.videos.explore_listed_videos.get_visibility_settings import get_visibility_settings
+from use_cases.videos.explore_listed_videos.helpers.get_visibility_settings import (
+    get_visibility_settings
+)
 
 truthy_func = lambda *args, **kwargs: True
 falsy_func = lambda *args, **kwargs: False

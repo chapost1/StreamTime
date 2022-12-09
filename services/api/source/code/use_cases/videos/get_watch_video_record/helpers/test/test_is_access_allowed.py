@@ -1,4 +1,6 @@
-from use_cases.videos.get_watch_video_record import is_access_allowed
+from use_cases.videos.get_watch_video_record.helpers.is_access_allowed import (
+    is_access_allowed
+)
 
 truthy_func = lambda *args, **kwargs: True
 falsy_func = lambda *args, **kwargs: False

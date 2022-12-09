@@ -2,7 +2,7 @@ from uuid import UUID
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from external_systems.data_access.storage.abstract import Storage
 from entities.storage import FileUploadSignedInstructions
-from use_cases.videos.get_upload_file_signed_instructions.abstract_internals import (
+from use_cases.videos.get_upload_file_signed_instructions.helpers.abstract import (
     AssertFileContentTypeFunction,
     GenerateNewVideoHashIdFunction
 )

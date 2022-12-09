@@ -1,8 +1,10 @@
-from use_cases.videos.update_video.listed_videos_preparations import prepare_listed_record_before_update
 from entities.videos import Video
 from common.utils import calc_server_time
 from uuid import uuid4
 from mock import patch
+from use_cases.videos.update_video.helpers.listed_videos_preparations import (
+    prepare_listed_record_before_update
+)
 
 
 @patch('entities.videos.Video.ALLOWED_UPDATE_FIELDS_FOR_LISTED_VIDEOS', {'user_id', 'hash_id'})

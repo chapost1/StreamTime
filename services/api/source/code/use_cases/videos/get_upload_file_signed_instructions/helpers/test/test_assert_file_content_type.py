@@ -1,4 +1,6 @@
-from use_cases.videos.get_upload_file_signed_instructions.assert_file_content_type import assert_file_content_type
+from use_cases.videos.get_upload_file_signed_instructions.helpers.assert_file_content_type import (
+    assert_file_content_type
+)
 from common.app_errors import InputError
 from mock import patch
 import pytest
