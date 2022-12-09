@@ -32,7 +32,7 @@ Key notes:
 
 Alternatively, if you don't want to spin up the service, you can read about it [here](./openapi.md) using a simpler markdown version.
 
-### Where can I find the routers in the source code?
+### Where can I find the Routers in the source code?
 
 A simplified version of the tree output beside to the entrypoint.py file:
 
@@ -52,7 +52,7 @@ A simplified version of the tree output beside to the entrypoint.py file:
 
     It means for example, if you look at the videos directories tree you can understand the use cases of the app.
 
-### Where can I find the routers in the source code?
+### Where can I find the Use Cases in the source code?
 
 A simplified version of the tree output beside to the entrypoint.py file:
 
@@ -102,11 +102,11 @@ For example, the update_video use case directory in lower resolution:
 
 ## Data Access <a name="data_access"></a>
 
-    The Data Access is basically a layer inside of the External Systems layer.
+    The Data Access is basically a layer (DAL) inside of the External Systems layer.
 
     This layer (Data Access) is responsible for the "low level" integration with databases & storages or similar.
 
-### Where can I find the routers in the source code?
+### Where can I find the DAL in the source code?
 
 A simplified version of the tree output beside to the entrypoint.py file:
 
