@@ -143,7 +143,7 @@ The describers classes can be found here (relative to the DAL directroy):
 
     It means for example, if you look at the videos directories tree you can understand the use cases of the app.
 
-### Where can I find the Use Cases in the source code?
+#### Where can I find the Use Cases in the source code?
 
 A simplified version of the tree output beside to the entrypoint.py file:
 
@@ -199,6 +199,8 @@ For example, the update_video use case directory in lower resolution:
 
 The Entities are typically defined using pydantic classes, to provide automatic type validations/basic functionality to each defined field.
 This is the most 
+
+#### Where can I find the Entities in the source code?
 
 The "entities" package is typically located within the service's source code tree, alongside the other components such as the routers and use cases. For example, the directory structure of the service may look something like this:
 
