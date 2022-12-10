@@ -94,14 +94,21 @@ To read more about the API Web Server Design, <strong>[click here](./services/ap
 
 ## Deployment
 
-First, navigate to the deployment directory and run:
+First, navigate to the deployment directory:
+
+```bash
+# from root directory
+foo@bar:~ (root) $ cd deployment
+```
+
+Run:
 
 ```bash
 # will download necessary plugins
-foo@bar:~ (main) $ terraform init
+foo@bar:~ (deployment) $ terraform init
 ```
 
-Next, from the root directory, to deploy:
+Next, from the deployment directory, to deploy:
 
 > Make sure the length of your app name does not exceed 18 bytes, as it is used as an identifier in some resources that restrict the length of their identifier.
 
@@ -109,7 +116,7 @@ Next, from the root directory, to deploy:
 # During future deployments of an existing cluster,
 # You can use the db_mode patch (or none),
 # And fill the dll file with the relevant SQL commands.
-foo@bar:~ (main) $ ./deployment/terraform.sh --command apply \
+foo@bar:~ (deployment) $ ./terraform.sh --command apply \
 --aws_access_key <AWS_ACCESS_KEY> \
 --aws_secret_key <AWS_SECRET_KEY> \
 --app_name <APP_NAME> \
