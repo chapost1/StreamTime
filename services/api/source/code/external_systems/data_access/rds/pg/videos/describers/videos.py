@@ -36,7 +36,13 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
         conditions, params = super().build_query_conditions_params(conditions=conditions, params=params)
 
         # ignore anything which is related to the excluded user ids
-        conditions, params = self.build_excluded_user_ids_conditions_params(conditions=conditions, params=params)
+        conditions, params = super().build_property_conditions_params(
+            raw_params=self.excluded_user_ids,
+            col_name='user_id',
+            exclude=True,
+            conditions=conditions,
+            params=params
+        )
 
         # pagination index can appear also after user_id as it is an maintained index on pg side (user_id)
         conditions, params = self.build_pagination_conditions_params(conditions=conditions, params=params)
@@ -48,16 +54,6 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
         conditions, params = self.build_privacy_conditions_params(conditions=conditions, params=params)
 
         return conditions, params
-
-
-    def build_excluded_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return super().build_property_conditions_params(
-            raw_params=self.excluded_user_ids,
-            col_name='user_id',
-            exclude=True,
-            conditions=conditions,
-            params=params
-        )
 
 
     def build_pagination_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
