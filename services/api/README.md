@@ -1,10 +1,11 @@
 # API Web Server Service
 
-### HL Table of Contents
-- [Design](#design)
+#### Table of Contents
+- [Service Diagram](#diagram)
 - [Layers Key Points](#layers_key_points)
 
-## Service Diagram <a name="design"></a>
+## Service Diagram <a name="diagram"></a>
+<hr>
 
 #### Heavily influenced by Robert C. Martin (Uncle Bob), <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">The Clean Architecture</a>
 
@@ -12,19 +13,34 @@ This Diagram should explain the relation between the app layers.
 
 ![Api Web Server Service Diagram](./abstract_web_api_architecture_diagram.jpg)
 
-## Layers Key Points <a name="layers_key_points"></a>
-### Table of Contents
-- [Routers](#routers)
+## Layers <a name="layers_key_points"></a>
+<hr>
+
+#### Layers Table of Contents
+- [External Systems](#external_systems)
 - [Use Cases](#use_cases)
-- [Data Access](#data_access)
 - [Entities](#entities)
 
 
-## Routers  <a name="routers"></a>
+## External Systems  <a name="external_systems"></a>
+
+    This layer is for egress/ingress usages and is the outer-most layer, which is most prone to change.
+    It includes sub-layers such as:
+        - http_network_interface
+        - data_access
+        - integrations with 3-parties
+
+### Sub Layers Table of Contents
+- [Routers](#routers)
+- [Data Access](#data_access)
+
+
+
+### Routers  <a name="routers"></a>
 
     The Routers are basically a layer inside of the External Systems layer.
 
-    This layer (External Systems) is for egress/ingress usages and is the outer-most layer, which is most prone to change.
+    It can be found under the sub-layer http_network_interface.
 
 Key notes:
 
@@ -32,14 +48,14 @@ Key notes:
 
 :key: More technically, the routers are just a map between HTTP calls and use cases functions.
 
-### API HTTP Endpoints
+#### API HTTP Endpoints
 
     The best way to understand the API HTTP Endpoints is to spin up the service.
     Then, look at the Swagger page which can be found on the /docs endpoint
 
 Alternatively, if you don't want to spin up the service, you can read about it <strong>[here](./openapi.md)</strong> using a simpler markdown version.
 
-### Where can I find the Routers in the source code?
+#### Where can I find the Routers in the source code?
 
 A simplified version of the tree output beside to the entrypoint.py file:
 
@@ -51,69 +67,13 @@ A simplified version of the tree output beside to the entrypoint.py file:
 ```
 
 
-## Use Cases <a name="use_cases"></a>
-
-    In general, this is the layer which is responsible to the business logic.
-
-    It is dedicated to be domain driven.
-
-    It means for example, if you look at the videos directories tree you can understand the use cases of the app.
-
-### Where can I find the Use Cases in the source code?
-
-A simplified version of the tree output beside to the entrypoint.py file:
-
-> With dedication to the videos use cases as an example.
-
-```sh
-|-- entrypoint.py
-`-- use_cases # here
-    |-- __init__.py
-    |-- videos
-        |-- __init__.py
-        |-- delete_video
-        |-- explore_listed_videos
-        |-- get_authenticated_user_videos
-        |-- get_specific_user_listed_videos
-        |-- get_upload_file_signed_instructions
-        |-- get_video_upload_config
-        |-- get_watch_video_record
-        |-- update_video
-```
-
-Each Use case is a directory by itself and contains the followings:
-- use_case.py: file which contains a use_case() funciton, which is the logic itself.
-- test folder: unit tests for the specific use case.
-- helpers (optional): helper functions which are needed to perform the use case
-  these files are seperated for these purposes:
-  - help maintain the use case simpler, so that it can use them as a black box.
-  - be able to mock them and isolate the use case when testing it.
-- __ init __ .py: is used to stitch the use case with its helpers before exporting it so any other layer can import it.
-
-
-For example, the update_video use case directory in lower resolution:
- 
-```sh
-|-- update_video
-    |-- __init__.py
-    |-- helpers
-        |-- __init__.py
-        |-- test
-        |-- abstract.py
-        |-- listed_videos_preparations.py
-        |-- new_listing_preparations.py
-        |-- parse_video_into_state_dict.py
-    |-- test
-    |-- use_case.py
-```
-
-## Data Access <a name="data_access"></a>
+### Data Access <a name="data_access"></a>
 
     The Data Access is basically a layer (DAL) inside of the External Systems layer.
 
     This layer (Data Access) is responsible for the "low level" integration with databases & storages or similar.
 
-### Where can I find the DAL in the source code?
+#### Where can I find the DAL in the source code?
 
 A simplified version of the tree output beside to the entrypoint.py file:
 
@@ -174,6 +134,63 @@ The describers classes can be found here (relative to the DAL directroy):
 ```
 
 
+
+## Use Cases <a name="use_cases"></a>
+
+    In general, this is the layer which is responsible to the business logic.
+
+    It is dedicated to be domain driven.
+
+    It means for example, if you look at the videos directories tree you can understand the use cases of the app.
+
+### Where can I find the Use Cases in the source code?
+
+A simplified version of the tree output beside to the entrypoint.py file:
+
+> With dedication to the videos use cases as an example.
+
+```sh
+|-- entrypoint.py
+`-- use_cases # here
+    |-- __init__.py
+    |-- videos
+        |-- __init__.py
+        |-- delete_video
+        |-- explore_listed_videos
+        |-- get_authenticated_user_videos
+        |-- get_specific_user_listed_videos
+        |-- get_upload_file_signed_instructions
+        |-- get_video_upload_config
+        |-- get_watch_video_record
+        |-- update_video
+```
+
+Each Use case is a directory by itself and contains the followings:
+- use_case.py: file which contains a use_case() funciton, which is the logic itself.
+- test folder: unit tests for the specific use case.
+- helpers (optional): helper functions which are needed to perform the use case
+  these files are seperated for these purposes:
+  - help maintain the use case simpler, so that it can use them as a black box.
+  - be able to mock them and isolate the use case when testing it.
+- __ init __ .py: is used to stitch the use case with its helpers before exporting it so any other layer can import it.
+
+
+For example, the update_video use case directory in lower resolution:
+ 
+```sh
+|-- update_video
+    |-- __init__.py
+    |-- helpers
+        |-- __init__.py
+        |-- test
+        |-- abstract.py
+        |-- listed_videos_preparations.py
+        |-- new_listing_preparations.py
+        |-- parse_video_into_state_dict.py
+    |-- test
+    |-- use_case.py
+```
+
 ## Entities <a name="entities"></a>
 
    The Entities layer contains the application/domain models for the service. The entities are a critical component of the service, as they define the core data and behavior of the service and provide the foundation for the other components to build upon.
@@ -189,7 +206,7 @@ The "entities" package is typically located within the service's source code tre
 |-- entrypoint.py
 |-- external_systems
 |-- use_cases
-|-- entities # here
+`-- entities # here
 |   |-- __init__.py
 |   |-- videos.py
 |   |-- storage.py
