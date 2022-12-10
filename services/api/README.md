@@ -2,7 +2,12 @@
 
 #### Table of Contents
 - [Service Diagram](#diagram)
-- [Layers Key Points](#layers_key_points)
+- [App Layers](#app_layers)
+  - [External Systems](#external_systems)
+    - [Routers](#routers)
+    - [Data Access](#data_access)
+  - [Use Cases](#use_cases)
+  - [Entities](#entities)
 
 ## Service Diagram <a name="diagram"></a>
 <hr>
@@ -13,34 +18,22 @@ This Diagram should explain the relation between the app layers.
 
 ![Api Web Server Service Diagram](./abstract_web_api_architecture_diagram.jpg)
 
-## Layers <a name="layers_key_points"></a>
+## App Layers <a name="app_layers"></a>
 <hr>
-
-#### Layers Table of Contents
-- [External Systems](#external_systems)
-- [Use Cases](#use_cases)
-- [Entities](#entities)
-
 
 ## External Systems  <a name="external_systems"></a>
 
     This layer is for egress/ingress usages and is the outer-most layer, which is most prone to change.
-    It includes sub-layers such as:
+    It includes the following sub-layers:
         - http_network_interface
         - data_access
         - integrations with 3-parties
-
-### Sub Layers Table of Contents
-- [Routers](#routers)
-- [Data Access](#data_access)
-
-
 
 ### Routers  <a name="routers"></a>
 
     The Routers are basically a layer inside of the External Systems layer.
 
-    It can be found under the sub-layer http_network_interface.
+    It is located within the http_network_interface sub-layer.
 
 Key notes:
 
@@ -71,6 +64,8 @@ A simplified version of the tree output beside to the entrypoint.py file:
 
     The Data Access is basically a layer (DAL) inside of the External Systems layer.
 
+    It is located within the http_network_interface sub-layer.
+
     This layer (Data Access) is responsible for the "low level" integration with databases & storages or similar.
 
 #### Where can I find the DAL in the source code?
@@ -85,17 +80,17 @@ A simplified version of the tree output beside to the entrypoint.py file:
 |   |   |-- storage
 ```
 
-Currently the Concrete RDS implementation is Postgresql
+Currently, the concrete RDS implementation is Postgresql.
 
-It worth to mention, that its implementation uses a class which is called a "Describer"
+It is worth mentioning that its implementation uses a class called a "Describer,
 
 It's code can be found under the pg directory of the RDS for any domain's entity.
 
-It is in general sort of a builder pattern which is related to the specific app domain entity (i.e: videos) and its properties.
+In general, it is a semi-builder pattern that is related to the specific app domain entity (e.g. videos) and its properties.
 
 > Similar to ORM but more dedicated to the application domain and logic.
 
-It lets the user (i.e: the get method of the videos database class) to build certain queries dynamically based on the arguments it pass to the describer, without the need to repeat writing similar logics for many use case's queries.
+It allows the user (e.g. the get method of the videos database class) to build certain queries dynamically based on the arguments passed to the describer, without the need to repeat writing similar logic for multiple use case queries.
 
 It's syntax may be similar to this:
 
