@@ -13,6 +13,8 @@ You can find more of this course porjects <a href="https://github.com/EASS-HIT-P
 
 The user functionalities which are currently supported include:
 
+:soon: Create Users
+
 :gem: Upload / Delete your videos.
 
 :gem: Control whether your videos are private or public so others can watch them.
