@@ -51,7 +51,7 @@ This diagram is intended to show the relationship between the system components 
 
 ### API Web Server Service Diagram
 
-To read more about the API Web Server Design, <strong>[click here](./services/api/README.md)</strong>
+To read more about the API Web Server Design, <strong>[click here](./services/api/)</strong> the service directory will open with the readme file just below the source code.
 
 ![Api Web Server Service Diagram](./services/api/abstract_web_api_architecture_diagram.jpg)
 
