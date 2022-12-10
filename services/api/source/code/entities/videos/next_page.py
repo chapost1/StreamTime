@@ -6,7 +6,7 @@ from common.app_errors import InputError
 from typing import Optional
 
 class NextPage(BaseModel):
-    pagination_index_is_smaller_than: Optional[int] = None
+    minimum_pagination_index: Optional[int] = None
 
     @staticmethod
     def decode(b64: str) -> NextPage:
@@ -25,7 +25,7 @@ class NextPage(BaseModel):
         except Exception:
             inputError()
 
-        if self.pagination_index_is_smaller_than is None:
+        if self.minimum_pagination_index is None:
             inputError()
 
         return self

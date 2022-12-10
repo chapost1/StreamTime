@@ -1,5 +1,4 @@
 from __future__ import annotations
-from external_systems.data_access.rds.abstract.videos.describers import UnprocessedVideosDescriber
 from external_systems.data_access.rds.pg.abstract_internals import GetConnectionFunction
 from external_systems.data_access.rds.pg.videos import tables
 from entities.videos import VideoStages
@@ -9,12 +8,9 @@ from common.utils import nl
 
 
 class UploadedVideosDescriberPG:
-    f"""
-    DescribedUploadedVideos database class which implements the abstract protocol
+    """
+    DescribedUploadedVideos database class
     Uses postgres as a concrete implementation
-
-    Abstract protocol docs:
-    {UnprocessedVideosDescriber.__doc__}
     """
 
     get_connection_fn: GetConnectionFunction
@@ -29,13 +25,13 @@ class UploadedVideosDescriberPG:
         self.user_ids = []
 
 
-    def with_hash(self, id: UUID) -> UnprocessedVideosDescriber:
+    def with_hash(self, id: UUID) -> UploadedVideosDescriberPG:
         if id is not None:
             self.hash_ids.append(id)
         return self
 
 
-    def owned_by(self, user_id: UUID) -> UnprocessedVideosDescriber:
+    def owned_by(self, user_id: UUID) -> UploadedVideosDescriberPG:
         if user_id is not None:
             self.user_ids.append(user_id)
         return self
@@ -43,29 +39,22 @@ class UploadedVideosDescriberPG:
 
     def build_query_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
         # user_id is an index and therefore it is a good first filter condition
-        conditions, params = self.build_user_ids_conditions_params(conditions=conditions, params=params)
-
-        conditions, params = self.build_hash_ids_conditions_params(conditions=conditions, params=params)
-
-        return conditions, params
-
-
-    def build_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return self.build_property_conditions_params(
+        conditions, params = self.build_property_conditions_params(
             raw_params=self.user_ids,
             col_name='user_id',
             conditions=conditions,
             params=params
         )
 
-
-    def build_hash_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return self.build_property_conditions_params(
+        # hash_id
+        conditions, params = self.build_property_conditions_params(
             raw_params=self.hash_ids,
             col_name='hash_id',
             conditions=conditions,
             params=params
         )
+
+        return conditions, params
 
 
     def build_property_conditions_params(
@@ -88,12 +77,12 @@ class UploadedVideosDescriberPG:
             s.append(self.cast(val_name='%s', casting_type=casting_type))
             params.append(param)
         
-        pre_in_expression = 'not' if exclude else ''
+        pre_in_expression = 'NOT' if exclude else ''
 
         statement_building_blocks = [
             self.cast(val_name=col_name, casting_type=casting_type),
             pre_in_expression,
-            'in',
+            'IN',
             f"({', '.join(s)})"
         ]
 

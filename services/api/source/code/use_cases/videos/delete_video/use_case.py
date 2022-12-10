@@ -1,6 +1,5 @@
 from uuid import UUID
 from typing import Callable, List, Awaitable
-from external_systems.data_access.rds.abstract.videos import VideosDescriber
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from common.app_errors import NotFoundError, TooEarlyError
 from entities.videos import VideoStages, Video, UnprocessedVideo
@@ -17,21 +16,22 @@ def make_delete_video_on_ready_stage_handler(database: VideosDatabase, storage: 
   async def delete_video_on_ready_stage_hadnler(user_id: UUID, hash_id: UUID) -> None:
     """Deletes a ready state Video from database and also it's assets from storage"""
 
-    videos_describer: VideosDescriber = (
-      database.describe_videos()
-      .with_hash(id=hash_id)
-      .owned_by(user_id=user_id)
-      .include_privates_of(user_id=user_id)
+    # first, get video meta to delete assets from storage
+    videos, _ = await database.get_videos(
+        include_user_id=user_id,
+        include_hash_id=hash_id,
+        include_privates_of_user_id=user_id
     )
-
-    # get video meta to delete assets from storage
     video: Video = find_one(
-      items=await videos_describer.search()
+        items=videos
     )
 
-    # first remove the video so in case of failure, at max the user won't have access to corrupted video record
+    # then, remove the video so in case of failure, at max the user won't have access to corrupted video record
     # and another service may collect removed records and handle cleaning it up
-    await videos_describer.delete()
+    await database.delete_video(
+      user_id=user_id,
+      hash_id=hash_id
+    )
 
     # delete from storage [both video and thumbnail]
     await storage.delete_file(item_relative_path=video.storage_object_key)
@@ -46,20 +46,19 @@ def make_delete_unprocessed_video_handler(database: VideosDatabase) -> Callable[
   async def delete_unprocessed_video_handler(user_id: UUID, hash_id: UUID) -> None:
     """Deletes an unprocessed Video from database"""
 
-    unprocessed_vidoes_describer: VideosDescriber = (
-      database.describe_unprocessd_videos()
-      .with_hash(id=hash_id)
-      .owned_by(user_id=user_id)
-    )
-
     unprocessed_video: UnprocessedVideo = find_one(
-      items=await unprocessed_vidoes_describer.search()
+        items=await database.get_unprocessed_videos(
+          user_id=user_id,
+          hash_id=hash_id
+        )
     )
 
     if unprocessed_video.is_still_processing():
       raise TooEarlyError()
 
-    await unprocessed_vidoes_describer.delete()
+    await database.delete_unprocessed_video(
+      user_id=user_id,hash_id=hash_id
+    )
 
   return delete_unprocessed_video_handler
 

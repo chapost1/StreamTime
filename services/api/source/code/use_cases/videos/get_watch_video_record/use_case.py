@@ -1,16 +1,12 @@
 from uuid import UUID
 from common.constants import MAXIMUM_SECONDS_TILL_PRESIGNED_URL_EXPIRATION
+from common.utils import find_one
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from typing import Union
 from entities.videos import WatchVideoRecord, Video
 from common.app_errors import AccessDeniedError
 from external_systems.data_access.storage.abstract import Storage
-from external_systems.data_access.rds.abstract.common_protocols import (
-    Searchable
-)
-from use_cases.db_operation_utils.abstract import SearchOneInDatabaseFunction
-from use_cases.videos.get_watch_video_record.abstract_internals import (
-    DescribeVideosInDatabaseFunction,
+from use_cases.videos.get_watch_video_record.helpers.abstract import (
     IsAccessAllowedFunction
 )
 
@@ -19,8 +15,6 @@ async def use_case(
     # creation scope
     database: VideosDatabase,
     storage: Storage,
-    search_one_in_database_fn: SearchOneInDatabaseFunction,
-    describe_videos_in_database_fn: DescribeVideosInDatabaseFunction,
     is_access_allowed_fn: IsAccessAllowedFunction,
     # usage scope
     authenticated_user_id: Union[UUID, str],
@@ -34,15 +28,15 @@ async def use_case(
     It is needed to grant premission to access (watch) to the video assets storage
     """
 
-    db_videos_describer: Searchable = describe_videos_in_database_fn(
-        database=database,
-        authenticated_user_id=authenticated_user_id,
-        user_id=user_id,
-        hash_id=hash_id
+    videos, _ = await database.get_videos(
+        include_user_id=user_id,
+        include_hash_id=hash_id,
+        filter_unlisted=True,
+        include_privates_of_user_id=authenticated_user_id
     )
 
-    video: Video = await search_one_in_database_fn(
-        searchable=db_videos_describer
+    video: Video = find_one(
+        items=videos
     )
 
     is_access_denied = not is_access_allowed_fn(

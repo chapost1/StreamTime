@@ -1,12 +1,11 @@
-from typing import Protocol
-from entities.videos import VideoStages
+from typing import Protocol, List, Dict, Tuple, Optional
+from entities.videos import VideoStages, Video, UnprocessedVideo
 from uuid import UUID
-from external_systems.data_access.rds.abstract.videos.describers import VideosDescriber
-from external_systems.data_access.rds.abstract.videos.describers import UnprocessedVideosDescriber
 
 
 class VideosDatabase(Protocol):
     """VideosDatabase database class protocol"""
+
 
     async def find_video_stage(self, user_id: UUID, hash_id: UUID) -> VideoStages:
         """
@@ -15,12 +14,58 @@ class VideosDatabase(Protocol):
         - else, it will return it's current stage
         """
 
-    def describe_videos(self) -> VideosDescriber:
+
+    async def get_videos(
+        self,
+        include_user_id: Optional[UUID],
+        include_hash_id: Optional[UUID],
+        ignore_user_id: Optional[UUID],
+        include_privates_of_user_id: Optional[UUID],
+        filter_unlisted: Optional[bool],
+        next: Optional[str],
+        page_limit: Optional[int]
+    ) -> Tuple[List[Video], str]:
         """
-        Gets new instance of videos describer
+        Gets a page of videos
+        """
+    
+
+    async def update_video(
+        self,
+        user_id: UUID,
+        hash_id: UUID,
+        new_desired_state: Dict
+    ) -> None:
+        """
+        Updates video of specified user if exits
         """
 
-    def describe_unprocessd_videos(self) -> UnprocessedVideosDescriber:
+
+    async def delete_video(
+        self,
+        user_id: UUID,
+        hash_id: UUID,
+    ) -> None:
         """
-        Gets new instance of unprocessed videos describer
+        Deletes a video of specified user if exists
+        """
+
+
+    async def get_unprocessed_videos(
+        self,
+        include_user_id: Optional[UUID],
+        include_hash_id: Optional[UUID]
+    ) -> List[UnprocessedVideo]:
+        """
+        Gets unprocessed videos
+        """
+
+
+    async def delete_unprocessed_video(
+        self,
+        user_id: UUID,
+        hash_id: UUID,
+    ) -> None:
+        """
+        Deletes an unprocessed video of specified user if exists
         """

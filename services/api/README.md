@@ -1,12 +1,15 @@
-## API Web Server Service
+# API Web Server Service
 
 ### Table of Contents
-- [Design](#design)
-- [Routers](#routers)
-- [Use Cases](#use_cases)
-- [Data Access](#data_access)
+- [Service Diagram](#diagram)
+- [App Layers](#app_layers)
+  - [External Systems](#external_systems)
+    - [Routers](#routers)
+    - [Data Access](#data_access)
+  - [Use Cases](#use_cases)
+  - [Entities](#entities)
 
-### Service Diagram  <a name="design"></a>
+# Service Diagram <a name="diagram"></a>
 
 #### Heavily influenced by Robert C. Martin (Uncle Bob), <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">The Clean Architecture</a>
 
@@ -14,12 +17,21 @@ This Diagram should explain the relation between the app layers.
 
 ![Api Web Server Service Diagram](./abstract_web_api_architecture_diagram.jpg)
 
+# App Layers <a name="app_layers"></a>
 
-## Routers  <a name="routers"></a>
+## External Systems  <a name="external_systems"></a>
+
+    This layer is for egress/ingress usages and is the outer-most layer, which is most prone to change.
+    It includes the following sub-layers:
+        - http_network_interface
+        - data_access
+        - integrations with 3-parties
+
+### Routers  <a name="routers"></a>
 
     The Routers are basically a layer inside of the External Systems layer.
 
-    This layer (External Systems) is for egress/ingress usages and is the outer-most layer, which is most prone to change.
+    It is located within the http_network_interface sub-layer.
 
 Key notes:
 
@@ -27,12 +39,14 @@ Key notes:
 
 :key: More technically, the routers are just a map between HTTP calls and use cases functions.
 
-    The best way to understand the API is to spin up the service.
+#### API HTTP Endpoints
+
+    The best way to understand the API HTTP Endpoints is to spin up the service.
     Then, look at the Swagger page which can be found on the /docs endpoint
 
-Alternatively, if you don't want to spin up the service, you can read about it [here](./openapi.md) using a simpler markdown version.
+Alternatively, if you don't want to spin up the service, you can read about it <strong>[here](./openapi.md)</strong> using a simpler markdown version.
 
-### Where can I find the routers in the source code?
+#### Where can I find the Routers in the source code?
 
 A simplified version of the tree output beside to the entrypoint.py file:
 
@@ -44,6 +58,76 @@ A simplified version of the tree output beside to the entrypoint.py file:
 ```
 
 
+### Data Access <a name="data_access"></a>
+
+    The Data Access is basically a layer (DAL) inside of the External Systems layer.
+
+    It is located within the http_network_interface sub-layer.
+
+    This layer (Data Access) is responsible for the "low level" integration with databases & storages or similar.
+
+#### Where can I find the DAL in the source code?
+
+A simplified version of the tree output beside to the entrypoint.py file:
+
+```sh
+|-- entrypoint.py
+|-- external_systems
+|   `-- data_access # here
+|   |   |-- rds
+|   |   |-- storage
+```
+
+Currently, the concrete RDS implementation is Postgresql.
+
+It is worth mentioning that its implementation uses a class called a "Describer,
+
+It's code can be found under the pg directory of the RDS for any domain's entity.
+
+In general, it is a semi-builder pattern that is related to the specific app domain entity (e.g. videos) and its properties.
+
+> Similar to ORM but more dedicated to the application domain and logic.
+
+It allows the user (e.g. the get method of the videos database class) to build certain queries dynamically based on the arguments passed to the describer, without the need to repeat writing similar logic for multiple use case queries.
+
+It's syntax may be similar to this:
+
+```python
+database.describe_videos()
+.owned_by(user_id=user_id)
+.filter_unlisted(flag=True)
+.include_privates_of(user_id=authenticated_user_id)
+.paginate(pagination_index_is_smaller_than=pagination_index_is_smaller_than)
+.limit(limit=page_limit)
+.search()
+```
+
+Notice that, as mentioned the syntax is related to the domain itself, it "describes" to the database how the records should look like.
+
+Afterwards, it's possible to do some supported operations, such as Search, or Delete.
+
+> Each domain entity has its own Describers (i.e: Videos)
+
+The describers classes can be found here (relative to the DAL directroy):
+
+```sh
+|-- __init__.py
+|-- rds
+|   |-- pg
+|   |   |-- __init__.py
+|   |   |-- videos
+|   |       |-- __init__.py
+|   |       |-- database.py
+|   |       `-- describers # here
+|   |           |-- __init__.py
+|   |           |-- test
+|   |           |-- unprocessed_videos.py
+|   |           |-- uploaded_videos.py
+|   |           |-- videos.py
+```
+
+
+
 ## Use Cases <a name="use_cases"></a>
 
     In general, this is the layer which is responsible to the business logic.
@@ -52,7 +136,7 @@ A simplified version of the tree output beside to the entrypoint.py file:
 
     It means for example, if you look at the videos directories tree you can understand the use cases of the app.
 
-### Where can I find the routers in the source code?
+#### Where can I find the Use Cases in the source code?
 
 A simplified version of the tree output beside to the entrypoint.py file:
 
@@ -74,17 +158,14 @@ A simplified version of the tree output beside to the entrypoint.py file:
         |-- update_video
 ```
 
-Each Use case is built as another directory which has the followings:
+Each Use case is a directory by itself and contains the followings:
 - use_case.py: file which contains a use_case() funciton, which is the logic itself.
-- test folder: unit tests for the specific use case and its helper functions.
-- certain python files: basically helper functions which are needed to perform the use case
+- test folder: unit tests for the specific use case.
+- helpers (optional): helper functions which are needed to perform the use case
   these files are seperated for these purposes:
   - help maintain the use case simpler, so that it can use them as a black box.
   - be able to mock them and isolate the use case when testing it.
-- db_describe_logic.py: not used in every use case. it's purposes is:
-  - encapsulates the logic for calling the data access layer in the correct manner, it is seperated so it can be mocked easily.
-  - it Creates a Database Describer object, which is discussed in the Data Access Layer section.
-- __ init __ .py: is important because we can stitch the use case with its helpers before exporting it so any other layer can import it.
+- __ init __ .py: is used to stitch the use case with its helpers before exporting it so any other layer can import it.
 
 
 For example, the update_video use case directory in lower resolution:
@@ -92,78 +173,41 @@ For example, the update_video use case directory in lower resolution:
 ```sh
 |-- update_video
     |-- __init__.py
-    |-- abstract_internals.py
-    |-- db_describe_logic.py
-    |-- listed_videos_preparations.py
-    |-- new_listing_preparations.py
-    |-- parse_video_into_state_dict.py
+    |-- helpers
+        |-- __init__.py
+        |-- test
+        |-- abstract.py
+        |-- listed_videos_preparations.py
+        |-- new_listing_preparations.py
+        |-- parse_video_into_state_dict.py
     |-- test
     |-- use_case.py
 ```
 
-## Data Access <a name="data_access"></a>
+## Entities <a name="entities"></a>
 
-    The Data Access is basically a layer inside of the External Systems layer.
+   The Entities layer contains the application/domain models for the service. The entities are a critical component of the service, as they define the core data and behavior of the service and provide the foundation for the other components to build upon.
 
-    This layer (Data Access) is responsible for the "low level" integration with databases & storages or similar.
+> As This is the core of data of the service, it should change less frequently.
 
-### Where can I find the routers in the source code?
+The Entities are typically defined using pydantic classes, to provide automatic type validations/basic functionality to each defined field.
+This is the most 
 
-A simplified version of the tree output beside to the entrypoint.py file:
+#### Where can I find the Entities in the source code?
+
+The "entities" package is typically located within the service's source code tree, alongside the other components such as the routers and use cases. For example, the directory structure of the service may look something like this:
 
 ```sh
 |-- entrypoint.py
 |-- external_systems
-|   `-- data_access # here
-|   |   |-- rds
-|   |   |-- storage
+|-- use_cases
+`-- entities # here
+|   |-- __init__.py
+|   |-- videos.py
+|   |-- storage.py
 ```
 
-It worth to mention, currently the Use Cases layer uses the RDS abstract protocol using something which is called a "Database Describer"
+The "entities" package is typically imported and used by other components of the service, such as the use cases, to create and/or manipulate entity objects. For instance, a Video class can be created after searching the database, and reveal methods that can be used in the use cases layer.
+Or for another example, the VideoPage class can calculate the next page based on the current videos that it compose.
 
-It's code can be found under the abstract directory of the RDS.
-
-It is in general sort of a builder pattern which is related to the specific app domain (i.e: videos) and its properties.
-
-> Similar to ORM but more dedicated to the application domain and logic.
-
-It lets the user (i.e: Use Cases layer) to build certain queries dynamically without the need to create special function dedicated for this query in the Data Access layer, and yet to abstract the nitty-gritty parts from the DAL user.
-
-It's syntax may be similar to this (usage example in the use case layer):
-
-```python
-database.describe_videos()
-.owned_by(user_id=user_id)
-.filter_unlisted(flag=True)
-.include_privates_of(user_id=authenticated_user_id)
-.paginate(pagination_index_is_smaller_than=pagination_index_is_smaller_than)
-.limit(limit=page_limit)
-```
-
-Notice that, as mentioned the syntax is related to the domain itself, it "describes" to the database how the records should look like.
-
-Afterwards, it's possible to do some supported operations, such as Search, or Delete.
-
-> Each domain entity has its own Describers (i.e: Videos)
-
-The abstract protocols can be found here (relative to the DAL directroy):
-
-```sh
-|-- __init__.py
-|-- rds
-|   |-- abstract
-|   |   |-- __init__.py
-|   |   |-- common_protocols.py
-|   |   |-- videos
-|   |       |-- __init__.py
-|   |       |-- database.py
-|   |       `-- describers # here
-|   |           |-- __init__.py
-|   |           |-- unprocessed_videos.py
-|   |           |-- uploaded_videos.py
-|   |           |-- videos.py
-```
-
-Notice that, the concrete implementations, i.e: of Postgres, can be found on the same files hierarchy under the pg directory.
-
-it should be found on the path: (data_access/rds/pg)
+Overall, the "entities" package is a key component of the service, as it defines the core data and behavior of the service and provides a consistent and standardized way to represent and manipulate the data within the service.

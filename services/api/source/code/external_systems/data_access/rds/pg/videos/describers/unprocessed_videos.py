@@ -1,7 +1,7 @@
 from __future__ import annotations
-from external_systems.data_access.rds.abstract.videos import UnprocessedVideosDescriber
 from external_systems.data_access.rds.pg.videos.describers.uploaded_videos import UploadedVideosDescriberPG
 from typing import List, Tuple
+from uuid import UUID
 from entities.videos import UnprocessedVideo
 from entities.videos import VideoStages
 from external_systems.data_access.rds.pg.videos import tables
@@ -9,13 +9,11 @@ from common.utils import nl
 
 
 class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
-    f"""
-    DescribedUnprocessedVideos database class which implements the abstract protocol
-    Uses postgres as a concrete implementation
-
-    Abstract protocol docs:
-    {UnprocessedVideosDescriber.__doc__}
     """
+    DescribedUnprocessedVideos database class
+    Uses postgres as a concrete implementation
+    """
+
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -48,6 +46,14 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
 
     async def delete(self) -> None:
         await super().delete(stage=VideoStages.UNPROCESSED.value)
+
+
+    def with_hash(self, id: UUID) -> UnprocessedVideosDescriberPG:
+        return super().with_hash(id=id)
+
+
+    def owned_by(self, user_id: UUID) -> UnprocessedVideosDescriberPG:
+        return super().with_hash(user_id=user_id)
 
 
     def __prase_db_records_into_classes(self, unprocessed_video: Tuple) -> UnprocessedVideo:

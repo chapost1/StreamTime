@@ -19,7 +19,7 @@ class VideosPage(BaseModel):
             return None
 
         next_page = NextPage(
-            pagination_index_is_smaller_than=min(videos, key=next_page_key_lambda).pagination_index
+            minimum_pagination_index=min(videos, key=next_page_key_lambda).pagination_index
         )
 
         return next_page.encode()

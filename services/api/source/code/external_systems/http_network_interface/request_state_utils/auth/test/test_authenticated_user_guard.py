@@ -5,7 +5,7 @@ from uuid import uuid4
 import common.constants as constants
 from mock import patch
 import pytest
-from asyncmock import AsyncMock
+from unittest.mock import AsyncMock
 
 user_id = uuid4()
 
