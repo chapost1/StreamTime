@@ -2,7 +2,7 @@
 
 ### HL Table of Contents
 - [Design](#design)
-- [Layers Idea](#layers)
+- [Layers Key Points](#layers_key_points)
 
 ## Service Diagram <a name="design"></a>
 
@@ -12,7 +12,7 @@ This Diagram should explain the relation between the app layers.
 
 ![Api Web Server Service Diagram](./abstract_web_api_architecture_diagram.jpg)
 
-## Layers Idea <a name="layers"></a>
+## Layers Key Points <a name="layers_key_points"></a>
 ### Table of Contents
 - [Routers](#routers)
 - [Use Cases](#use_cases)
