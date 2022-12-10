@@ -1,18 +1,23 @@
-## API Web Server Service
+# API Web Server Service
 
-### Table of Contents
+### HL Table of Contents
 - [Design](#design)
-- [Routers](#routers)
-- [Use Cases](#use_cases)
-- [Data Access](#data_access)
+- [Layers Idea](#layers)
 
-### Service Diagram  <a name="design"></a>
+## Service Diagram <a name="design"></a>
 
 #### Heavily influenced by Robert C. Martin (Uncle Bob), <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">The Clean Architecture</a>
 
 This Diagram should explain the relation between the app layers.
 
 ![Api Web Server Service Diagram](./abstract_web_api_architecture_diagram.jpg)
+
+## Layers Idea <a name="layers"></a>
+### Table of Contents
+- [Routers](#routers)
+- [Use Cases](#use_cases)
+- [Data Access](#data_access)
+- [Entities](#entities)
 
 
 ## Routers  <a name="routers"></a>
@@ -167,3 +172,30 @@ The describers classes can be found here (relative to the DAL directroy):
 |   |           |-- uploaded_videos.py
 |   |           |-- videos.py
 ```
+
+
+## Entities <a name="entities"></a>
+
+   The Entities layer contains the application/domain models for the service. The entities are a critical component of the service, as they define the core data and behavior of the service and provide the foundation for the other components to build upon.
+
+> As This is the core of data of the service, it should change less frequently.
+
+The Entities are typically defined using pydantic classes, to provide automatic type validations/basic functionality to each defined field.
+This is the most 
+
+The "entities" package is typically located within the service's source code tree, alongside the other components such as the routers and use cases. For example, the directory structure of the service may look something like this:
+
+```sh
+|-- entrypoint.py
+|-- external_systems
+|-- use_cases
+|-- entities # here
+|   |-- __init__.py
+|   |-- videos.py
+|   |-- storage.py
+```
+
+The "entities" package is typically imported and used by other components of the service, such as the use cases, to create and/or manipulate entity objects. For instance, a Video class can be created after searching the database, and reveal methods that can be used in the use cases layer.
+Or for another example, the VideoPage class can calculate the next page based on the current videos that it compose.
+
+Overall, the "entities" package is a key component of the service, as it defines the core data and behavior of the service and provides a consistent and standardized way to represent and manipulate the data within the service.
