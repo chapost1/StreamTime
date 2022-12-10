@@ -39,29 +39,22 @@ class UploadedVideosDescriberPG:
 
     def build_query_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
         # user_id is an index and therefore it is a good first filter condition
-        conditions, params = self.build_user_ids_conditions_params(conditions=conditions, params=params)
-
-        conditions, params = self.build_hash_ids_conditions_params(conditions=conditions, params=params)
-
-        return conditions, params
-
-
-    def build_user_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return self.build_property_conditions_params(
+        conditions, params = self.build_property_conditions_params(
             raw_params=self.user_ids,
             col_name='user_id',
             conditions=conditions,
             params=params
         )
 
-
-    def build_hash_ids_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
-        return self.build_property_conditions_params(
+        # hash_id
+        conditions, params = self.build_property_conditions_params(
             raw_params=self.hash_ids,
             col_name='hash_id',
             conditions=conditions,
             params=params
         )
+
+        return conditions, params
 
 
     def build_property_conditions_params(
@@ -84,12 +77,12 @@ class UploadedVideosDescriberPG:
             s.append(self.cast(val_name='%s', casting_type=casting_type))
             params.append(param)
         
-        pre_in_expression = 'not' if exclude else ''
+        pre_in_expression = 'NOT' if exclude else ''
 
         statement_building_blocks = [
             self.cast(val_name=col_name, casting_type=casting_type),
             pre_in_expression,
-            'in',
+            'IN',
             f"({', '.join(s)})"
         ]
 

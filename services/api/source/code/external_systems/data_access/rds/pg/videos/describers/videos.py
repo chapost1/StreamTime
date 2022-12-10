@@ -72,7 +72,7 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
     def build_listing_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
         conditions = conditions.copy()
         if self.unlisted_should_be_hidden:
-            conditions.append('listing_time is not null')
+            conditions.append('listing_time IS NOT null')
         return conditions, params
 
 
@@ -82,25 +82,33 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
             ...
         elif 0 < len(self.allowed_privates_of_user_ids):
             # allow privates for specified users
-            conditions = conditions.copy()
-            params = params.copy()
 
-            s = []
-            for param in self.allowed_privates_of_user_ids:
-                s.append(self.cast(val_name='%s', casting_type='text'))
-                params.append(param)
+            temp_conditions, temp_params = self.build_property_conditions_params(
+                raw_params=self.allowed_privates_of_user_ids,
+                col_name='user_id',
+                casting_type='text',
+                # the next steps uses the first element of conditions
+                # therefore, the base params/conditions should be empty
+            )
+
+            user_in_allowed_privates_condition = temp_conditions[0]
 
             # need to be strict regarding whether it is an allowed user or it should be determined by privacy            
             statement = self.case(
                 cases=[
                     # for all users are in allowed privates, return true
-                    (f"{self.cast(val_name='user_id', casting_type='text')} in ({', '.join(s)})", 'true'),
+                    (user_in_allowed_privates_condition, 'true'),
                 ],
                 # default is true only if private is not true (means: it is public)
-                default=f"{self.cast(val_name='is_private is not true', casting_type='bool')}"
+                default=f"{self.cast(val_name='is_private IS NOT true', casting_type='bool')}"
             )
 
+            # avoid side-effects
+            conditions = conditions.copy()
+            params = params.copy()
+
             conditions.append(statement)
+            params.extend(temp_params)
 
         return conditions, params
 

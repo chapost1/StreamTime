@@ -96,7 +96,7 @@ def test_build_property_conditions_params_returns_expected_value():
 
     assert conditions == [
         dummy_first_condition, dummy_second_condition,
-        f"{uv.cast(val_name=col_name, casting_type=default_casting_type)} in ({uv.cast(val_name='%s', casting_type=default_casting_type)}, {uv.cast(val_name='%s', casting_type=default_casting_type)})"
+        f"{uv.cast(val_name=col_name, casting_type=default_casting_type)} IN ({uv.cast(val_name='%s', casting_type=default_casting_type)}, {uv.cast(val_name='%s', casting_type=default_casting_type)})"
     ]
 
     assert params == [
@@ -121,26 +121,70 @@ def test_build_property_conditions_params_returns_expected_value_with_exclude_as
     )
 
     assert conditions == [
-        f"{uv.cast(val_name=col_name, casting_type=casting_type)} not in ({uv.cast(val_name='%s', casting_type=casting_type)})"
+        f"{uv.cast(val_name=col_name, casting_type=casting_type)} NOT IN ({uv.cast(val_name='%s', casting_type=casting_type)})"
     ]
 
     assert params == [random_param]
 
 
-def test_build_hash_ids_conditions_params_returns_expected_values():
+def test_build_query_conditions_params_no_conditions():
     uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
-    uid_1 = uuid4()
-    uid_2 = uuid4()
-    uv.with_hash(id=uid_1)
-    uv.with_hash(id=uid_2)
+    conditions, params = uv.build_query_conditions_params()
+    assert conditions == []
+    assert params == []
 
-    conditions, params = uv.build_hash_ids_conditions_params()
 
-    assert conditions == [
-        f"{uv.cast(val_name='hash_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')})"
+def test_build_query_conditions_params_user_id_conditions():
+    uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    u1 = uuid4()
+    u2 = uuid4()
+    u3 = uuid4()
+    uv.owned_by(user_id=u1).owned_by(user_id=u2).owned_by(user_id=u3)
+    conditions, params = uv.build_query_conditions_params()
+    expected_conditions = [
+        f"{uv.cast(val_name='user_id', casting_type='text')} IN ({uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')})"
     ]
+    expected_params = [u1, u2, u3]
 
-    assert params == [uid_1, uid_2]
+    assert conditions == expected_conditions
+    assert params == expected_params
+
+
+def test_build_query_conditions_params_hash_id_conditions():
+    uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    h1 = uuid4()
+    h2 = uuid4()
+    h3 = uuid4()
+    uv.with_hash(id=h1).with_hash(id=h2).with_hash(id=h3)
+    uv.hash_ids = [h1, h2, h3]
+    conditions, params = uv.build_query_conditions_params()
+    expected_conditions = [
+        f"{uv.cast(val_name='hash_id', casting_type='text')} IN ({uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')})"
+    ]
+    expected_params = [h1, h2, h3]
+    assert conditions == expected_conditions
+    assert params == expected_params
+
+
+def test_build_query_conditions_params_user_id_and_hash_id_conditions():
+    uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    u1 = uuid4()
+    u2 = uuid4()
+    u3 = uuid4()
+    h1 = uuid4()
+    h2 = uuid4()
+    h3 = uuid4()
+    uv.with_hash(id=h1).with_hash(id=h2).with_hash(id=h3)
+    uv.owned_by(user_id=u1).owned_by(user_id=u2).owned_by(user_id=u3)
+    conditions, params = uv.build_query_conditions_params()
+    expected_conditions = [
+        f"{uv.cast(val_name='user_id', casting_type='text')} IN ({uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')})",
+        f"{uv.cast(val_name='hash_id', casting_type='text')} IN ({uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')})"
+    ]
+    expected_params = [u1, u2, u3, h1, h2, h3]
+
+    assert conditions == expected_conditions
+    assert params == expected_params
 
 
 def test_with_hash_adds_hash_id_into_list():
@@ -156,22 +200,6 @@ def test_with_hash_adds_nothing_if_none():
     uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
     uv.with_hash(id=None)
     assert uv.hash_ids == []
-
-
-def test_build_user_ids_conditions_params_returns_expected_values():
-    uv = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
-    uid_1 = uuid4()
-    uid_2 = uuid4()
-    uv.owned_by(user_id=uid_1)
-    uv.owned_by(user_id=uid_2)
-
-    conditions, params = uv.build_user_ids_conditions_params()
-
-    assert conditions == [
-        f"{uv.cast(val_name='user_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')}, {uv.cast(val_name='%s', casting_type='text')})"
-    ]
-
-    assert params == [uid_1, uid_2]
 
 
 def test_owned_by_adds_user_id_into_list():
@@ -299,8 +327,8 @@ async def test_update_calls_with_expected_steps():
             nl().join([
                 f'UPDATE {mock_table_name}',
                 'SET hello = %s, a = %s, c = %s',
-                f"WHERE {uv.cast(val_name='user_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')})",
-                f"AND {uv.cast(val_name='hash_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')})"
+                f"WHERE {uv.cast(val_name='user_id', casting_type='text')} IN ({uv.cast(val_name='%s', casting_type='text')})",
+                f"AND {uv.cast(val_name='hash_id', casting_type='text')} IN ({uv.cast(val_name='%s', casting_type='text')})"
             ]),
             tuple(['world', 'b', 4, user_id, hash_id])
         )
@@ -332,8 +360,8 @@ async def test_delete_calls_with_expected_steps():
         (
             nl().join([
                 f'DELETE FROM {mock_table_name}',
-                f"WHERE {uv.cast(val_name='user_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')})",
-                f"AND {uv.cast(val_name='hash_id', casting_type='text')} in ({uv.cast(val_name='%s', casting_type='text')})"
+                f"WHERE {uv.cast(val_name='user_id', casting_type='text')} IN ({uv.cast(val_name='%s', casting_type='text')})",
+                f"AND {uv.cast(val_name='hash_id', casting_type='text')} IN ({uv.cast(val_name='%s', casting_type='text')})"
             ]),
             tuple([user_id, hash_id])
         )
