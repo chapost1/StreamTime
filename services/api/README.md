@@ -1,6 +1,6 @@
 # API Web Server Service
 
-#### Table of Contents
+### Table of Contents
 - [Service Diagram](#diagram)
 - [App Layers](#app_layers)
   - [External Systems](#external_systems)
@@ -9,8 +9,7 @@
   - [Use Cases](#use_cases)
   - [Entities](#entities)
 
-## Service Diagram <a name="diagram"></a>
-<hr>
+# Service Diagram <a name="diagram"></a>
 
 #### Heavily influenced by Robert C. Martin (Uncle Bob), <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">The Clean Architecture</a>
 
@@ -18,8 +17,7 @@ This Diagram should explain the relation between the app layers.
 
 ![Api Web Server Service Diagram](./abstract_web_api_architecture_diagram.jpg)
 
-## App Layers <a name="app_layers"></a>
-<hr>
+# App Layers <a name="app_layers"></a>
 
 ## External Systems  <a name="external_systems"></a>
 
