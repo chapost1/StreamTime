@@ -1,37 +1,22 @@
-from typing import List, Any, Dict
 from use_cases.videos.update_video.use_case import use_case
 from common.utils import calc_server_time
 from common.app_errors import InputError
 from entities.videos import Video
 from uuid import uuid4
-from use_cases.videos.update_video.new_listing_preparations import prepare_new_listing_before_publish
-from use_cases.videos.update_video.listed_videos_preparations import prepare_listed_record_before_update
-from use_cases.videos.update_video.parse_video_into_state_dict import parse_video_into_state_dict
-from use_cases.db_operation_utils.concrete import (
-    search_one_in_database,
-    update_in_database
-)
+from use_cases.videos.update_video.helpers import prepare_new_listing_before_publish
+from use_cases.videos.update_video.helpers import prepare_listed_record_before_update
+from use_cases.videos.update_video.helpers import parse_video_into_state_dict
 import pytest
 import random
+from unittest.mock import (
+    Mock,
+    AsyncMock
+)
+
 
 user_id = uuid4()
 video_id = uuid4()
 hash_id = uuid4()
-
-def get_database_describer(matching_videos_in_db=List[Video]):
-    class SearchableUpdatable:
-        desired_update_state_record: Dict
-        def __init__(self) -> None:
-            self.desired_update_state_record = None
-
-        async def search(self) -> List[Any]:
-            return matching_videos_in_db
-
-        async def update(self, new_desired_state: Dict) -> None:
-            self.desired_update_state_record = new_desired_state
-            return None
-    
-    return SearchableUpdatable()
 
 
 # the tests below checks specific behaviors
@@ -48,13 +33,20 @@ async def test_unlisted_video_will_get_listing_time_on_the_update_db_fn():
         )
     ]
 
-    su = get_database_describer(matching_videos_in_db=matching_videos_in_db)
+    mock_database = AsyncMock()
+    mock_database.get_videos.return_value = (
+        matching_videos_in_db,
+        None
+    )
+    mock_database.update_video.return_value = None
 
-    called_right_prepate_fn = False
-    def prepare_new_listing_before_publish_call_recorder(*args, **kwagrs) -> Any:
-        nonlocal called_right_prepate_fn
-        called_right_prepate_fn = True
-        return prepare_new_listing_before_publish(*args, **kwagrs)
+    spy_prepare_new_listing_before_publish = Mock(
+        wraps=prepare_new_listing_before_publish
+    )
+    spy_prepare_listed_record_before_update = Mock(
+        wraps=prepare_listed_record_before_update
+    )
+
 
     description = 'dummy desc'
     title = 'dummy title'
@@ -68,12 +60,9 @@ async def test_unlisted_video_will_get_listing_time_on_the_update_db_fn():
     )
 
     await use_case(
-        database=None,
-        search_one_in_database_fn=search_one_in_database,
-        update_in_database_fn=update_in_database,
-        describe_videos_in_database_fn=lambda *args, **kwds: su,
-        prepare_new_listing_before_publish_fn=prepare_new_listing_before_publish_call_recorder,
-        prepare_listed_record_before_update_fn=prepare_listed_record_before_update,
+        database=mock_database,
+        prepare_new_listing_before_publish_fn=spy_prepare_new_listing_before_publish,
+        prepare_listed_record_before_update_fn=spy_prepare_listed_record_before_update,
         parse_video_into_state_dict_fn=parse_video_into_state_dict,
         # usage scope
         authenticated_user_id=user_id,
@@ -81,21 +70,27 @@ async def test_unlisted_video_will_get_listing_time_on_the_update_db_fn():
         hash_id=hash_id
     )
 
-    # listing time has been attached
-    assert su.desired_update_state_record['listing_time'] is not None
+    # listing time has been attached via new desired state
+    listing_time = mock_database.update_video.call_args.kwargs['new_desired_state']['listing_time']
+    assert listing_time is not None
 
     expected = {
         'description': description,
         'title': title,
         # need to be attached as it unpredictable
-        'listing_time': su.desired_update_state_record['listing_time']
+        'listing_time': listing_time
     }
 
     # assert exact structure
-    assert su.desired_update_state_record == expected
+    mock_database.update_video.assert_called_once_with(
+        user_id=user_id,
+        hash_id=hash_id,
+        new_desired_state=expected
+    )
 
     # assert the right prepare method for unlisted video has been called
-    assert called_right_prepate_fn == True
+    spy_prepare_new_listing_before_publish.assert_called()
+    spy_prepare_listed_record_before_update.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -104,14 +99,15 @@ async def test_unlisted_video_will_raise_exception_if_title_is_missing_which_is_
         Video(listing_time=None)
     ]
 
-    su = get_database_describer(matching_videos_in_db=matching_videos_in_db)
+    mock_database = AsyncMock()
+    mock_database.get_videos.return_value = (
+        matching_videos_in_db,
+        None
+    )
 
     try:
         await use_case(
-            database=None,
-            search_one_in_database_fn=search_one_in_database,
-            update_in_database_fn=update_in_database,
-            describe_videos_in_database_fn=lambda *args, **kwds: su,
+            database=mock_database,
             prepare_new_listing_before_publish_fn=prepare_new_listing_before_publish,
             prepare_listed_record_before_update_fn=prepare_listed_record_before_update,
             parse_video_into_state_dict_fn=parse_video_into_state_dict,
@@ -136,13 +132,23 @@ async def test_listed_video_will_not_get_listing_time_on_update_func_as_it_is_im
         )
     ]
 
-    su = get_database_describer(matching_videos_in_db=matching_videos_in_db)
+    mock_database = AsyncMock()
+    mock_database.get_videos.return_value = (
+        matching_videos_in_db,
+        None
+    )
+    mock_database.update_video.return_value = None
 
-    called_right_prepate_fn = False
-    def prepare_listed_record_before_update_call_recorder(*args, **kwagrs) -> Any:
-        nonlocal called_right_prepate_fn
-        called_right_prepate_fn = True
-        return prepare_listed_record_before_update(*args, **kwagrs)
+    spy_prepare_new_listing_before_publish = Mock(
+        wraps=prepare_new_listing_before_publish
+    )
+    spy_prepare_listed_record_before_update = Mock(
+        wraps=prepare_listed_record_before_update
+    )
+    spy_parse_video_into_state_dict = Mock(
+        wraps=parse_video_into_state_dict
+    )
+
 
     description = 'dummy desc'
     update_input = Video(
@@ -155,23 +161,31 @@ async def test_listed_video_will_not_get_listing_time_on_update_func_as_it_is_im
     )
 
     await use_case(
-        database=None,
-        search_one_in_database_fn=search_one_in_database,
-        update_in_database_fn=update_in_database,
-        describe_videos_in_database_fn=lambda *args, **kwds: su,
-        prepare_new_listing_before_publish_fn=prepare_new_listing_before_publish,
-        prepare_listed_record_before_update_fn=prepare_listed_record_before_update_call_recorder,
-        parse_video_into_state_dict_fn=parse_video_into_state_dict,
+        database=mock_database,
+        prepare_new_listing_before_publish_fn=spy_prepare_new_listing_before_publish,
+        prepare_listed_record_before_update_fn=spy_prepare_listed_record_before_update,
+        parse_video_into_state_dict_fn=spy_parse_video_into_state_dict,
         # usage scope
         authenticated_user_id=user_id,
         video=update_input,
         hash_id=hash_id
     )
 
-    expected = { 'description': description,}
+    expected = { 'description': description }
 
     # assert exact structure
-    assert su.desired_update_state_record == expected
+    mock_database.update_video.assert_called_once_with(
+        user_id=user_id,
+        hash_id=hash_id,
+        new_desired_state=expected
+    )
+
+    spy_parse_video_into_state_dict.assert_called_once_with(
+        video=Video(
+            description=description
+        )
+    )
 
     # assert the right prepare method for unlisted video has been called
-    assert called_right_prepate_fn == True
+    spy_prepare_new_listing_before_publish.assert_not_called()
+    spy_prepare_listed_record_before_update.assert_called()

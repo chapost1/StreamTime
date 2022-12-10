@@ -126,13 +126,13 @@ class VideosDatabasePG:
 
     async def get_unprocessed_videos(
         self,
-        user_id: Optional[UUID] = None,
-        hash_id: Optional[UUID] = None
+        include_user_id: Optional[UUID] = None,
+        include_hash_id: Optional[UUID] = None
     ) -> List[UnprocessedVideo]:
         return await (
             self._describe_unprocessd_videos()
-            .owned_by(user_id=user_id)
-            .with_hash(id=hash_id)
+            .owned_by(user_id=include_user_id)
+            .with_hash(id=include_hash_id)
             .search()
         )
 

@@ -1,6 +1,6 @@
 import pytest
 from common.utils import run_in_parallel
-from asyncmock import AsyncMock
+from unittest.mock import AsyncMock
 
 
 @pytest.mark.asyncio

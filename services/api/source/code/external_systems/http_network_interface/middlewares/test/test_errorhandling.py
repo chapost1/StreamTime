@@ -2,7 +2,7 @@ from fastapi import status, Response, Request
 from fastapi.responses import JSONResponse
 import common.app_errors as app_errors
 import pytest
-from asyncmock import AsyncMock
+from unittest.mock import AsyncMock
 from external_systems.http_network_interface.middlewares.errorhandling import (
     app_errors_handler,
     http_error
