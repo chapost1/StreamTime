@@ -76,8 +76,8 @@ async def test_returns_expected_structure_with_returned_values_in_internals():
 
     # assert that the mock objects were called with the expected arguments
     mock_database.get_videos.assert_any_call(
-        include_user_id=user_id,
-        include_hash_id=hash_id,
+        user_id=user_id,
+        hash_id=hash_id,
         # always
         filter_unlisted=True,
         include_privates_of_user_id=user_id

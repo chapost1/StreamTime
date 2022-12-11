@@ -23,9 +23,9 @@ async def test_returns_expected_structure_with_returned_values_in_internals():
     bools = [True, False]
 
     mock_visibility_settings_fn = Mock()
-    ignore_user_id = random.choice(bools)
+    not_user_id = random.choice(bools)
     include_privates_of_user_id = random.choice(bools)
-    mock_visibility_settings_fn.return_value = (ignore_user_id, include_privates_of_user_id)
+    mock_visibility_settings_fn.return_value = (not_user_id, include_privates_of_user_id)
 
     call_authenticated_user_id = uuid4()
     call_next_page_token = uuid4()
@@ -54,7 +54,7 @@ async def test_returns_expected_structure_with_returned_values_in_internals():
 
     # assert that the mock objects were called with the expected arguments
     mock_database.get_videos.assert_any_call(
-        ignore_user_id=ignore_user_id,
+        not_user_id=not_user_id,
         include_privates_of_user_id=include_privates_of_user_id,
         # always
         filter_unlisted=True,

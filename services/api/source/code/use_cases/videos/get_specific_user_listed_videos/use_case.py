@@ -25,7 +25,7 @@ async def use_case(
     # TODO: validate if target user actually exists
 
     videos, next_page = await database.get_videos(
-        include_user_id=user_id,
+        user_id=user_id,
         include_privates_of_user_id=authenticated_user_id,
         filter_unlisted=True,
         next=next,

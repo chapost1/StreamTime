@@ -67,9 +67,9 @@ class VideosDatabasePG:
 
     async def get_videos(
         self,
-        include_user_id: Optional[UUID] = None,
-        include_hash_id: Optional[UUID] = None,
-        ignore_user_id: Optional[UUID] = None,
+        user_id: Optional[UUID] = None,
+        hash_id: Optional[UUID] = None,
+        not_user_id: Optional[UUID] = None,
         include_privates_of_user_id: Optional[UUID] = None,
         filter_unlisted: Optional[bool] = True,
         next: Optional[str] = None,
@@ -80,9 +80,9 @@ class VideosDatabasePG:
 
         videos: List[Video] = await (
             self._describe_videos()
-            .owned_by(user_id=include_user_id)
-            .not_owned_by(user_id=ignore_user_id)
-            .with_hash(id=include_hash_id)
+            .owned_by(user_id=user_id)
+            .not_owned_by(user_id=not_user_id)
+            .with_hash(id=hash_id)
             .include_privates_of(user_id=include_privates_of_user_id)
             .filter_unlisted(flag=filter_unlisted)
             .paginate(pagination_index_is_smaller_than=curr_page.minimum_pagination_index)
@@ -126,13 +126,13 @@ class VideosDatabasePG:
 
     async def get_unprocessed_videos(
         self,
-        include_user_id: Optional[UUID] = None,
-        include_hash_id: Optional[UUID] = None
+        user_id: Optional[UUID] = None,
+        hash_id: Optional[UUID] = None
     ) -> List[UnprocessedVideo]:
         return await (
             self._describe_unprocessd_videos()
-            .owned_by(user_id=include_user_id)
-            .with_hash(id=include_hash_id)
+            .owned_by(user_id=user_id)
+            .with_hash(id=hash_id)
             .search()
         )
 

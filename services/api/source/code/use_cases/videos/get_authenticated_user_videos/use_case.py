@@ -19,10 +19,10 @@ async def use_case(
 
     unprocessed_videos, videos_page = await run_in_parallel(
         database.get_unprocessed_videos(
-            include_user_id=authenticated_user_id
+            user_id=authenticated_user_id
         ),
         database.get_videos(
-            include_user_id=authenticated_user_id,
+            user_id=authenticated_user_id,
             filter_unlisted=False,
             include_privates_of_user_id=authenticated_user_id
         )

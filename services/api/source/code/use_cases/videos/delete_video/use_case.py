@@ -18,9 +18,9 @@ def make_delete_video_on_ready_stage_handler(database: VideosDatabase, storage: 
 
     # first, get video meta to delete assets from storage
     videos, _ = await database.get_videos(
-        include_user_id=user_id,
+        user_id=user_id,
         filter_unlisted=False,
-        include_hash_id=hash_id,
+        hash_id=hash_id,
         include_privates_of_user_id=user_id
     )
     video: Video = find_one(
@@ -49,8 +49,8 @@ def make_delete_unprocessed_video_handler(database: VideosDatabase) -> Callable[
 
     unprocessed_video: UnprocessedVideo = find_one(
         items=await database.get_unprocessed_videos(
-          include_user_id=user_id,
-          include_hash_id=hash_id
+          user_id=user_id,
+          hash_id=hash_id
         )
     )
 

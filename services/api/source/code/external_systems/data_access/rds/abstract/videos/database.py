@@ -17,9 +17,9 @@ class VideosDatabase(Protocol):
 
     async def get_videos(
         self,
-        include_user_id: Optional[UUID],
-        include_hash_id: Optional[UUID],
-        ignore_user_id: Optional[UUID],
+        user_id: Optional[UUID],
+        hash_id: Optional[UUID],
+        not_user_id: Optional[UUID],
         include_privates_of_user_id: Optional[UUID],
         filter_unlisted: Optional[bool],
         next: Optional[str],
@@ -53,8 +53,8 @@ class VideosDatabase(Protocol):
 
     async def get_unprocessed_videos(
         self,
-        include_user_id: Optional[UUID],
-        include_hash_id: Optional[UUID]
+        user_id: Optional[UUID],
+        hash_id: Optional[UUID]
     ) -> List[UnprocessedVideo]:
         """
         Gets unprocessed videos

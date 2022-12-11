@@ -25,7 +25,7 @@ async def use_case(
     )
 
     videos, next_page = await database.get_videos(
-        ignore_user_id=user_id_to_ignore,
+        not_user_id=user_id_to_ignore,
         include_privates_of_user_id=authenticated_user_to_allow_privates,
         filter_unlisted=True,
         next=next,
