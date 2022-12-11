@@ -31,10 +31,10 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
 
         sql = nl().join([
             'SELECT',
-            'hash_id',
-            'user_id',
-            'upload_time',
-            'failure_reason'
+            'hash_id,',
+            'user_id,',
+            'upload_time,',
+            'failure_reason',
             f'FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
             f'WHERE {where_condition}',
             'ORDER BY upload_time DESC'

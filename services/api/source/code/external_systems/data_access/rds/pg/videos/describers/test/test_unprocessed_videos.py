@@ -41,10 +41,10 @@ async def test_search_pass_expected_envs_to_conn_query_no_conditions():
         (
             nl().join([
                 'SELECT',
-                'hash_id',
-                'user_id',
-                'upload_time',
-                'failure_reason'
+                'hash_id,',
+                'user_id,',
+                'upload_time,',
+                'failure_reason',
                 f'FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
                 f'WHERE true',
                 'ORDER BY upload_time DESC'
@@ -91,10 +91,10 @@ async def test_search_pass_expected_envs_to_conn_query_with_user_id_hash_id():
         (
             nl().join([
                 'SELECT',
-                'hash_id',
-                'user_id',
-                'upload_time',
-                'failure_reason'
+                'hash_id,',
+                'user_id,',
+                'upload_time,',
+                'failure_reason',
                 f'FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
                 f"WHERE {f'{nl()}AND '.join(conditions)}",
                 'ORDER BY upload_time DESC'

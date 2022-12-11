@@ -27,6 +27,7 @@ async def use_case(
     videos, _ = await database.get_videos(
         include_user_id=authenticated_user_id,
         include_hash_id=hash_id,
+        filter_unlisted=False,
         include_privates_of_user_id=authenticated_user_id
     )
 
