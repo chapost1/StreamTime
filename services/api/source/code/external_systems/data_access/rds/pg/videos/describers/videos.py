@@ -162,7 +162,7 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
 
 
     def owned_by(self, user_id: UUID) -> VideosDescriberPG:
-        return super().with_hash(user_id=user_id)
+        return super().owned_by(user_id=user_id)
 
 
     def not_owned_by(self, user_id: UUID) -> VideosDescriberPG:

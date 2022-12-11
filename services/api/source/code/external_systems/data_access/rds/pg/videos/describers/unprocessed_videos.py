@@ -21,27 +21,30 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
 
     async def search(self) -> List[UnprocessedVideo]:
         conditions, params = super().build_query_conditions_params()
+        print(conditions)
+        print(params)
 
         # default to true to prevent query crash for invalid WHERE syntax where conditions are empty
         where_condition = 'true'
         if 0 < len(conditions):
             where_condition = f'{nl()}AND '.join(conditions)
 
-        videos = await self.get_connection_fn().query([
-            (
-                f"""SELECT
-                        hash_id,
-                        user_id,
-                        upload_time,
-                        failure_reason
-                FROM {tables.UNPROCESSED_VIDEOS_TABLE}
-                WHERE {where_condition}
-                ORDER BY upload_time DESC""",
-                tuple(params)
-            )
+        sql = nl().join([
+            'SELECT',
+            'hash_id',
+            'user_id',
+            'upload_time',
+            'failure_reason'
+            f'FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
+            f'WHERE {where_condition}',
+            'ORDER BY upload_time DESC'
         ])
 
-        return list(map(self.__prase_db_records_into_classes, videos))
+        videos = await self.get_connection_fn().query([
+            (sql, tuple(params))
+        ])
+
+        return list(map(self._prase_db_records_into_classes, videos))
     
 
     async def delete(self) -> None:
@@ -53,10 +56,10 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
 
 
     def owned_by(self, user_id: UUID) -> UnprocessedVideosDescriberPG:
-        return super().with_hash(user_id=user_id)
+        return super().owned_by(user_id=user_id)
 
 
-    def __prase_db_records_into_classes(self, unprocessed_video: Tuple) -> UnprocessedVideo:
+    def _prase_db_records_into_classes(self, unprocessed_video: Tuple) -> UnprocessedVideo:
         return UnprocessedVideo(
             hash_id=unprocessed_video[0],
             user_id=unprocessed_video[1],
