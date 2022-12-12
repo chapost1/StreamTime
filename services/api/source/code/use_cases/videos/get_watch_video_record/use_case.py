@@ -1,6 +1,6 @@
 from uuid import UUID
 from common.constants import MAXIMUM_SECONDS_TILL_PRESIGNED_URL_EXPIRATION
-from common.utils import find_one
+from common.utils import first_item
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from typing import Union
 from entities.videos import WatchVideoRecord, Video
@@ -35,7 +35,7 @@ async def use_case(
         include_privates_of_user_id=authenticated_user_id
     )
 
-    video: Video = find_one(
+    video: Video = first_item(
         items=videos
     )
 

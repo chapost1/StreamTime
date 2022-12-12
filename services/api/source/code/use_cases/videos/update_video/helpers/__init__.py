@@ -1,3 +1,3 @@
-from .listed_videos_preparations import prepare_listed_record_before_update
-from .new_listing_preparations import prepare_new_listing_before_publish
+from .post_listing_update_state_resolver import resolve_update_state as resolve_update_state_for_post_listing
+from .pre_listing_update_state_resolver import resolve_update_state as resolve_update_state_for_pre_listing
 from .parse_video_into_state_dict import parse_video_into_state_dict

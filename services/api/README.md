@@ -177,9 +177,9 @@ For example, the update_video use case directory in lower resolution:
         |-- __init__.py
         |-- test
         |-- abstract.py
-        |-- listed_videos_preparations.py
-        |-- new_listing_preparations.py
-        |-- parse_video_into_state_dict.py
+        |-- parse_video_into_sate_dict.py
+        |-- post_listing_update_state_resolver.py
+        |-- pre_listing_update_state_resolver.py
     |-- test
     |-- use_case.py
 ```

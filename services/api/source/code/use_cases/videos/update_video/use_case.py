@@ -1,20 +1,18 @@
 from uuid import UUID
 from entities.videos import Video
-from common.utils import find_one
+from common.utils import first_item
 from external_systems.data_access.rds.abstract.videos import VideosDatabase
 from use_cases.videos.update_video.helpers.abstract import (
-    PrepareNewListingBeforePublishFunction,
-    PrepareListedRecordBeforeUpdateFunction,
-    ParseVideoIntoStateDictFunction
+    ResolveUpdateStateForPreListingFunction,
+    ResolveUpdateStateForPostListingFunction
 )
 
 
 async def use_case(
     # creation scope
     database: VideosDatabase,
-    prepare_new_listing_before_publish_fn: PrepareNewListingBeforePublishFunction,
-    prepare_listed_record_before_update_fn: PrepareListedRecordBeforeUpdateFunction,
-    parse_video_into_state_dict_fn: ParseVideoIntoStateDictFunction,
+    resolve_update_state_for_pre_listing_fn: ResolveUpdateStateForPreListingFunction,
+    resolve_update_state_for_post_listing_fn: ResolveUpdateStateForPostListingFunction,
     # usage scope
     authenticated_user_id: UUID,
     video: Video,
@@ -31,21 +29,17 @@ async def use_case(
         include_privates_of_user_id=authenticated_user_id
     )
 
-    existing_video: Video = find_one(
+    existing_video: Video = first_item(
         items=videos
     )
 
     if existing_video.is_not_listed():
-        video = prepare_new_listing_before_publish_fn(video=video)
+        desired_state = resolve_update_state_for_pre_listing_fn(video=video)
     else:
-        video = prepare_listed_record_before_update_fn(video=video)
-
-    new_desired_state = parse_video_into_state_dict_fn(
-        video=video
-    )
+        desired_state = resolve_update_state_for_post_listing_fn(video=video)
 
     await database.update_video(
         user_id=authenticated_user_id,
         hash_id=hash_id,
-        new_desired_state=new_desired_state
+        new_desired_state=desired_state
     )

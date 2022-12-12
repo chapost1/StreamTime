@@ -1,9 +1,9 @@
-from typing import Any, List, Union
+from typing import Dict, List, Union
 from uuid import UUID
 import common.constants as constants
 from common.app_errors import InputError
 
-def assert_required_fields(entity: Any, fields: List[str]) -> None:
+def assert_required_fields(entity: Dict, fields: List[str]) -> None:
     missing_fields = []
     for field in fields:
         if entity.get(field, None) is None:
@@ -15,6 +15,18 @@ def assert_required_fields(entity: Any, fields: List[str]) -> None:
             'errors': errors
         })
 
+
+    return None
+
+
+def fail_on_unsupported_fields(entity: Dict, supported_fields: List[str]) -> None:
+    supported = set(supported_fields)
+    unsupported_fields = list(filter(lambda field: field not in supported, list(entity.keys())))
+    if 0 < len(unsupported_fields):
+        errors = list(map(lambda field: f'unsupported field: {field}', unsupported_fields))
+        raise InputError(details={
+            'errors': errors
+        })
 
     return None
 
