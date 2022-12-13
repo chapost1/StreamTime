@@ -26,7 +26,9 @@ The user functionalities which are currently supported include:
 
 ## Status:
 
-POC :soon: MVP
+:x: &nbsp; POC
+
+:soon: &nbsp; MVP
 
 Quick demonstration of video upload directly to S3 using presigned upload under the hood, it triggers processing steps which also creates thumbnail.
 At start, S3 bucket is shown to be empty to demonstrate the upload process.
