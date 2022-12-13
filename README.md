@@ -128,23 +128,23 @@ foo@bar:~ (deployment) $ ./terraform.sh --command apply \
 
 ## Next Milestones
 
-&nbsp;&nbsp; :rock: GUI: Support base videos functionality
+&nbsp;&nbsp; :rock: &nbsp; GUI: Support base videos functionality
 
-&nbsp;&nbsp; :rock: UX: Add Original File Name tracking to improve UX on processing term
+&nbsp;&nbsp; :rock: &nbsp; UX: Add Original File Name tracking to improve UX on processing term
 
-&nbsp;&nbsp; :rock: Performance and services simplicity: Add G.C Service, for atomic delete operation (S3, RDS)
+&nbsp;&nbsp; :rock: &nbsp; Performance and services simplicity: Add G.C Service, for atomic delete operation (S3, RDS)
 
-&nbsp;&nbsp; :rock: Robustness: Add System-Wide test suite for B.B "Result" tests
+&nbsp;&nbsp; :rock: &nbsp; Robustness: Add System-Wide test suite for B.B "Result" tests
 
-&nbsp;&nbsp; :rock: Streaming Performance: Use CloudFront to stream videos instead of S3 directly, for caching
+&nbsp;&nbsp; :rock: &nbsp; Streaming Performance: Use CloudFront to stream videos instead of S3 directly, for caching
 
-&nbsp;&nbsp; :rock: Security and Scale: Users & Authentication
+&nbsp;&nbsp; :rock: &nbsp; Security and Scale: Users & Authentication
 
-&nbsp;&nbsp; :rock: Processing: Add Celery/Some Pipeline processing of new videos for multi-resolution support
+&nbsp;&nbsp; :rock: &nbsp; Processing: Add Celery/Some Pipeline processing of new videos for multi-resolution support
 
-&nbsp;&nbsp; :rock: Processing: Extract N video frames for videos thumbnails to appear on video hover (on GUI)
+&nbsp;&nbsp; :rock: &nbsp; Processing: Extract N video frames for videos thumbnails to appear on video hover (on GUI)
 
-&nbsp;&nbsp; :rock: Dev Experience: Add some Jump host on EC2 (access using ssh), with access to private RDS
+&nbsp;&nbsp; :rock: &nbsp; Dev Experience: Add some Jump host on EC2 (access using ssh), with access to private RDS
 
 
 
@@ -154,4 +154,3 @@ Project owner:
 > <a href="https://github.com/chapost1"><kbd><img src="https://avatars.githubusercontent.com/u/39523779?s=25"/></kbd></a> &nbsp; Shahar Tal
 >
 > [Github](https://github.com/chapost1) | [LinkedIn](https://www.linkedin.com/in/shahar-tal-4aa887166/) 
-
