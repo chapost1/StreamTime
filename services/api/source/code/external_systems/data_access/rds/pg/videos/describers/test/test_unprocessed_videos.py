@@ -9,6 +9,7 @@ from common.utils.nl import nl
 from common.utils.run_in_parallel import run_in_parallel
 from common.utils.calc_server_time import calc_server_time
 from unittest.mock import (
+    Mock,
     AsyncMock
 )
 
@@ -24,7 +25,7 @@ async def test_search_pass_expected_envs_to_conn_query_no_conditions():
     conn_mock = ConnectionMock(return_value=records)
 
     describer = UnprocessedVideosDescriberPG(
-        get_connection_fn=lambda *args, **kwargs: conn_mock
+        get_connection_fn=Mock(return_value=conn_mock)
     )
 
     describer_spy: UnprocessedVideosDescriberPG = AsyncMock(wraps=describer)
@@ -66,7 +67,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_user_id_hash_id():
     conn_mock = ConnectionMock(return_value=records)
 
     describer: UnprocessedVideosDescriberPG = UnprocessedVideosDescriberPG(
-        get_connection_fn=lambda *args, **kwargs: conn_mock
+        get_connection_fn=Mock(return_value=conn_mock)
     )
 
     user_id = uuid4()
@@ -109,7 +110,7 @@ async def test_delete_calls_parent_delete_with_the_correct_table_using_conn_mock
     conn_mock = ConnectionMock()
 
     describer: UnprocessedVideosDescriberPG = UnprocessedVideosDescriberPG(
-        get_connection_fn=lambda *args, **kwargs: conn_mock
+        get_connection_fn=Mock(return_value=conn_mock)
     )
 
     user_id = uuid4()
@@ -137,7 +138,7 @@ async def test_delete_calls_parent_delete_with_the_correct_table_using_conn_mock
 def test_with_hash_works():
     # it is checked before method is overriden
     describer: UnprocessedVideosDescriberPG = UnprocessedVideosDescriberPG(
-        get_connection_fn=lambda *args, **kwargs: ConnectionMock()
+        get_connection_fn=Mock(return_value=ConnectionMock())
     )
     assert len(describer.hash_ids) < 1
     describer.with_hash(id=uuid4())
@@ -147,7 +148,7 @@ def test_with_hash_works():
 def test_owned_by_works():
     # it is checked before method is overriden
     describer: UnprocessedVideosDescriberPG = UnprocessedVideosDescriberPG(
-        get_connection_fn=lambda *args, **kwargs: ConnectionMock()
+        get_connection_fn=Mock(return_value=ConnectionMock())
     )
     assert len(describer.user_ids) < 1
     describer.owned_by(user_id=uuid4())
@@ -161,7 +162,7 @@ def test__prase_db_records_into_classes():
     ]
 
     describer: UnprocessedVideosDescriberPG = UnprocessedVideosDescriberPG(
-        get_connection_fn=lambda *args, **kwargs: ConnectionMock()
+        get_connection_fn=Mock(return_value=ConnectionMock())
     )
 
     result = list(map(describer._prase_db_records_into_classes, records))

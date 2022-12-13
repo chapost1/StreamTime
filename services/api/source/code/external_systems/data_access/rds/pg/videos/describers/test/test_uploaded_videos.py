@@ -6,6 +6,7 @@ import random
 import pytest
 from common.utils.nl import nl
 from mock import patch
+from unittest.mock import Mock
 
 mock_table_name = 'mock_table'
 
@@ -282,14 +283,14 @@ def test_assert_required_values_before_specific_video_query_execution_with_both_
     assert 1 == 1
 
 
-@patch('external_systems.data_access.rds.pg.videos.tables.video_stages_to_table', lambda *args, **kwargs: None)
+@patch('external_systems.data_access.rds.pg.videos.tables.video_stages_to_table', Mock(return_value=None))
 def test_get_table_of_uploaded_video_by_stage_raise_exception_if_stage_table_is_none():
     describer = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
     with pytest.raises(expected_exception=Exception):
         describer.get_table_of_uploaded_video_by_stage(stage=None)
 
 
-@patch('external_systems.data_access.rds.pg.videos.tables.video_stages_to_table', lambda *args, **kwargs: mock_table_name)
+@patch('external_systems.data_access.rds.pg.videos.tables.video_stages_to_table', Mock(return_value=mock_table_name))
 def test_get_table_of_uploaded_video_by_stage_returns_valid_table():
     describer = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
     result = describer.get_table_of_uploaded_video_by_stage(stage=None)
@@ -297,10 +298,10 @@ def test_get_table_of_uploaded_video_by_stage_returns_valid_table():
 
 
 @pytest.mark.asyncio
-@patch('external_systems.data_access.rds.pg.videos.tables.video_stages_to_table', lambda *args, **kwargs: mock_table_name)
+@patch('external_systems.data_access.rds.pg.videos.tables.video_stages_to_table', Mock(return_value=mock_table_name))
 async def test_update_calls_with_expected_steps():
     connection_mock = get_connection_mock()
-    describer = UploadedVideosDescriberPG(get_connection_fn=lambda *args, **kwargs: connection_mock)
+    describer = UploadedVideosDescriberPG(get_connection_fn=Mock(return_value=connection_mock))
 
     user_id = uuid4()
     hash_id = uuid4()
@@ -338,10 +339,10 @@ async def test_update_calls_with_expected_steps():
 
 
 @pytest.mark.asyncio
-@patch('external_systems.data_access.rds.pg.videos.tables.video_stages_to_table', lambda *args, **kwargs: mock_table_name)
+@patch('external_systems.data_access.rds.pg.videos.tables.video_stages_to_table', Mock(return_value=mock_table_name))
 async def test_delete_calls_with_expected_steps():
     connection_mock = get_connection_mock()
-    describer = UploadedVideosDescriberPG(get_connection_fn=lambda *args, **kwargs: connection_mock)
+    describer = UploadedVideosDescriberPG(get_connection_fn=Mock(return_value=connection_mock))
 
     user_id = uuid4()
     hash_id = uuid4()

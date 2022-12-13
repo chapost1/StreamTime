@@ -120,33 +120,35 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
         where_condition = 'true'
         if 0 < len(conditions):
             where_condition = f'{nl()}AND '.join(conditions)
-        
+
         videos = await self.get_connection_fn().query([
             (
-                f"""SELECT 
-                        hash_id,
-                        user_id,
-                        title,
-                        description,
-                        size_in_bytes,
-                        duration_seconds,
-                        video_type,
-                        thumbnail_url,
-                        storage_object_key,
-                        storage_thumbnail_key,
-                        upload_time,
-                        is_private,
-                        listing_time,
-                        pagination_index
-                FROM {tables.VIDEOS_TABLE}
-                WHERE {where_condition}
-                ORDER BY pagination_index DESC
-                LIMIT %s""",
+                nl().join([
+                    'SELECT',
+                    'hash_id,',
+                    'user_id,',
+                    'title,',
+                    'description,',
+                    'size_in_bytes,',
+                    'duration_seconds,',
+                    'video_type,',
+                    'thumbnail_url,',
+                    'storage_object_key,',
+                    'storage_thumbnail_key,',
+                    'upload_time,',
+                    'is_private,',
+                    'listing_time,',
+                    'pagination_index',
+                    f'FROM {tables.VIDEOS_TABLE}',
+                    f'WHERE {where_condition}',
+                    'ORDER BY pagination_index DESC',
+                    'LIMIT %s'
+                ]),
                 tuple(params)
             )
         ])
 
-        return list(map(self.__prase_db_records_into_classes, videos))
+        return list(map(self._prase_db_records_into_classes, videos))
     
 
     async def delete(self) -> None:
@@ -188,7 +190,8 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
 
     
     def paginate(self, pagination_index_is_smaller_than: int) -> VideosDescriberPG:
-        self.pagination_index_is_smaller_than = pagination_index_is_smaller_than
+        if pagination_index_is_smaller_than is not None:
+            self.pagination_index_is_smaller_than = pagination_index_is_smaller_than
         return self
     
 
@@ -197,7 +200,7 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
         return self
 
 
-    def __prase_db_records_into_classes(self, video: Tuple) -> Video:
+    def _prase_db_records_into_classes(self, video: Tuple) -> Video:
         return Video(
             hash_id=video[0],
             user_id=video[1],
