@@ -13,15 +13,15 @@ You can find more of this course porjects <a href="https://github.com/EASS-HIT-P
 
 The user functionalities which are currently supported include:
 
-:soon: Create Users
+:soon: &nbsp; Create Users
 
-:gem: Upload / Delete your videos.
+:gem: &nbsp; Upload / Delete your videos.
 
-:gem: Control whether your videos are private or public so others can watch them.
+:gem: &nbsp; Control whether your videos are private or public so others can watch them.
 
-:gem: Watch yours / others public videos.
+:gem: &nbsp; Watch yours / others public videos.
 
-:gem: Explore videos of other users.
+:gem: &nbsp; Explore videos of other users.
 
 
 ## Status:
@@ -62,7 +62,7 @@ To read more about the API Web Server Design, <strong>[click here](./services/ap
 
 ### Prerequisites
 
-#### Ensure the following are installed:
+#### :point_right: &nbsp; Ensure the following are installed:
 
 - <b>Docker</b> - is needed to build images.
 
@@ -76,7 +76,7 @@ To read more about the API Web Server Design, <strong>[click here](./services/ap
 
     https://aws.amazon.com/cli/
 
-#### Ensure the following are already exist:
+#### :point_right: &nbsp; Ensure the following are already exist:
 
 - <b>AWS Account</b> - deployment is going to request for cloud resources from AWS and therefore, an account is required.
 
@@ -126,56 +126,26 @@ foo@bar:~ (deployment) $ ./terraform.sh --command apply \
 
 > ### Note: Provision of resources on AWS with this command can result in invoicing.
 
-## Baseline Roadmap
+## Next Milestones
 
-### Provisioning
+&nbsp;&nbsp; :rock: GUI: Support base videos functionality
 
-&nbsp;&nbsp; :white_check_mark: Network
+&nbsp;&nbsp; :rock: UX: Add Original File Name tracking to improve UX on processing term
 
-&nbsp;&nbsp; :white_check_mark: RDS provisioning
+&nbsp;&nbsp; :rock: Performance and services simplicity: Add G.C Service, for atomic delete operation (S3, RDS)
 
-&nbsp;&nbsp; :white_check_mark: Serverless processing Lambda workers
+&nbsp;&nbsp; :rock: Robustness: Add System-Wide test suite for B.B "Result" tests
 
-&nbsp;&nbsp; :white_check_mark: SNS between processing updates and WSS
+&nbsp;&nbsp; :rock: Streaming Performance: Use CloudFront to stream videos instead of S3 directly, for caching
 
-&nbsp;&nbsp; :white_check_mark: Websocket communication mamagement via API GW
+&nbsp;&nbsp; :rock: Security and Scale: Users & Authentication
 
-&nbsp;&nbsp; :white_check_mark: Webserver CF serve Web app
+&nbsp;&nbsp; :rock: Processing: Add Celery/Some Pipeline processing of new videos for multi-resolution support
 
-&nbsp;&nbsp; :white_check_mark: RDS DDL init script
+&nbsp;&nbsp; :rock: Processing: Extract N video frames for videos thumbnails to appear on video hover (on GUI)
 
-&nbsp;&nbsp; :white_check_mark: Web Api Tasks Execution
+&nbsp;&nbsp; :rock: Dev Experience: Add some Jump host on EC2 (access using ssh), with access to private RDS
 
-&nbsp;&nbsp; :white_check_mark: Buckets lifecycle def
-
-&nbsp;&nbsp; :white_check_mark: TLS
-
-&nbsp;&nbsp; :black_square_button: Provision Videos deleter service as a scheduled operation
-
-
-### Software
-
-&nbsp;&nbsp; :white_check_mark: New video processing Lambda worker
-
-&nbsp;&nbsp; :white_check_mark: Image resizer Lambda worker (for thumbnail)
-
-&nbsp;&nbsp; :white_check_mark: RDS records update Lambda worker
-
-&nbsp;&nbsp; :white_check_mark: WSS Connections store Lambda worker
-
-&nbsp;&nbsp; :white_check_mark: Web api videos management
-
-&nbsp;&nbsp; :black_square_button: Web app videos UI
-
-&nbsp;&nbsp; :black_square_button: Web api mark as delete for later handling
-
-&nbsp;&nbsp; :black_square_button: Videos deleter service logic
-
-&nbsp;&nbsp; :black_square_button: Web api users management
-
-&nbsp;&nbsp; :black_square_button: Web api authentication management
-
-&nbsp;&nbsp; :black_square_button: Web app authentication UI
 
 
 ## Contact
