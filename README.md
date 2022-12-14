@@ -30,11 +30,12 @@ The user functionalities which are currently supported include:
 
 :soon: &nbsp; MVP
 
-Quick demonstration of video upload directly to S3 using presigned upload under the hood, it triggers processing steps which also creates thumbnail.
-At start, S3 bucket is shown to be empty to demonstrate the upload process.
+Quick demonstration of video upload demonstration using UI and edits video & watch it using api via postman, until UI support those.
 
 
-https://user-images.githubusercontent.com/39523779/203442739-e2baa0b1-eb5a-4318-8889-e265aa7fcdb2.mp4
+
+https://user-images.githubusercontent.com/39523779/207719117-68607c7b-b68e-412c-a068-4dc3cd9cce7d.mp4
+
 
 
 ## Design:
