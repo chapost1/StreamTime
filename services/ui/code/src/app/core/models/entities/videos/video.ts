@@ -12,7 +12,6 @@ class Video extends UploadedVideo {
     thumbnailUrl: string;
     isPrivate: boolean;
     listingTime: string | null;
-    paginationIndex: number;
 
     constructor(
         hashId: string,
@@ -25,8 +24,7 @@ class Video extends UploadedVideo {
         videoType: string,
         thumbnailUrl: string,
         isPrivate: boolean,
-        listingTime: string | undefined,
-        paginationIndex: number
+        listingTime: string | undefined
     ) {
         super(hashId, userId, uploadTime);
 
@@ -44,8 +42,6 @@ class Video extends UploadedVideo {
         this.thumbnailUrl = thumbnailUrl;
         assertField(this.constructor.name, 'isPrivate', isPrivate);
         this.isPrivate = isPrivate;
-        assertField(this.constructor.name, 'paginationIndex', paginationIndex);
-        this.paginationIndex = paginationIndex;
     }
 
     public isListed(): boolean {
@@ -64,8 +60,7 @@ class Video extends UploadedVideo {
             source.video_type,
             source.thumbnail_url,
             source.is_private,
-            source.listing_time || undefined,
-            source.pagination_index
+            source.listing_time || undefined
         )
     }
 
@@ -79,8 +74,7 @@ class Video extends UploadedVideo {
             video_type: this.videoType,
             thumbnail_url: this.thumbnailUrl,
             is_private: this.isPrivate,
-            listing_time: this.listingTime || undefined,
-            pagination_index: this.paginationIndex
+            listing_time: this.listingTime || undefined
         }
         removeUndefinedValuesKeysFromObject(result);
         return result;

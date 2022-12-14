@@ -17,7 +17,6 @@ export interface IVideo extends IUploadedVideo {
     thumbnail_url: string;
     is_private: boolean;
     listing_time?: string | null;
-    pagination_index: number;
 }
 
 export interface IUserVideosList {
