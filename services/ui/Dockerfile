@@ -27,4 +27,5 @@ RUN rm -rf /var/ng/project
 RUN mv /var/ng/dist/* /var/ng/
 RUN rm -rf /var/ng/dist
 
-CMD tialf /dev/null
+
+CMD tailf /dev/null

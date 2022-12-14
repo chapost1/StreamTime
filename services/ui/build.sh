@@ -16,18 +16,19 @@ if [[ "$is_new_build_needed" -eq 42 ]]; then
     wait $pid2
     is_docker_build_succeeded=$?
     if [[ "$is_docker_build_succeeded" -eq 0 ]]; then
+        # prepare output dir
+        rm -rf $(pwd)/dist
+        mkdir $(pwd)/dist
+        # cp output from image
+        docker run --rm -it -v $(pwd)/dist:/tmp/dist ng-frontend-dist mv /var/ng /tmp/dist
+        mv $(pwd)/dist/ng/* $(pwd)/dist/
+        rm -rf $(pwd)/dist/ng
+
         exit 0;
     else
         echo "$service docker build failed";
         exit 1;
     fi
-    # prepare output dir
-    rm -rf $(pwd)/dist
-    mkdir $(pwd)/dist
-    # cp output from image
-    docker run --rm -it -v $(pwd)/dist:/tmp/dist ng-frontend-dist mv /var/ng /tmp/dist
-    mv $(pwd)/dist/ng/* $(pwd)/dist/
-    rm -rf $(pwd)/dist/ng
 elif [[ $is_new_build_needed -eq 0 ]]; then
     echo "no new build needed for $service"
 else
