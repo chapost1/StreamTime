@@ -30,7 +30,7 @@ The user functionalities which are currently supported include:
 
 :soon: &nbsp; MVP
 
-Quick demonstration of video upload demonstration using UI and edits video & watch it using api via postman, until UI support those.
+Quick demonstration of video upload using with GUI and edits video & watch it using api via postman, until UI support those.
 
 
 
