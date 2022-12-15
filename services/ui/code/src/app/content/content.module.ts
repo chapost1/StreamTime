@@ -19,6 +19,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { DndDirective } from '../core/directives/drag-and-drop.directive';
 
+import { ConfirmationDialog } from './confirmation-dialog.component';
 import { UploadVideoDialog } from './workspace/upload-video-dialog/upload-video-dialog.component';
 import { EditVideoFormDialog } from './workspace/edit-video-dialog/edit-video-form-dialog.component';
 
@@ -54,7 +55,8 @@ import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
     VideoSummaryComponent,
     VideosTableComponent,
     UnprocessedVideosTableComponent,
-    EditVideoFormDialog
+    EditVideoFormDialog,
+    ConfirmationDialog
   ],
   imports: [
     LogoModule,
@@ -85,7 +87,8 @@ import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
   bootstrap: [ContentComponent],
   entryComponents: [
     UploadVideoDialog,
-    EditVideoFormDialog
+    EditVideoFormDialog,
+    ConfirmationDialog
   ]
 })
 export class ContentModule { }

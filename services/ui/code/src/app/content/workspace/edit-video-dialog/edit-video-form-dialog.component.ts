@@ -11,8 +11,7 @@ export interface EditVideoDialogData {
 
 @Component({
     selector: 'dialog-edit-video-form-dialog',
-    templateUrl: './edit-video-form-dialog.component.html',
-    styleUrls: ['./edit-video-form-dialog.component.scss']
+    templateUrl: './edit-video-form-dialog.component.html'
 })
 export class EditVideoFormDialog implements OnInit, OnDestroy {
     private subscriptions: Subscription = new Subscription();
@@ -37,8 +36,6 @@ export class EditVideoFormDialog implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit(): void {
-        this.initListeners();
-        
         this.setupLayout();
 
         this.syncFormWithVideo();
@@ -46,20 +43,6 @@ export class EditVideoFormDialog implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
-    }
-
-    private initListeners(): void {
-        const keydownEvents = this.dialogRef.keydownEvents().subscribe(event => {
-            if (event.key === "Escape") {
-                this.exit();
-            }
-        });
-        this.subscriptions.add(keydownEvents);
-
-        const backdropClick = this.dialogRef.backdropClick().subscribe(event => {
-            this.exit();
-        });
-        this.subscriptions.add(backdropClick);
     }
 
     public exit(result: undefined | any = undefined): void {

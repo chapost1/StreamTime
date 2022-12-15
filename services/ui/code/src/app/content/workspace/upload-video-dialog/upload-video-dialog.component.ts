@@ -42,7 +42,6 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.initUploadConfig();
-        this.initListeners();
     }
 
     ngOnDestroy(): void {
@@ -51,20 +50,6 @@ export class UploadVideoDialog implements OnInit, OnDestroy {
 
     public exit(): void {
         this.dialogRef.close();
-    }
-
-    private initListeners(): void {
-        const keydownEvents = this.dialogRef.keydownEvents().subscribe(event => {
-            if (event.key === "Escape") {
-                this.exit();
-            }
-        });
-        this.subscriptions.add(keydownEvents);
-
-        const backdropClick = this.dialogRef.backdropClick().subscribe(event => {
-            this.exit();
-        });
-        this.subscriptions.add(backdropClick);
     }
 
     private async initUploadConfig(): Promise<void> {

@@ -9,6 +9,7 @@ import UploadedVideo from 'src/app/core/models/entities/videos/uploaded-video';
 import UserVideosList from 'src/app/core/models/entities/videos/user-videos-list';
 import { UploadedVideosSyncService } from 'src/app/core/services/uploaded-videos-sync.service';
 import { EditVideoFormDialog } from './edit-video-dialog/edit-video-form-dialog.component';
+import { ConfirmationDialog } from '../confirmation-dialog.component';
 
 @Component({
   selector: 'app-workspace',
@@ -72,6 +73,28 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   public onDelete(video: UploadedVideo): void {
+    const dialogRef = this.dialog.open(ConfirmationDialog, {
+      autoFocus: false,
+      height: 'auto',
+      width: 'auto',
+      maxWidth: 'calc(100% - 2rem)',
+      data: {
+        title: 'Are you sure you want to delete this video?'
+      }
+    });
+
+    const sub = dialogRef.afterClosed().subscribe({
+      next: (result: boolean) => {
+        if (result) {
+          this.deleteVideoRequest(video);
+        }
+      }
+    });
+
+    this.subscriptions.add(sub);
+  }
+
+  private deleteVideoRequest(video: UploadedVideo): void {
     const onSuccess = () => {
       this.userVideosList.removeVideo(video);
     }
@@ -84,7 +107,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.deleteVideo(video.hashId, onSuccess, onComplete);
   }
 
-  public deleteVideo(hashId: string, onSuccess: Function, onComplete: Function): void {
+  private deleteVideo(hashId: string, onSuccess: Function, onComplete: Function): void {
     const sub = this.backendService.deleteVideo(hashId)
       .subscribe({
         next: onSuccess.bind(this),
@@ -106,7 +129,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       autoFocus: false,
       height: 'auto',
       minWidth: 'calc(100% - 2rem)',
-      disableClose: true,
       exitAnimationDuration: '200ms'
     });
   }
@@ -121,7 +143,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       height: 'auto',
       width: 'auto',
       maxWidth: 'calc(100% - 2rem)',
-      disableClose: true,
       exitAnimationDuration: '200ms',
       data: {
         video
