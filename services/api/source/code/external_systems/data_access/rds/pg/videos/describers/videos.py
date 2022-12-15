@@ -90,7 +90,7 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
             return conditions, params
 
         if set(self.allowed_privates_of_user_ids) == set(self.user_ids):
-            # all target video owners (users) are allowed for privates
+            # there is a restriction on users, and all of them are allowed to see privates
             # so, no need to restrict privacy
             # note: equality means both are not empty
             return conditions, params
