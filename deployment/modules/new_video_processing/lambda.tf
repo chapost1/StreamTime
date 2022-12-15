@@ -20,6 +20,7 @@ resource "aws_lambda_function" "new_video_processing" {
   handler          = "app.lambda_handler"
   runtime          = "python3.8"
   timeout          = 300 # 5m
+  memory_size      = 512
   layers = [
     aws_lambda_layer_version.ffmpeg_python_lambda_layer.arn
   ]

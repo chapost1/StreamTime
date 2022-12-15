@@ -112,11 +112,6 @@ def get_video_duration_seconds(s3_source_signed_url: str) -> float:
     return duration
 
 
-def seconds_to_hh_mm_ss(seconds: int) -> str:
-    time_partitions = str(datetime.timedelta(seconds=seconds)).split('.')[0].split(':')
-    return ':'.join(list(map(lambda partition: partition.zfill(2), time_partitions)))
-
-
 def run_ffmpeg_thumbnail_extraction_command(command) -> Any:
     print(command)
     try:
@@ -130,15 +125,14 @@ def run_ffmpeg_thumbnail_extraction_command(command) -> Any:
 def upload_frame_as_thumbnail(s3_source_signed_url: str, duration_seconds: float, bucket: str, thumbnail_key: str) -> None:
     executable_path = f'{EXECUTABLES_DIRECTORY}/ffmpeg'
 
-    mid_of_video_duration_seconds = duration_seconds / 3
-    time_frame_to_extract = seconds_to_hh_mm_ss(mid_of_video_duration_seconds)
+    mid_of_video_duration_seconds = int(duration_seconds / 3)
     frame_path = '/tmp/frame.png'
     
     if os.path.exists(frame_path):
         os.remove(frame_path)
 
-    ffmpeg_cmd = f"{executable_path} -y -ss {time_frame_to_extract} -i \"" + \
-        str(s3_source_signed_url) + f"\" -frames:v 1 {frame_path}"
+    ffmpeg_cmd = f"{executable_path} -ss {mid_of_video_duration_seconds} -i \"" + \
+        str(s3_source_signed_url) + f"\" -vframes 1 -vcodec png -an -y {frame_path}"
     run_ffmpeg_thumbnail_extraction_command(ffmpeg_cmd)
     
     if not os.path.exists(frame_path):
@@ -324,7 +318,8 @@ def lambda_handler(event, context):
     if current_file_key.split('/')[0] != os.environ[UPLOADED_VIDEOS_PREFIX_ENV_NAME]:
         print(
             f'An invalid s3 prefix, for key: {current_file_key}, processing has been stopped before being able to get hash_id due to infrastructure failure')
-        return {'statusCode': 500}
+        # avoid retries
+        return {'statusCode': 200, 'body': 'invalid prefix, no need to retry'}
 
     # validate object key exists and accessable
     try:
