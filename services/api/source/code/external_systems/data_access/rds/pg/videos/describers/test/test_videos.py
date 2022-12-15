@@ -23,7 +23,7 @@ def test_build_query_conditions_params_with_no_params_added():
     )
 
     conditions, params = describer.build_query_conditions_params()
-    assert conditions == []
+    assert conditions == ['is_private IS NOT true']
     assert params == []
 
 
@@ -44,7 +44,8 @@ def test_build_query_conditions_params_with_user_id_hash_id():
 
     expected_conditions = [
         f"{describer.cast('user_id', 'text')} IN ({describer.cast('%s', 'text')})",
-        f"{describer.cast('hash_id', 'text')} IN ({describer.cast('%s', 'text')})"
+        f"{describer.cast('hash_id', 'text')} IN ({describer.cast('%s', 'text')})",
+        'is_private IS NOT true'
     ]
     assert conditions == expected_conditions
     assert params == [user_id, hash_id]
@@ -70,7 +71,8 @@ def test_build_query_conditions_params_with_hash_id_and_excluded_user_id():
 
     expected_conditions = [
         f"{describer.cast('hash_id', 'text')} IN ({describer.cast('%s', 'text')})",
-        f"{describer.cast('user_id', 'text')} NOT IN ({describer.cast('%s', 'text')}, {describer.cast('%s', 'text')})"
+        f"{describer.cast('user_id', 'text')} NOT IN ({describer.cast('%s', 'text')}, {describer.cast('%s', 'text')})",
+        'is_private IS NOT true'
     ]
     assert conditions == expected_conditions
     assert params == [hash_id, *excluded_user_ids]
@@ -96,7 +98,8 @@ def test_build_query_conditions_params_with_paginate():
 
     expected_conditions = [
         f"{describer.cast('hash_id', 'text')} IN ({describer.cast('%s', 'text')})",
-        f"pagination_index < %s"
+        f"pagination_index < %s",
+        'is_private IS NOT true'
     ]
     assert conditions == expected_conditions   
     assert params == [hash_id, last_page_min_index]
@@ -117,7 +120,7 @@ def test_build_query_conditions_params_with_paginate_none():
         .build_query_conditions_params()
     )
 
-    assert conditions == []   
+    assert conditions == ['is_private IS NOT true']   
     assert params == []
     assert describer.pagination_index_is_smaller_than is None
     assert describer.requested_limit == limit
@@ -152,13 +155,15 @@ def test_build_query_conditions_params_with_listing_conditions_listing_is_added(
     if condition is not None:
         expected_conditions.append(condition)
 
+    expected_conditions.append('is_private IS NOT true')
+
     assert conditions == expected_conditions
 
     assert params == [user_id]
     assert describer.unlisted_should_be_hidden == flag
 
 
-def test_build_query_conditions_params_privacy():
+def test_build_query_conditions_params_privacy_not_same_users_but_some_should_be_allowed_to_see_privates():
     describer = VideosDescriberPG(
         get_connection_fn=Mock(return_value=ConnectionMock())
     )
@@ -176,6 +181,7 @@ def test_build_query_conditions_params_privacy():
         .build_query_conditions_params()
     )
 
+    # expects to see private self.case as not all users are allowed to see privates
     expected_conditions = [
         f"{describer.cast('user_id', 'text')} IN ({describer.cast('%s', 'text')})",
         f"CASE WHEN {describer.cast('user_id', 'text')} IN ({describer.cast('%s', 'text')}, {describer.cast('%s', 'text')}) THEN true ELSE {describer.cast(val_name='is_private IS NOT true', casting_type='bool')} END"
@@ -184,6 +190,58 @@ def test_build_query_conditions_params_privacy():
     assert conditions == expected_conditions
     assert params == [user_id_0, user_id_1, user_id_2]
     assert describer.allowed_privates_of_user_ids == [user_id_1, user_id_2]
+
+
+def test_build_query_conditions_params_privacy_no_specified_users_but_yes_private_allowed():
+    describer = VideosDescriberPG(
+        get_connection_fn=Mock(return_value=ConnectionMock())
+    )
+
+    # using user_id to assert conditions and params are not overwritten
+    user_id_0 = uuid4()
+
+    conditions, params = (
+        describer
+        .include_privates_of(user_id=user_id_0)
+        .build_query_conditions_params()
+    )
+
+    # expects to see private self.case as some of the data is relevant to users which are not allwed to see privates
+    expected_conditions = [
+        f"CASE WHEN {describer.cast('user_id', 'text')} IN ({describer.cast('%s', 'text')}) THEN true ELSE {describer.cast(val_name='is_private IS NOT true', casting_type='bool')} END"
+    ]
+
+    assert conditions == expected_conditions
+    assert params == [user_id_0]
+    assert describer.allowed_privates_of_user_ids == [user_id_0]
+
+
+def test_build_query_conditions_params_privacy_all_users_are_allowed():
+    describer = VideosDescriberPG(
+        get_connection_fn=Mock(return_value=ConnectionMock())
+    )
+
+    # using user_id to assert conditions and params are not overwritten
+    user_id_0 = uuid4()
+    user_id_1 = uuid4()
+
+    conditions, params = (
+        describer
+        .owned_by(user_id=user_id_0)
+        .owned_by(user_id=user_id_1)
+        .include_privates_of(user_id=user_id_1)
+        .include_privates_of(user_id=user_id_0)
+        .build_query_conditions_params()
+    )
+
+    # expects to not see private self.case as all users are allowed to see privates even if not at the same order
+    expected_conditions = [
+        f"{describer.cast('user_id', 'text')} IN ({describer.cast('%s', 'text')}, {describer.cast('%s', 'text')})"
+    ]
+
+    assert conditions == expected_conditions
+    assert params == [user_id_0, user_id_1]
+    assert describer.allowed_privates_of_user_ids == [user_id_1, user_id_0]
 
 
 @pytest.mark.asyncio
@@ -242,7 +300,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_no_conditions():
                 'listing_time,',
                 'pagination_index',
                 f'FROM {tables.VIDEOS_TABLE}',
-                f'WHERE true',
+                f'WHERE is_private IS NOT true',
                 'ORDER BY pagination_index DESC',
                 'LIMIT %s'
             ]),

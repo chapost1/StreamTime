@@ -73,38 +73,52 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
 
 
     def build_privacy_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        # avoid side-effects
+        conditions = conditions.copy()
+        params = params.copy()
+
         # by default privates are disabled
         if self.allow_privates_globally:
-            ...
-        elif 0 < len(self.allowed_privates_of_user_ids):
-            # allow privates for specified users
+            # privates are enabled globally
+            # so, no need to restrict privacy
+            return conditions, params
 
-            temp_conditions, temp_params = self.build_property_conditions_params(
-                raw_params=self.allowed_privates_of_user_ids,
-                col_name='user_id',
-                casting_type='text',
-                # the next steps uses the first element of conditions
-                # therefore, the base params/conditions should be empty
-            )
+        if len(self.allowed_privates_of_user_ids) < 1:
+            # no user is allowed for privates
+            # therefore, restrict privacy
+            conditions.append('is_private IS NOT true')
+            return conditions, params
 
-            user_in_allowed_privates_condition = temp_conditions[0]
+        if set(self.allowed_privates_of_user_ids) == set(self.user_ids):
+            # all target video owners (users) are allowed for privates
+            # so, no need to restrict privacy
+            # note: equality means both are not empty
+            return conditions, params
 
-            # need to be strict regarding whether it is an allowed user or it should be determined by privacy            
-            statement = self.case(
-                cases=[
-                    # for all users are in allowed privates, return true
-                    (user_in_allowed_privates_condition, 'true'),
-                ],
-                # default is true only if private is not true (means: it is public)
-                default=f"{self.cast(val_name='is_private IS NOT true', casting_type='bool')}"
-            )
+        # allow privates for specified users
 
-            # avoid side-effects
-            conditions = conditions.copy()
-            params = params.copy()
+        temp_conditions, temp_params = self.build_property_conditions_params(
+            raw_params=self.allowed_privates_of_user_ids,
+            col_name='user_id',
+            casting_type='text',
+            # the next steps uses the first element of conditions
+            # therefore, the base params/conditions should be empty
+        )
 
-            conditions.append(statement)
-            params.extend(temp_params)
+        user_in_allowed_privates_condition = temp_conditions[0]
+
+        # need to be strict regarding whether it is an allowed user or it should be determined by privacy            
+        statement = self.case(
+            cases=[
+                # for all users are in allowed privates, return true
+                (user_in_allowed_privates_condition, 'true'),
+            ],
+            # default is true only if private is not true (means: it is public)
+            default=f"{self.cast(val_name='is_private IS NOT true', casting_type='bool')}"
+        )
+
+        conditions.append(statement)
+        params.extend(temp_params)
 
         return conditions, params
 
