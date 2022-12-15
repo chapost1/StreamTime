@@ -135,6 +135,8 @@ foo@bar:~ (deployment) $ ./terraform.sh --command apply \
 
 &nbsp;&nbsp; :rock: &nbsp; UX: Add Original File Name tracking to improve UX on processing term
 
+&nbsp;&nbsp; :rock: &nbsp; Upload Performance: Enable S3 transfer acceleration
+
 &nbsp;&nbsp; :rock: &nbsp; Performance and services simplicity: Add G.C Service, for atomic delete operation (S3, RDS)
 
 &nbsp;&nbsp; :rock: &nbsp; Robustness: Add System-Wide test suite for B.B "Result" tests
