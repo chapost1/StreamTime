@@ -1,0 +1,57 @@
+<app-dialog class="edit-video-form-dialog">
+    <div class="py-3">
+        <div>
+
+            <div class="mb-2">
+                <h2 mat-dialog-title class="d-inline">Edit Video - {{this.data.video.title}}</h2>
+            </div>
+
+            <form [formGroup]="editables" (ngSubmit)="onFormSubmit()">
+
+                <div class="row">
+
+                    <div class="my-2">
+                        <section>
+                            <mat-checkbox color="primary" formControlName="isPrivate"
+                                [formControl]="editables.controls.isPrivate">Private</mat-checkbox>
+                        </section>
+                    </div>
+
+                    <mat-form-field appearance="fill">
+                        <mat-label>Title</mat-label>
+                        <input matInput formControlName="title">
+                        <section [hidden]="!editables.get('title')?.touched">
+                            <small class="text-danger" *ngIf="editables.get('title')?.hasError('required')">
+                                This field is required.
+                            </small>
+                            <small class="text-danger" *ngIf="editables.get('title')?.hasError('minlength')">
+                                The minimum length for this field is
+                                {{editables.get('title')?.errors?.['minlength'].requiredLength}} characters.
+                            </small>
+                        </section>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput formControlName="description" rows="8"
+                            placeholder="Tell others about your video">
+                        </textarea>
+                        <section [hidden]="!editables.get('description')?.touched">
+                            <small class="text-danger" *ngIf="editables.get('description')?.hasError('required')">
+                                This field is required.
+                            </small>
+                        </section>
+                    </mat-form-field>
+
+
+                    <div class="text-center">
+                        <button mat-flat-button color="primary" type="submit"
+                            [disabled]="!editables.valid || !isDeltaFound">
+                            {{saveButtonText}}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</app-dialog>

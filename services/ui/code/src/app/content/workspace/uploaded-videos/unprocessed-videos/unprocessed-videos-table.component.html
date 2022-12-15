@@ -8,7 +8,8 @@
                 <div *ngIf="!element.isStillProcessing()">
                     <button mat-button (click)="onDelete(element)" matTooltip="Delete forever"
                         [matTooltipPosition]="'below'">
-                        <fa-icon [icon]="icons.delete" class="text-danger"></fa-icon>
+                        <mat-spinner *ngIf="element.sync" class="text-center mx-auto" [diameter]="32"></mat-spinner>
+                        <fa-icon *ngIf="!element.sync" [icon]="icons.delete" class="text-danger"></fa-icon>
                     </button>
                 </div>
             </td>

@@ -15,10 +15,10 @@
         <div class="text-center">
             <div *ngIf="fetchingUserVideosList;then watingForUserVideosList else userVideosListIsReady"></div>
             <ng-template #userVideosListIsReady>
-                <app-uploaded-videos (deleteVideoEmitter)="onDelete($event)"
-                (uploadVideoEmitter)="onUploadVideoRequest($event)"
-                [userVideosList]="userVideosList">
-            </app-uploaded-videos>
+                <app-uploaded-videos (editVideoEmitter)="onEditVideoRequest($event)"
+                    (deleteVideoEmitter)="onDelete($event)" (uploadVideoEmitter)="onUploadVideoRequest($event)"
+                    [userVideosList]="userVideosList">
+                </app-uploaded-videos>
             </ng-template>
             <ng-template #watingForUserVideosList>
                 <div class="py-3">

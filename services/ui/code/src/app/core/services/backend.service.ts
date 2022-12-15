@@ -129,6 +129,22 @@ export class BackendService {
         return this.httpClient.delete(url).pipe(catchError(this.handleError));
     }
 
+    public updateVideo(hashId: string, data: {
+        title?: string,
+        description?: string,
+        isPrivate?: boolean
+    }): Observable<Object> {
+        const url = `${this.hostUrl}/${this.videoEndpointsRoute}/my/${hashId}`;
+
+        const payload = {
+            title: data.title,
+            description: data.description,
+            is_private: data.isPrivate
+        };
+
+        return this.httpClient.put(url, payload).pipe(catchError(this.handleError));
+    }
+
     private handleError(err: HttpErrorResponse): Observable<Error> {
         let errorMessage: string = 'unknown error';
 

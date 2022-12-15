@@ -10,6 +10,7 @@ import { MatSort } from '@angular/material/sort';
   styleUrls: ['videos-table.component.scss']
 })
 export class VideosTableComponent implements OnChanges {
+  @Output() editVideoEmitter: EventEmitter<Video> = new EventEmitter<Video>();
   @Output() deleteVideoEmitter: EventEmitter<Video> = new EventEmitter<Video>();
   @Input() videos: Video[] = [];
   @ViewChild(MatSort) set matSort(sort: MatSort) {
@@ -62,5 +63,9 @@ export class VideosTableComponent implements OnChanges {
 
   public onDelete(video: Video): void {
     this.deleteVideoEmitter.emit(video);
+  }
+
+  public onEdit(video: Video): void {
+    this.editVideoEmitter.emit(video);
   }
 }

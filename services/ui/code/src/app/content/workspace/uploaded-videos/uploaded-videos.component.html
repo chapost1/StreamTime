@@ -18,7 +18,8 @@
                 <span class="text-muted"> - Popo, Cameraman</span>
 
                 <div class="my-2">
-                    <button mat-flat-button color="primary" (click)="onUploadVideoClick()">Upload my first video!</button>
+                    <button mat-flat-button color="primary" (click)="onUploadVideoClick()">Upload my first
+                        video!</button>
                 </div>
             </div>
         </div>
@@ -41,7 +42,8 @@
             <div *ngIf="0 < (userVideosList?.videos || []).length">
                 <h2 class="m-2">Ready Videos</h2>
                 <div class="table-wrapper">
-                    <app-videos-table (deleteVideoEmitter)="onDelete($event)" [videos]="userVideosList?.videos || []">
+                    <app-videos-table (editVideoEmitter)="onEdit($event)" (deleteVideoEmitter)="onDelete($event)"
+                        [videos]="userVideosList?.videos || []">
                     </app-videos-table>
                 </div>
             </div>

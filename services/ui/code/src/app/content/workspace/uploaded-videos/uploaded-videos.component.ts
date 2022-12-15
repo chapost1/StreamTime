@@ -9,6 +9,7 @@ import UploadedVideo from 'src/app/core/models/entities/videos/uploaded-video';
   styleUrls: ['uploaded-videos.component.scss']
 })
 export class UploadedVideosComponent {
+  @Output() editVideoEmitter: EventEmitter<UploadedVideo> = new EventEmitter<UploadedVideo>();
   @Output() deleteVideoEmitter: EventEmitter<UploadedVideo> = new EventEmitter<UploadedVideo>();
   @Output() uploadVideoEmitter: EventEmitter<void> = new EventEmitter<void>();
   @Input() userVideosList: UserVideosList | undefined = undefined;
@@ -31,6 +32,10 @@ export class UploadedVideosComponent {
 
   public onDelete(video: UploadedVideo): void {
     this.deleteVideoEmitter.emit(video);
+  }
+
+  public onEdit(video: UploadedVideo): void {
+    this.editVideoEmitter.emit(video);
   }
 
   public onUploadVideoClick(): void {

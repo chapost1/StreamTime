@@ -7,7 +7,11 @@ class UploadedVideo {
     uploadTime: string;
     uploadTimeTS: number;
 
+    sync: boolean;
+
     protected constructor(hashId: string, userId: string, uploadTime: string) {
+        this.sync = false;
+
         assertField(this.constructor.name, 'hashId', hashId);
         this.hashId = hashId;
         assertField(this.constructor.name, 'userId', userId);

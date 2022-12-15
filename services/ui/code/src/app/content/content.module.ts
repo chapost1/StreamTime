@@ -13,10 +13,14 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { DndDirective } from '../core/directives/drag-and-drop.directive';
 
 import { UploadVideoDialog } from './workspace/upload-video-dialog/upload-video-dialog.component';
+import { EditVideoFormDialog } from './workspace/edit-video-dialog/edit-video-form-dialog.component';
 
 import { LogoModule } from '../common/logo/logo.module';
 import { ContentComponent } from './content.component';
@@ -33,6 +37,7 @@ import { UnprocessedVideosTableComponent } from './workspace/uploaded-videos/unp
 import { SecondsToTimePipe } from '../core/pipes/seconds-to-time';
 import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
 
+
 @NgModule({
   declarations: [
     SecondsToTimePipe,
@@ -48,7 +53,8 @@ import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
     UploadedVideosComponent,
     VideoSummaryComponent,
     VideosTableComponent,
-    UnprocessedVideosTableComponent
+    UnprocessedVideosTableComponent,
+    EditVideoFormDialog
   ],
   imports: [
     LogoModule,
@@ -64,7 +70,11 @@ import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatTableModule,
-    MatSortModule
+    MatSortModule,
+    MatInputModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatCheckboxModule
   ],
   exports: [
     ContentComponent,
@@ -73,6 +83,9 @@ import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
     ReadableFileSizePipe
   ],
   bootstrap: [ContentComponent],
-  entryComponents: [UploadVideoDialog]
+  entryComponents: [
+    UploadVideoDialog,
+    EditVideoFormDialog
+  ]
 })
 export class ContentModule { }

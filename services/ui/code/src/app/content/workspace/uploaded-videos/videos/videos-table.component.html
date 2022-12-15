@@ -5,7 +5,8 @@
         <ng-container matColumnDef="videoSummary" sticky>
             <th mat-header-cell *matHeaderCellDef> Video </th>
             <td mat-cell *matCellDef="let element">
-                <app-video-summary [video]="element" (deleteVideoEmitter)="onDelete($event)"></app-video-summary>
+                <app-video-summary [video]="element" (editVideoEmitter)="onEdit($event)"
+                    (deleteVideoEmitter)="onDelete($event)"></app-video-summary>
             </td>
         </ng-container>
 
