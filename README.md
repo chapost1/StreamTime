@@ -143,7 +143,9 @@ foo@bar:~ (deployment) $ ./terraform.sh --command apply \
 
 &nbsp;&nbsp; :rock: &nbsp; Streaming Performance: Use CloudFront to stream videos instead of S3 directly, for caching
 
-&nbsp;&nbsp; :rock: &nbsp; Security and Scale: Users & Authentication
+&nbsp;&nbsp; :rock: &nbsp; Security and Scale: Users & Authentication based on JWT
+
+&nbsp;&nbsp; :rock: &nbsp; Security: Add some shared Auth logic to API Web Server and WSS Server to validate JWT so the GUI cannot send invalid requests to either of them
 
 &nbsp;&nbsp; :rock: &nbsp; Processing: Add Celery/Some Pipeline processing of new videos for multi-resolution support
 
