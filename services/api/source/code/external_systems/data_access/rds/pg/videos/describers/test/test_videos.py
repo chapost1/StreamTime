@@ -163,6 +163,57 @@ def test_build_query_conditions_params_with_listing_conditions_listing_is_added(
     assert describer.unlisted_should_be_hidden == flag
 
 
+def test_build_query_conditions_params_privacy_while_allowed_globally():
+    describer = VideosDescriberPG(
+        get_connection_fn=Mock(return_value=ConnectionMock())
+    )
+
+    # using user_id to assert conditions and params are not overwritten
+    user_id_0 = uuid4()
+
+    conditions, params = (
+        describer
+        .owned_by(user_id=user_id_0)
+        .unfilter_privates(flag=True)
+        .build_query_conditions_params()
+    )
+
+    # expects to see private self.case as not all users are allowed to see privates
+    expected_conditions = [
+        f"{describer.cast('user_id', 'text')} IN ({describer.cast('%s', 'text')})"
+    ]
+
+    assert conditions == expected_conditions
+    assert params == [user_id_0]
+    assert describer.allow_privates_globally is True
+
+
+def test_build_query_conditions_params_privacy_while_allowed_globally_while_also_allowed_specific_users():
+    describer = VideosDescriberPG(
+        get_connection_fn=Mock(return_value=ConnectionMock())
+    )
+
+    # using user_id to assert conditions and params are not overwritten
+    user_id_0 = uuid4()
+
+    conditions, params = (
+        describer
+        .owned_by(user_id=user_id_0)
+        .unfilter_privates(flag=True)
+        .include_privates_of(user_id=user_id_0)
+        .build_query_conditions_params()
+    )
+
+    # expects to see private self.case as not all users are allowed to see privates
+    expected_conditions = [
+        f"{describer.cast('user_id', 'text')} IN ({describer.cast('%s', 'text')})"
+    ]
+
+    assert conditions == expected_conditions
+    assert params == [user_id_0]
+    assert describer.allow_privates_globally is True
+
+
 def test_build_query_conditions_params_privacy_not_same_users_but_some_should_be_allowed_to_see_privates():
     describer = VideosDescriberPG(
         get_connection_fn=Mock(return_value=ConnectionMock())
@@ -190,6 +241,8 @@ def test_build_query_conditions_params_privacy_not_same_users_but_some_should_be
     assert conditions == expected_conditions
     assert params == [user_id_0, user_id_1, user_id_2]
     assert describer.allowed_privates_of_user_ids == [user_id_1, user_id_2]
+    # did not change and therefore it should be false
+    assert describer.allow_privates_globally is False
 
 
 def test_build_query_conditions_params_privacy_no_specified_users_but_yes_private_allowed():
