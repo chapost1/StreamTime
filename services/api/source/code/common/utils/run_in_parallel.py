@@ -1,11 +1,12 @@
 import asyncio
+from builtins import ExceptionGroup
 from typing import List, Any, Awaitable, Tuple
 
 
 async def run_in_parallel(*tasks: List[Awaitable]) -> Tuple[Any]:
     """
-    Runs awaitables in parallel and returns the results as a list
-    In case any of the awaitables raise an exception, an exception is thrown
+    Runs awaitables in parallel and returns the results as a tuple in the same order as the awaitables
+    In case any of the awaitables raises exceptions, the exceptions are thrown in an ExceptionGroup
     """
 
     results = await asyncio.gather(
@@ -13,12 +14,9 @@ async def run_in_parallel(*tasks: List[Awaitable]) -> Tuple[Any]:
         return_exceptions=True
     )
 
-    output: List[Any] = []
+    exceptions = [result for result in results if isinstance(result, Exception)]
+    # if any of the tasks raised an exception, raise an exception group
+    if exceptions:
+        raise ExceptionGroup('coudln\'t run in parallel', exceptions)
 
-    for result in results:
-        if isinstance(result, Exception):
-            raise result
-        else:
-            output.append(result)
-    
-    return tuple(output)
+    return tuple(results)

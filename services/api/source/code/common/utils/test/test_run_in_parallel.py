@@ -1,3 +1,4 @@
+from builtins import ExceptionGroup
 import pytest
 from common.utils import run_in_parallel
 from unittest.mock import AsyncMock
@@ -18,12 +19,18 @@ async def test_run_in_parallel_should_return_tasks_results_as_tuple_in_the_corre
 
 @pytest.mark.asyncio
 async def test_run_in_parallel_exception_should_be_propagated():
-    mock = AsyncMock(side_effect=NotImplementedError)
+    mock_nie = AsyncMock(side_effect=NotImplementedError)
+    mock_re = AsyncMock(side_effect=RuntimeError)
 
     try:
-        await run_in_parallel(mock())
+        await run_in_parallel(
+            mock_nie(),
+            mock_re()
+        )
         # fail
         assert 1 == 2
-    except NotImplementedError:
+    except ExceptionGroup as eg:
         # expected
-        assert 1 == 1
+        assert len(eg.exceptions) == 2
+        assert isinstance(eg.exceptions[0], NotImplementedError)
+        assert isinstance(eg.exceptions[1], RuntimeError)
