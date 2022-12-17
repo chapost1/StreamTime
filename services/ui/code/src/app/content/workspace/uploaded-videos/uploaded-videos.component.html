@@ -43,7 +43,7 @@
                 <h2 class="m-2">Ready Videos</h2>
                 <div class="table-wrapper">
                     <app-videos-table (editVideoEmitter)="onEdit($event)" (deleteVideoEmitter)="onDelete($event)"
-                        [videos]="userVideosList?.videos || []">
+                        (watchVideoEmitter)="onWatch($event)" [videos]="userVideosList?.videos || []">
                     </app-videos-table>
                 </div>
             </div>

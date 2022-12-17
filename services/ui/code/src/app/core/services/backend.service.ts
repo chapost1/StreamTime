@@ -5,8 +5,10 @@ import { AuthService } from './auth.service';
 import { IBackendConfig } from '../models/backend/backend.types';
 import { IUploadConfig, IUploadResponse, IUploadSignatures } from '../models/backend/upload.types';
 import UploadConfig from '../models/entities/upload-config';
-import { IUserVideosList } from '../models/backend/videos.types';
+import { IUserVideosList, IWatchVideoRecord } from '../models/backend/videos.types';
 import UserVideosList from '../models/entities/videos/user-videos-list';
+import { IUserIdHashId } from '../models/entities/videos/uploaded-video';
+import WatchVideoRecord from '../models/entities/videos/watch-video-record';
 
 @Injectable()
 export class BackendService {
@@ -143,6 +145,23 @@ export class BackendService {
         };
 
         return this.httpClient.put(url, payload).pipe(catchError(this.handleError));
+    }
+
+    public getWatchVideoRecord(identifiers: IUserIdHashId): Observable<WatchVideoRecord> {
+        const url = `${this.hostUrl}/${this.videoEndpointsRoute}/watch`;
+        const options = {
+            params: {
+                user_id: identifiers.userId,
+                hash_id: identifiers.hashId
+            }
+        }
+        return <Observable<WatchVideoRecord>>this.httpClient.get(url, options)
+            .pipe(
+                map((object: object) => {
+                    return WatchVideoRecord.fromInterface(<IWatchVideoRecord>object);
+                }),
+                catchError(this.handleError)
+            );
     }
 
     private handleError(err: HttpErrorResponse): Observable<Error> {

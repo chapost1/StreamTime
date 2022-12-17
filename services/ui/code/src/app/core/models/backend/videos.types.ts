@@ -23,3 +23,8 @@ export interface IUserVideosList {
     unprocessed_videos: IUnprocessedVideo[];
     videos: IVideo[];
 }
+
+export interface IWatchVideoRecord {
+    watchable_url: string;
+    video: IVideo;
+}

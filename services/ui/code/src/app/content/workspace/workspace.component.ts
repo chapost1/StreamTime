@@ -10,6 +10,9 @@ import UserVideosList from 'src/app/core/models/entities/videos/user-videos-list
 import { UploadedVideosSyncService } from 'src/app/core/services/uploaded-videos-sync.service';
 import { EditVideoFormDialog } from './edit-video-dialog/edit-video-form-dialog.component';
 import { ConfirmationDialog } from '../confirmation-dialog.component';
+import { Router } from '@angular/router';
+import { ROUTES_CONFIG } from '../../core/routing-policy';
+
 
 @Component({
   selector: 'app-workspace',
@@ -28,6 +31,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   constructor(
     public dialog: MatDialog,
+    private router: Router,
     private backendService: BackendService,
     private syncService: UploadedVideosSyncService,
     private toast: NgToastStackService
@@ -181,5 +185,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
 
     this.subscriptions.add(sub);
+  }
+
+  public onWatchVideoRequest(video: UploadedVideo): void {
+    this.router.navigate([
+      `${ROUTES_CONFIG.WATCH.path}/${video.clientSideId()}`
+    ]);
   }
 }

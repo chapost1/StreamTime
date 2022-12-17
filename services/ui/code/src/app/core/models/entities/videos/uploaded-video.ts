@@ -1,6 +1,13 @@
 import { IUploadedVideo } from "../../backend/videos.types";
 import assertField from "../assert-field";
 
+export interface IUserIdHashId {
+    hashId: string;
+    userId: string;
+}
+
+const IUserIdHashIdSeperator = '$';
+
 class UploadedVideo {
     hashId: string;
     userId: string;
@@ -34,6 +41,19 @@ class UploadedVideo {
             hash_id: this.hashId,
             user_id: this.userId,
             upload_time: this.uploadTime
+        }
+    }
+
+    public clientSideId(): string {
+        return btoa(`${this.hashId}${IUserIdHashIdSeperator}${this.userId}`)
+    }
+
+    public static clientSideIdToUserIdHashId(clientSideId: string): IUserIdHashId {
+        const key = atob(clientSideId).split(IUserIdHashIdSeperator)
+
+        return {
+            hashId: key[0],
+            userId: key[1]
         }
     }
 }

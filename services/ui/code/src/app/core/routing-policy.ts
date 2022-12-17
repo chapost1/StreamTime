@@ -2,7 +2,7 @@ import { AuthGuard } from "./guards/auth-guard";
 import { NegateAuthGuard } from "./guards/negate-auth-guard";
 import { CanActivate } from "@angular/router";
 import { _Constructor } from "@angular/material/core";
-import { faCompass, faVideo, faLock, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faCompass, faVideo, faLock, IconDefinition, faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 export const ROUTES_CONFIG: Readonly<{
     [key in routes_map]: RouteConfig
@@ -26,6 +26,16 @@ export const ROUTES_CONFIG: Readonly<{
         navigationBarVisibility: true,
         children: {},
         icon: faVideo
+    },
+    WATCH: {
+        path: 'watch',
+        title: 'Watch',
+        canActivate: [],
+        isAuthenticationNeeded: false,
+        visibleToAuthenticatedUsers: true,
+        navigationBarVisibility: false,
+        children: {},
+        icon: faQuestion
     },
     EXPLORE: {
         path: 'explore',
@@ -53,4 +63,5 @@ export type RouteConfig = {
 type routes_map =
     'LOG_IN' |
     'WORKSPACE' |
+    'WATCH' |
     'EXPLORE';

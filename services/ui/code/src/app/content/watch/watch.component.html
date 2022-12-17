@@ -1,0 +1,17 @@
+<div class="watch">
+    <app-content-padding>
+        <div class="text-center">
+            <div *ngIf="fetchWatchableRecord;then wait else ready"></div>
+            <ng-template #ready>
+
+                <!-- Add Video component -->
+
+            </ng-template>
+            <ng-template #wait>
+                <div class="py-3">
+                    <mat-spinner class="text-center mx-auto" [diameter]="80"></mat-spinner>
+                </div>
+            </ng-template>
+        </div>
+    </app-content-padding>
+</div>

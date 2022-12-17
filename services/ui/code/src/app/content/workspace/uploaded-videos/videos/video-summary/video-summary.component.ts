@@ -8,6 +8,7 @@ import { faPen, faPlay, faTrashCan } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['video-summary.component.scss']
 })
 export class VideoSummaryComponent {
+  @Output() watchVideoEmitter: EventEmitter<Video> = new EventEmitter<Video>();
   @Output() editVideoEmitter: EventEmitter<Video> = new EventEmitter<Video>();
   @Output() deleteVideoEmitter: EventEmitter<Video> = new EventEmitter<Video>();
   @Input() video: Video | undefined;
@@ -24,5 +25,9 @@ export class VideoSummaryComponent {
 
   public onEdit(video: Video): void {
     this.editVideoEmitter.emit(video);
+  }
+
+  public onWatch(video: Video): void {
+    this.watchVideoEmitter.emit(video);
   }
 }
