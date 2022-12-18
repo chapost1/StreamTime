@@ -6,8 +6,6 @@ export interface IUserIdHashId {
     userId: string;
 }
 
-const IUserIdHashIdSeperator = '$';
-
 class UploadedVideo {
     hashId: string;
     userId: string;
@@ -45,15 +43,23 @@ class UploadedVideo {
     }
 
     public clientSideId(): string {
-        return btoa(`${this.hashId}${IUserIdHashIdSeperator}${this.userId}`)
+        // base64 encoding adds padding to the end of the string, which is not allowed in URLs
+        // it adds padding to make sure the decoded string is divisable by 3
+        // the key contains 2 uuids, which are 36 bytes each, which is 72 bytes
+        // that's already divisable by 3, therefore no padding is added
+        // so to keep it as is, we don't add any separators and just concatenate the strings
+        return btoa(`${this.hashId}${this.userId}`);
     }
 
     public static clientSideIdToUserIdHashId(clientSideId: string): IUserIdHashId {
-        const key = atob(clientSideId).split(IUserIdHashIdSeperator)
+        const key = atob(clientSideId);
+        // as the key is constructed by concatenating two uuids (same length)
+        // we can just split it in half
+        const mid = key.length / 2;
 
         return {
-            hashId: key[0],
-            userId: key[1]
+            hashId: key.substring(0, mid),
+            userId: key.substring(mid)
         }
     }
 }
