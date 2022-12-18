@@ -1,0 +1,37 @@
+<div class="watch-video d-flex flex-column">
+    <video #player class="video-js"></video>
+
+    <!-- Video Meta -->
+    <div class="metadata p-1">
+        <div class="video-meta my-2 text-start" *ngIf="watchVideoRecord">
+
+            <div class="d-flex flex-column justify-start">
+                <h2 class="title">
+                    {{ watchVideoRecord.video.title }}
+                </h2>
+
+                <div class="p-2 rounded description-outer">
+
+                    <div class="fw-bold">
+                        {{ watchVideoRecord.video.listingTime | date }}
+                    </div>
+
+                    <div class="my-2"></div>
+
+                    <p #description class="m-0 description {{minimizeDescription? 'minimized': ''}}">
+                        {{ watchVideoRecord.video.description ? watchVideoRecord.video.description: 'No Description' }}
+                    </p>
+
+                    <div
+                        *ngIf="!minimizeDescription || watchVideoRecord.video.description && isDescriptionTextClipped()">
+                        <button mat-button (click)="toggleDescriptionVisibility()">
+                            {{minimizeDescription? 'Show More': 'Show Less'}}
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

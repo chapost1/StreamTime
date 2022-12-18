@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import Video from 'src/app/core/models/entities/videos/video';
+import Video from '../../../../../core/models/entities/videos/video';
 import { faPen, faPlay, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 @Component({

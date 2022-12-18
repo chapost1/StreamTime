@@ -4,7 +4,7 @@
             <div *ngIf="fetchWatchableRecord;then wait else ready"></div>
             <ng-template #ready>
 
-                <!-- Add Video component -->
+                <app-watch-video [watchVideoRecord]="watchVideoRecord"></app-watch-video>
 
             </ng-template>
             <ng-template #wait>

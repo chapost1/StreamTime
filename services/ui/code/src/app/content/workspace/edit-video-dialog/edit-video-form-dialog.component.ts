@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NgToastStackService } from 'ng-toast-stack';
-import Video from 'src/app/core/models/entities/videos/video';
+import Video from '../../../core/models/entities/videos/video';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -74,11 +74,11 @@ export class EditVideoFormDialog implements OnInit, OnDestroy {
         const description = this.editables.controls.description.value;
         const isPrivate = this.editables.controls.isPrivate.value;
         
-        if (title && title !== this.data.video.title) {
+        if (title != null && title !== this.data.video.title) {
             return true;
         }
 
-        if (description && description !== this.data.video.description) {
+        if (description != null && description !== this.data.video.description) {
             return true;
         }
 

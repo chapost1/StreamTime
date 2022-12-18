@@ -3,11 +3,11 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { faXmark, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { Subscription } from 'rxjs';
 import { IUploadResponse } from '../../../core/models/backend/upload.types';
-import { BackendService } from 'src/app/core/services/backend.service';
+import { BackendService } from '../../../core/services/backend.service';
 import { HttpResponse, HttpEventType } from '@angular/common/http';
 import { NgToastStackService } from 'ng-toast-stack';
-import UploadConfig from 'src/app/core/models/entities/upload-config';
-import { ReadableFileSizePipe } from 'src/app/core/pipes/readable-file-size';
+import UploadConfig from '../../../core/models/entities/upload-config';
+import { ReadableFileSizePipe } from '../../../core/pipes/readable-file-size';
 
 @Component({
     selector: 'dialog-upload-video-dialog',

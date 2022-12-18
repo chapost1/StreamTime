@@ -1,5 +1,5 @@
 import { Component, DoCheck, EventEmitter, Input, IterableDiffer, IterableDiffers, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
-import UnprocessedVideo from 'src/app/core/models/entities/videos/unprocessed-video';
+import UnprocessedVideo from '../../../../core/models/entities/videos/unprocessed-video';
 import { faTriangleExclamation, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import UserVideosList from 'src/app/core/models/entities/videos/user-videos-list';
+import UserVideosList from '../../../core/models/entities/videos/user-videos-list';
 import { faEye, faEyeSlash, faBars, faList } from '@fortawesome/free-solid-svg-icons';
-import UploadedVideo from 'src/app/core/models/entities/videos/uploaded-video';
+import UploadedVideo from '../../../core/models/entities/videos/uploaded-video';
 
 @Component({
   selector: 'app-uploaded-videos',

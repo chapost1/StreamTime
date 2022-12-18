@@ -38,6 +38,7 @@ import { UnprocessedVideosTableComponent } from './workspace/uploaded-videos/unp
 import { SecondsToTimePipe } from '../core/pipes/seconds-to-time';
 import { ReadableFileSizePipe } from '../core/pipes/readable-file-size';
 import { WatchComponent } from './watch/watch.component';
+import { WatchVideoComponent } from './watch/video/video.component';
 
 
 @NgModule({
@@ -58,7 +59,8 @@ import { WatchComponent } from './watch/watch.component';
     UnprocessedVideosTableComponent,
     EditVideoFormDialog,
     ConfirmationDialog,
-    WatchComponent
+    WatchComponent,
+    WatchVideoComponent
   ],
   imports: [
     LogoModule,

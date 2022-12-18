@@ -1,11 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgToastStackService } from 'ng-toast-stack';
-import UploadedVideo from 'src/app/core/models/entities/videos/uploaded-video';
-import { IUserIdHashId } from 'src/app/core/models/entities/videos/uploaded-video';
-import { BackendService } from 'src/app/core/services/backend.service';
+import UploadedVideo from '../../core/models/entities/videos/uploaded-video';
+import { IUserIdHashId } from '../../core/models/entities/videos/uploaded-video';
+import { BackendService } from '../../core/services/backend.service';
 import { Subscription } from 'rxjs';
-import WatchVideoRecord from 'src/app/core/models/entities/videos/watch-video-record';
+import WatchVideoRecord from '../../core/models/entities/videos/watch-video-record';
 
 @Component({
   selector: 'app-watch',
