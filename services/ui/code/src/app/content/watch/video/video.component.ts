@@ -47,11 +47,11 @@ export class WatchVideoComponent implements OnDestroy {
 
   private buildPlayerOptions(watchVideoRecord: WatchVideoRecord): videojs.PlayerOptions {
     const options: videojs.PlayerOptions = {
+      preload: 'auto',
       bigPlayButton: true,
       playbackRates: [0.5, 1, 1.5, 2],
       aspectRatio: '16:9',
       fill: true,
-      poster: watchVideoRecord.video.thumbnailUrl,
       playsinline: true,
       controls: true,
       controlBar: {
