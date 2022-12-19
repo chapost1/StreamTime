@@ -28,3 +28,8 @@ export interface IWatchVideoRecord {
     watchable_url: string;
     video: IVideo;
 }
+
+export interface IVideosPage {
+    videos: IVideo[];
+    next: string | null;
+}

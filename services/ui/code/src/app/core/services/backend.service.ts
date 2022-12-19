@@ -5,10 +5,11 @@ import { AuthService } from './auth.service';
 import { IBackendConfig } from '../models/backend/backend.types';
 import { IUploadConfig, IUploadResponse, IUploadSignatures } from '../models/backend/upload.types';
 import UploadConfig from '../models/entities/upload-config';
-import { IUserVideosList, IWatchVideoRecord } from '../models/backend/videos.types';
+import { IUserVideosList, IVideosPage, IWatchVideoRecord } from '../models/backend/videos.types';
 import UserVideosList from '../models/entities/videos/user-videos-list';
 import { IUserIdHashId } from '../models/entities/videos/uploaded-video';
 import WatchVideoRecord from '../models/entities/videos/watch-video-record';
+import VideosPage from '../models/entities/videos/videos-page';
 
 @Injectable()
 export class BackendService {
@@ -159,6 +160,25 @@ export class BackendService {
             .pipe(
                 map((object: object) => {
                     return WatchVideoRecord.fromInterface(<IWatchVideoRecord>object);
+                }),
+                catchError(this.handleError)
+            );
+    }
+
+    public exploreVideos(next: string | null): Observable<VideosPage> {
+        const url = `${this.hostUrl}/${this.videoEndpointsRoute}/explore`;
+        const options: any = {
+            params: {
+                include_my: 'true'
+            }
+        }
+        if (next) {
+            options.params['next'] = next;
+        }
+        return <Observable<VideosPage>>this.httpClient.get(url, options)
+            .pipe(
+                map((object: object) => {
+                    return VideosPage.fromInterface(<IVideosPage>object);
                 }),
                 catchError(this.handleError)
             );
