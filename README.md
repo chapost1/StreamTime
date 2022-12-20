@@ -26,8 +26,6 @@ The user functionalities which are currently supported include:
 
 ## Status:
 
-:x: &nbsp; POC
-
 :soon: &nbsp; MVP
 
 Quick demonstration of video upload using with GUI and edits video & watch it using api via postman, until UI support those.
@@ -130,8 +128,6 @@ foo@bar:~ (deployment) $ ./terraform.sh --command apply \
 > ### Note: Provision of resources on AWS with this command can result in invoicing.
 
 ## Next Milestones
-
-&nbsp;&nbsp; :rock: &nbsp; GUI: Support base videos functionality
 
 &nbsp;&nbsp; :rock: &nbsp; UX: Add Original File Name tracking to improve UX on processing term
 
