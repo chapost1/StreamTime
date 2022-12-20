@@ -1,9 +1,15 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgToastStackService } from 'ng-toast-stack';
 import { Subscription } from 'rxjs';
 import VideosPage from '../../core/models/entities/videos/videos-page';
 import Video from '../../core/models/entities/videos/video';
 import { BackendService } from '../../core/services/backend.service';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { Router } from '@angular/router';
+import { ROUTES_CONFIG } from '../../core/routing-policy';
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
+TimeAgo.addLocale(en)
 
 @Component({
   selector: 'app-explore',
@@ -11,15 +17,25 @@ import { BackendService } from '../../core/services/backend.service';
   styleUrls: ['./explore.component.scss']
 })
 export class ExploreComponent implements OnInit, OnDestroy {
+  @ViewChild('scrollContainer') scrollContainer: any;
+
   private subscriptions: Subscription = new Subscription();
   private next: string | null = null;
   public hasNext: boolean = true;
 
   public videos: Video[] = [];
 
-  public loadMoreVideos: boolean = false;
+  public loadingMoreVideos: boolean = false;
+
+  // pre-load 2 pages
+  private loadMoreRequestsQueue: number = 2;
+
+  public icons = {
+    watch: faPlay
+  }
 
   constructor(
+    private router: Router,
     private backendService: BackendService,
     private toast: NgToastStackService
   ) { }
@@ -32,21 +48,17 @@ export class ExploreComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  // listen to scroll event
-  // and load more videos if the user has scrolled to the bottom
-  @HostListener('window:scroll', ['$event'])
-  onScroll(event: any): void {
-    if ((window.innerHeight + window.scrollY * 1.1) >= document.body.offsetHeight) {
-      this.loadMore();
-    }
+  public onScroll(): void {
+    this.loadMoreRequestsQueue++;
+    this.loadMore();
   }
 
   public loadMore(): void {
-    if (!this.hasNext || this.loadMoreVideos) {
+    if (this.loadMoreRequestsQueue <= 0) {
       return;
     }
-
-    this.loadMoreVideos = true;
+    this.loadMoreRequestsQueue--;
+    this.loadingMoreVideos = true;
 
     const sub = this.backendService.exploreVideos(this.next)
       .subscribe({
@@ -54,16 +66,31 @@ export class ExploreComponent implements OnInit, OnDestroy {
           this.videos = this.videos.concat(page.videos);
           this.next = page.next;
           this.hasNext = page.hasNext()
+          this.loadingMoreVideos = false;
         },
         error: (error) => {
           this.toast.error('Failed to load more videos');
           console.error(error);
+          this.loadingMoreVideos = false;
         },
         complete: () => {
-          this.loadMoreVideos = false;
+          if (0 < this.loadMoreRequestsQueue) {
+            this.loadMore();
+          }
         }
       })
 
     this.subscriptions.add(sub);
+  }
+
+  public timeAgo(date: string | null): string {
+    const timeAgo = new TimeAgo('en-US');
+    return timeAgo.format(new Date(<string>date));
+  }
+
+  public onWatch(video: Video): void {
+    this.router.navigate([
+      `${ROUTES_CONFIG.WATCH.path}/${video.clientSideId()}`
+    ]);
   }
 }

@@ -1,7 +1,7 @@
 <div *ngIf="video" class="d-flex p-2 video-summary">
-    <div class="mx-2 position-relative thumbnail-wrapper">
+    <div class="mx-2 position-relative thumbnail-wrapper rounded">
         <img [src]="video.thumbnailUrl" [alt]="video.description" class="thumbnail" />
-        <span class="position-absolute video-duration py-1 px-2">
+        <span class="position-absolute video-duration py-1 px-2 rounded">
             {{video.durationSeconds | secondsToTime}}
         </span>
     </div>

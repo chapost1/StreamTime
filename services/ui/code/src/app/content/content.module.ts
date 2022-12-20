@@ -16,6 +16,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { InfiniteScrollModule } from "ngx-infinite-scroll";
 
 import { DndDirective } from '../core/directives/drag-and-drop.directive';
 
@@ -80,7 +81,8 @@ import { WatchVideoComponent } from './watch/video/video.component';
     MatInputModule,
     FormsModule,
     ReactiveFormsModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    InfiniteScrollModule
   ],
   exports: [
     ContentComponent,

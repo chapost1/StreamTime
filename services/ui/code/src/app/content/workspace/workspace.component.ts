@@ -65,11 +65,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         .subscribe({
           next: userVideosList => {
             this.userVideosList = userVideosList;
+            resolve();
           },
           error: (error: Error) => {
             this.toast.error(error.message);
-          },
-          complete: resolve
+            resolve();
+          }
         });
 
       this.subscriptions.add(sub);
@@ -117,6 +118,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         next: onSuccess.bind(this),
         error: (error: Error) => {
           this.toast.error(error.message);
+          onComplete.call(this);
         },
         complete: onComplete.bind(this)
       });
@@ -175,11 +177,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.fetchUserVideosList();
 
         this.toast.success('Video updated successfully');
+        video.sync = false;
       },
       error: (error: Error) => {
         this.toast.error(error.message);
-      },
-      complete: () => {
         video.sync = false;
       }
     });

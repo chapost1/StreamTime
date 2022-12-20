@@ -1,34 +1,44 @@
 <div class="explore">
     <app-content-padding>
-        <div class="container-fluid my-2">
-            <div class="videos row align-items-start">
-                <div *ngFor="let video of videos" class="video col-sm-12 col-md-6 col-lg-3">
-                    <div class="position-relative rounded thumbnail">
-                        <img [src]="video.thumbnailUrl" class="img-fluid" />
-                        <span class="position-absolute video-duration py-1 px-2">
-                            {{video.durationSeconds | secondsToTime}}
-                        </span>
+        <div #scrollContainer class="container-fluid my-2" infiniteScroll [infiniteScrollDistance]="2"
+            [infiniteScrollThrottle]="50" [infiniteScrollDisabled]="!hasNext || loadingMoreVideos"
+            (scrolled)="onScroll()">
+            <div class="videos row justify-content-start">
+                <div *ngFor="let video of videos" class="video col-sm-12 text-center col-md-6 col-lg-3">
+                    <div mat-button class="py-1 px-1 position-relative mx-auto thumbnail rounded">
+                        <div class="position-relative video-overview" (click)="onWatch(video)">
+                            <div class="thumbnail-inner">
+                                <img [src]="video.thumbnailUrl" class="thumbnail-image rounded img-fluid" />
+                                <span class="position-absolute video-duration px-2 py-1 rounded">
+                                    {{video.durationSeconds | secondsToTime}}
+                                </span>
+                            </div>
+                            <span class="watch">
+                                <fa-icon [icon]="icons.watch"></fa-icon>
+                                WATCH
+                            </span>
+                        </div>
+
+                        <div class="d-flex flex-column text-start">
+                            <label class="title">
+                                {{ video.title }}
+                            </label>
+                            <p class="text-muted m-0">
+                                {{timeAgo(video.listingTime)}}
+                            </p>
+
+                        </div>
                     </div>
 
-                    <div class="d-flex flex-column py-2 text-start">
-                        <label class="title">
-                            {{ video.title }}
-                        </label>
-                        <p class="text-muted description">
-                            {{video.listingTime | date}}
-                        </p>
 
-                    </div>
                 </div>
             </div>
 
-            <div *ngIf="loadMoreVideos">
+            <div *ngIf="loadingMoreVideos">
                 <div class="py-3">
                     <mat-spinner class="text-center mx-auto" [diameter]="80"></mat-spinner>
                 </div>
             </div>
-
-            <div *ngIf="hasNext" class="my-4"></div>
         </div>
 
     </app-content-padding>

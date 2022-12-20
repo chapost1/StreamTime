@@ -69,12 +69,11 @@ export class WatchComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (record: WatchVideoRecord) => {
           this.watchVideoRecord = record;
+          this.fetchWatchableRecord = false;
         },
         error: (error) => {
           this.toast.error(error.message);
           this.backToHome();
-        },
-        complete: () => {
           this.fetchWatchableRecord = false;
         }
       })
