@@ -16,16 +16,16 @@ if [[ "$is_new_build_needed" -eq 42 ]]; then
     wait $pid2
     is_docker_build_succeeded=$?
     if [[ "$is_docker_build_succeeded" -eq 0 ]]; then
+        # prepare output dir
+        rm -rf $(pwd)/source
+        mkdir $(pwd)/source
+        # cp output from image
+        docker run --rm -t -v $(pwd)/source:/source ffmpeg-python-layer-factory cp /var/task/python.zip /source/python.zip
         exit 0;
     else
         echo "$service docker build failed";
         exit 1;
     fi
-    # prepare output dir
-    rm -rf $(pwd)/source
-    mkdir $(pwd)/source
-    # cp output from image
-    docker run --rm -it -v $(pwd)/source:/source ffmpeg-python-layer-factory cp /var/task/python.zip /source
 elif [[ $is_new_build_needed -eq 0 ]]; then
     echo "no new build needed for $service"
 else

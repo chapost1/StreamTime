@@ -339,8 +339,7 @@ def lambda_handler(event, context):
     key_levels = current_file_key.split('/')
     if len(key_levels) < 3:
         # internal error
-        print(
-            f'An exception occurred, infrastructure failure, key is not in valid format: {current_file_key}')
+        e = Exception(f'An exception occurred, infrastructure failure, key is not in valid format: {current_file_key}')
         print(e)
         raise e
 

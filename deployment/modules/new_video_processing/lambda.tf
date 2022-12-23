@@ -2,7 +2,7 @@ resource "aws_lambda_layer_version" "ffmpeg_python_lambda_layer" {
   filename                 = "${path.module}/../../../lambdas/layers/pyffmpeg/source/python.zip"
   layer_name               = "ffmpeg_python_lambda_layer"
   source_code_hash         = filebase64sha256("${path.module}/../../../lambdas/layers/pyffmpeg/source/python.zip")
-  compatible_architectures = ["arm64"]
+  compatible_architectures = ["x86_64"]
   compatible_runtimes      = ["python3.8"]
 }
 
@@ -13,7 +13,7 @@ data "archive_file" "python_new_video_processing_lambda_package" {
 }
 resource "aws_lambda_function" "new_video_processing" {
   function_name    = "new_video_processing"
-  architectures    = ["arm64"]
+  architectures    = ["x86_64"]
   filename         = data.archive_file.python_new_video_processing_lambda_package.output_path
   source_code_hash = data.archive_file.python_new_video_processing_lambda_package.output_base64sha256
   role             = aws_iam_role.iam_for_new_video_processing_lambda.arn
