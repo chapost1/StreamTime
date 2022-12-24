@@ -28,11 +28,11 @@ The user functionalities which are currently supported include:
 
 :soon: &nbsp; MVP
 
-Quick demonstration of video upload using with GUI and edits video & watch it using api via postman, until UI support those.
+Quick demonstration of video upload & usage.
 
 
 
-https://user-images.githubusercontent.com/39523779/207732011-dc837ec9-5b41-423e-a0e0-6d5acb9b2a3c.mp4
+https://user-images.githubusercontent.com/39523779/209436044-5791d138-ac09-416e-a10c-65b53d7f466b.mp4
 
 
 
