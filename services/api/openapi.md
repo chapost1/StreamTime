@@ -95,6 +95,7 @@ include_my?: boolean
   videos: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     title?: string
     description?: string
@@ -134,6 +135,10 @@ Get Upload Video Signed Instructions
 
 ```ts
 file_content_type: string
+```
+
+```ts
+file_name: string
 ```
 
 #### Responses
@@ -208,12 +213,14 @@ Get Authenticated User Videos
   unprocessed_videos: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     failure_reason?: string
   }[]
   videos: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     title?: string
     description?: string
@@ -244,6 +251,7 @@ Update Video
 {
   hash_id?: string
   user_id?: string
+  file_name?: string
   upload_time?: string
   title?: string
   description?: string
@@ -335,6 +343,7 @@ next?: string
   videos: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     title?: string
     description?: string
@@ -394,6 +403,7 @@ hash_id: string
   video: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     title?: string
     description?: string
@@ -455,6 +465,7 @@ hash_id: string
 {
   hash_id?: string
   user_id?: string
+  file_name?: string
   upload_time?: string
   failure_reason?: string
 }
@@ -467,12 +478,14 @@ hash_id: string
   unprocessed_videos: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     failure_reason?: string
   }[]
   videos: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     title?: string
     description?: string
@@ -502,6 +515,7 @@ hash_id: string
 {
   hash_id?: string
   user_id?: string
+  file_name?: string
   upload_time?: string
   title?: string
   description?: string
@@ -530,6 +544,7 @@ hash_id: string
   videos: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     title?: string
     description?: string
@@ -552,6 +567,7 @@ hash_id: string
   video: {
     hash_id?: string
     user_id?: string
+    file_name?: string
     upload_time?: string
     title?: string
     description?: string
