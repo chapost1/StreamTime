@@ -39,7 +39,11 @@ class HttpServer:
             host='0.0.0.0',
             port=port,
             workers=1,
-            # trust the proxy to set the correct ip on the x-forwarded-for header
+            # trust the proxy to set the correct ip on the x-forwarded-for header (contains the real client ip)
             # and disable the default ip check
+            # the client ip can not be known pre-hand, so we can not set it in the allowed list
+            # as the proxy is trusted, it is safe to set the forwarded_allow_ips to '*'
+            # https://www.uvicorn.org/settings/#proxy-headers
+            # https://www.uvicorn.org/settings/#forwarded-allow-ips
             forwarded_allow_ips='*'
         )
