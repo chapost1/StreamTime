@@ -1,5 +1,5 @@
 import uvicorn
-from typing import Awaitable, List, Optional
+from typing import Awaitable, List
 from external_systems.http_network_interface.asgi_app import create_new_asgi_app
 from external_systems.http_network_interface.middlewares import attach_middlewares
 from external_systems.http_network_interface.routers import attach_routers
