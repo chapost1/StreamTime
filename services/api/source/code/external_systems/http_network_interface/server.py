@@ -39,7 +39,7 @@ class HttpServer:
             host='0.0.0.0',
             port=port,
             workers=1,
-            # allow redirects from https to http
-            # proxy handle it for us
+            # trust the proxy to set the correct ip on the x-forwarded-for header
+            # and disable the default ip check
             forwarded_allow_ips='*'
         )
