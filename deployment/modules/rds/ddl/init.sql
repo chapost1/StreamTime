@@ -17,6 +17,7 @@ DROP TABLE IF EXISTS unprocessed_videos CASCADE;
 CREATE TABLE unprocessed_videos (
     hash_id uuid NOT NULL,
     user_id uuid NOT NULL,
+    file_name varchar(255) NOT NULL,
     upload_time timestamptz NOT NULL,
     failure_reason varchar(64),
     CONSTRAINT fk_user_video_user_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -30,6 +31,7 @@ DROP TABLE IF EXISTS videos CASCADE;
 CREATE TABLE videos (
     hash_id uuid NOT NULL,
     user_id uuid NOT NULL,
+    file_name varchar(255) NOT NULL,
     pagination_index serial,
     title varchar(128) NOT NULL DEFAULT 'Draft',
     description text,

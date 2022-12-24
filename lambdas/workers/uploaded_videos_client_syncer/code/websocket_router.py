@@ -45,7 +45,8 @@ class WebsocketRouter:
             except self.api_gateway_management_api_client.exceptions.GoneException:
                 # This is a bad connection_id, remove it
                 self.websocket_connection_repo.delete(
-                    user_id=user_id, connection_id=connection_id)
+                    connection_id=connection_id
+                )
 
     def sns_input_controller(self, event, context):
         """

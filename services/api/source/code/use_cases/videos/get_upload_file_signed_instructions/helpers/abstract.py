@@ -8,6 +8,11 @@ class AssertFileContentTypeFunction(Protocol):
         ...
 
 
+class AssertFileNameFunction(Protocol):
+    def __call__(self, file_name: str) -> None:
+        ...
+
+
 class GenerateNewVideoHashIdFunction(Protocol):
     async def __call__(self, database: VideosDatabase, user_id: UUID) -> UUID:
         ...

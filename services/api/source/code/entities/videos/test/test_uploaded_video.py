@@ -20,6 +20,12 @@ def test_uploaded_video_user_id_required_uuid():
         UploadedVideo(user_id='not uuid')
 
 
+def test_uploaded_video_file_name_required_str():
+    with pytest.raises(expected_exception=ValidationError):
+        # unparsable string
+        UploadedVideo(file_name={})
+
+
 def test_uploaded_video_upload_time_requires_valid_datetime():
     with pytest.raises(expected_exception=ValidationError):
         UploadedVideo(upload_time='not datetime')
@@ -35,6 +41,12 @@ def test_uploaded_video_core_param_user_id():
     user_id = uuid4()
     vid = UploadedVideo(user_id=user_id)
     assert vid.user_id == user_id
+
+
+def test_uploaded_video_core_param_file_name():
+    file_name = 'file name.mp4'
+    vid = UploadedVideo(file_name=file_name)
+    assert vid.file_name == file_name
 
 
 def test_uploaded_video_core_param_upload_time():

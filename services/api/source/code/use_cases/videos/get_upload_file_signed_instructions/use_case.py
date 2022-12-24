@@ -4,6 +4,7 @@ from external_systems.data_access.storage.abstract import Storage
 from entities.storage import FileUploadSignedInstructions
 from use_cases.videos.get_upload_file_signed_instructions.helpers.abstract import (
     AssertFileContentTypeFunction,
+    AssertFileNameFunction,
     GenerateNewVideoHashIdFunction
 )
 
@@ -13,10 +14,12 @@ async def use_case(
     database: VideosDatabase,
     storage: Storage,
     assert_file_content_type_fn: AssertFileContentTypeFunction,
+    assert_file_name_fn: AssertFileNameFunction,
     generate_new_video_hash_id_fn: GenerateNewVideoHashIdFunction,
     # usage scope
     authenticated_user_id: UUID,
-    file_content_type: str
+    file_content_type: str,
+    file_name: str
 ) -> FileUploadSignedInstructions:
     """
     Gets Signed Instructions to upload a Video
@@ -28,9 +31,11 @@ async def use_case(
 
     assert_file_content_type_fn(file_content_type=file_content_type)
 
+    assert_file_name_fn(file_name=file_name)
+
     hash_id = await generate_new_video_hash_id_fn(database=database, user_id=authenticated_user_id)
 
-    object_key = f'{authenticated_user_id}/{hash_id}'
+    object_key = f'{authenticated_user_id}/{hash_id}/{file_name}'
 
     return await storage.get_upload_file_signed_instructions(
         item_relative_path=object_key,

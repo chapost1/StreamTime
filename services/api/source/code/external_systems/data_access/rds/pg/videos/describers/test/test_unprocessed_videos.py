@@ -18,8 +18,8 @@ from unittest.mock import (
 async def test_search_pass_expected_envs_to_conn_query_no_conditions():
     # create mocks
     records = [
-        (uuid4(), uuid4(), calc_server_time(), None),
-        (uuid4(), uuid4(), calc_server_time(), 'incomple file')
+        (uuid4(), uuid4(), 'im.py', calc_server_time(), None),
+        (uuid4(), uuid4(), 'f.mp', calc_server_time(), 'incomple file')
     ]
 
     conn_mock = ConnectionMock(return_value=records)
@@ -44,6 +44,7 @@ async def test_search_pass_expected_envs_to_conn_query_no_conditions():
                 'SELECT',
                 'hash_id,',
                 'user_id,',
+                'file_name,',
                 'upload_time,',
                 'failure_reason',
                 f'FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
@@ -59,9 +60,9 @@ async def test_search_pass_expected_envs_to_conn_query_no_conditions():
 async def test_search_pass_expected_envs_to_conn_query_with_user_id_hash_id():
     # create mocks
     records = [
-        (uuid4(), uuid4(), calc_server_time(), None),
-        (uuid4(), uuid4(), calc_server_time(), 'incomple file'),
-        (uuid4(), uuid4(), calc_server_time(), 'internal server error')
+        (uuid4(), uuid4(), 'file.py', calc_server_time(), None),
+        (uuid4(), uuid4(), 'ba.m', calc_server_time(), 'incomple file'),
+        (uuid4(), uuid4(), '!.>', calc_server_time(), 'internal server error')
     ]
 
     conn_mock = ConnectionMock(return_value=records)
@@ -94,6 +95,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_user_id_hash_id():
                 'SELECT',
                 'hash_id,',
                 'user_id,',
+                'file_name,',
                 'upload_time,',
                 'failure_reason',
                 f'FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
@@ -157,8 +159,8 @@ def test_owned_by_works():
 
 def test__prase_db_records_into_classes():
     records = [
-        (uuid4(), uuid4(), calc_server_time(), None),
-        (uuid4(), uuid4(), calc_server_time(), 'internal server error')
+        (uuid4(), uuid4(), 'vid.mp4', calc_server_time(), None),
+        (uuid4(), uuid4(), 'hey-shahar', calc_server_time(), 'internal server error')
     ]
 
     describer: UnprocessedVideosDescriberPG = UnprocessedVideosDescriberPG(
@@ -171,14 +173,16 @@ def test__prase_db_records_into_classes():
         UnprocessedVideo(
             hash_id=records[0][0],
             user_id=records[0][1],
-            upload_time=records[0][2],
-            failure_reason=records[0][3]
+            file_name=records[0][2],
+            upload_time=records[0][3],
+            failure_reason=records[0][4]
         ),
         UnprocessedVideo(
             hash_id=records[1][0],
             user_id=records[1][1],
-            upload_time=records[1][2],
-            failure_reason=records[1][3]
+            file_name=records[1][2],
+            upload_time=records[1][3],
+            failure_reason=records[1][4]
         )
     ]
 

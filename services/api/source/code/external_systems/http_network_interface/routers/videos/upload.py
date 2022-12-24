@@ -27,11 +27,13 @@ get_upload_video_signed_instructions_uc = partial(
 })
 async def get_upload_video_signed_instructions(
     file_content_type: str,
+    file_name: str,
     authenticated_user_id: UUID = Depends(authenticated_user)
 ) -> FileUploadSignedInstructions:
     return await get_upload_video_signed_instructions_uc(
         authenticated_user_id=authenticated_user_id,
-        file_content_type=file_content_type
+        file_content_type=file_content_type,
+        file_name=file_name
     )
 
 

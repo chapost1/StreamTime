@@ -55,7 +55,7 @@ export class UnprocessedVideosTableComponent implements OnChanges, DoCheck {
   }
 
   public displayedColumns(): string[] {
-    return ['actions', 'failureReason', 'uploadTimeTS'];
+    return ['name', 'actions', 'failureReason', 'uploadTimeTS'];
   }
 
   public onDelete(video: UnprocessedVideo): void {

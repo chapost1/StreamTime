@@ -62,6 +62,9 @@ export class EditVideoFormDialog implements OnInit, OnDestroy {
         // so user would have to enter a new title
         if (this.data.video.isListed()) {
             title = this.data.video.title;
+        } else {
+            // if video is not listed, use the file name as the title
+            title = this.data.video.fileName;
         }
 
         this.editables.controls.title.setValue(title);

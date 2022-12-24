@@ -1,5 +1,5 @@
 import uvicorn
-from typing import Awaitable, List
+from typing import Awaitable, List, Optional
 from external_systems.http_network_interface.asgi_app import create_new_asgi_app
 from external_systems.http_network_interface.middlewares import attach_middlewares
 from external_systems.http_network_interface.routers import attach_routers
@@ -34,4 +34,10 @@ class HttpServer:
         self,
         port: int
     ) -> None:
-        uvicorn.run(app=self.app, host='0.0.0.0', port=port, workers=1)
+        uvicorn.run(
+            app=self.app,
+            host='0.0.0.0',
+            port=port,
+            workers=1,
+            forwarded_allow_ips='*'
+        )

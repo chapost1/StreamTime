@@ -55,25 +55,25 @@ def sql_executor(transaction_steps: List[Tuple[str, Tuple[Any]]]) -> None:
     rds_connection.commit()
 
 
-def mark_upload_as_unprocessed(user_id: str, hash_id: str, upload_time: str) -> None:
+def mark_upload_as_unprocessed(user_id: str, hash_id: str, file_name: str, upload_time: str) -> None:
     print('mark_upload_as_unprocessed')
-    sql = f'INSERT INTO {os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, upload_time) VALUES(%s, %s, %s)'
-    params = (user_id, hash_id, upload_time)
+    sql = f'INSERT INTO {os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, file_name, upload_time) VALUES(%s, %s, %s, %s)'
+    params = (user_id, hash_id, file_name, upload_time)
     sql_executor(
         transaction_steps=[(sql, params)]
     )
 
 
-def mark_processing_as_failed(user_id: str, hash_id: str, upload_time: str, failure_reason: str) -> None:
+def mark_processing_as_failed(user_id: str, hash_id: str, file_name: str, upload_time: str, failure_reason: str) -> None:
     print('mark_processing_as_failed')
     print(f'failure reason: {failure_reason}')
     sql = \
-        f"""INSERT INTO {os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, upload_time, failure_reason)
-        VALUES(%s, %s, %s, %s)
+        f"""INSERT INTO {os.environ[UNPROCESSED_VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, file_name, upload_time, failure_reason)
+        VALUES(%s, %s, %s, %s, %s)
         ON CONFLICT (user_id, hash_id)
         DO
         UPDATE SET failure_reason = %s;"""
-    params = (user_id, hash_id, upload_time, failure_reason, failure_reason)
+    params = (user_id, hash_id, file_name, upload_time, failure_reason, failure_reason)
     sql_executor(
         transaction_steps=[(sql, params)]
     )
@@ -82,6 +82,7 @@ def mark_processing_as_failed(user_id: str, hash_id: str, upload_time: str, fail
 def mark_video_as_a_draft(
     user_id: str,
     hash_id: str,
+    file_name: str,
     video_type: str,
     size_in_bytes: int,
     duration_seconds: int,
@@ -97,9 +98,9 @@ def mark_video_as_a_draft(
     delete_unprocessed_entry_params = (user_id, hash_id, upload_time)
     # insert into drafts
     insert_sql = \
-        f"""INSERT INTO {os.environ[VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, upload_time, size_in_bytes, duration_seconds, video_type, thumbnail_url, storage_thumbnail_key, storage_object_key)
-            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-    insert_params = (user_id, hash_id, upload_time, size_in_bytes,
+        f"""INSERT INTO {os.environ[VIDEOS_TABLE_ENV_NAME]} (user_id, hash_id, file_name, title, upload_time, size_in_bytes, duration_seconds, video_type, thumbnail_url, storage_thumbnail_key, storage_object_key)
+            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    insert_params = (user_id, hash_id, file_name, file_name, upload_time, size_in_bytes,
                      duration_seconds, video_type, thumbnail_url,
                      storage_thumbnail_key, storage_object_key
                     )
@@ -124,14 +125,15 @@ def lambda_handler(event, context):
         record = event['record']
         if trigger == os.environ[PROCESSING_HAS_BEEN_STARTED_EVENT_ENV_NAME]:
             mark_upload_as_unprocessed(
-                user_id=record['user_id'], hash_id=record['hash_id'], upload_time=record['upload_time'])
+                user_id=record['user_id'], hash_id=record['hash_id'], file_name=record['file_name'], upload_time=record['upload_time'])
         elif trigger == os.environ[PROCESSING_FAILED_EVENT_ENV_NAME]:
             mark_processing_as_failed(
-                user_id=record['user_id'], hash_id=record['hash_id'], upload_time=record['upload_time'], failure_reason=record['failure_reason'])
+                user_id=record['user_id'], hash_id=record['hash_id'], file_name=record['file_name'], upload_time=record['upload_time'], failure_reason=record['failure_reason'])
         elif trigger == os.environ[PROCESSED_VIDEO_MOVED_TO_DRAFTS_EVENT_ENV_NAME]:
             mark_video_as_a_draft(
                 user_id=record['user_id'],
                 hash_id=record['hash_id'],
+                file_name=record['file_name'],
                 video_type=record['video_type'],
                 size_in_bytes=record['size_in_bytes'],
                 duration_seconds=record['duration_seconds'],

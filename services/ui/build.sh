@@ -20,7 +20,7 @@ if [[ "$is_new_build_needed" -eq 42 ]]; then
         rm -rf $(pwd)/dist
         mkdir $(pwd)/dist
         # cp output from image
-        docker run --rm -it -v $(pwd)/dist:/tmp/dist ng-frontend-dist mv /var/ng /tmp/dist
+        docker run --rm -t -v $(pwd)/dist:/tmp/dist ng-frontend-dist mv /var/ng /tmp/dist
         mv $(pwd)/dist/ng/* $(pwd)/dist/
         rm -rf $(pwd)/dist/ng
 

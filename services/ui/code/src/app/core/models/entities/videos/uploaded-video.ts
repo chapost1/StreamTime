@@ -9,18 +9,21 @@ export interface IUserIdHashId {
 class UploadedVideo {
     hashId: string;
     userId: string;
+    fileName: string;
     uploadTime: string;
     uploadTimeTS: number;
 
     sync: boolean;
 
-    protected constructor(hashId: string, userId: string, uploadTime: string) {
+    protected constructor(hashId: string, userId: string, fileName: string, uploadTime: string) {
         this.sync = false;
 
         assertField(this.constructor.name, 'hashId', hashId);
         this.hashId = hashId;
         assertField(this.constructor.name, 'userId', userId);
         this.userId = userId;
+        assertField(this.constructor.name, 'fileName', fileName);
+        this.fileName = fileName;
         assertField(this.constructor.name, 'uploadTime', uploadTime);
         this.uploadTime = uploadTime;
         this.uploadTimeTS = new Date(this.uploadTime).getTime();
@@ -30,6 +33,7 @@ class UploadedVideo {
         return new UploadedVideo(
             source.hash_id,
             source.user_id,
+            source.file_name,
             source.upload_time
         )
     }
@@ -38,6 +42,7 @@ class UploadedVideo {
         return {
             hash_id: this.hashId,
             user_id: this.userId,
+            file_name: this.fileName,
             upload_time: this.uploadTime
         }
     }

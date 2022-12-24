@@ -1,6 +1,7 @@
 export interface IUploadedVideo {
     hash_id: string;
     user_id: string;
+    file_name: string;
     upload_time: string;
 }
 

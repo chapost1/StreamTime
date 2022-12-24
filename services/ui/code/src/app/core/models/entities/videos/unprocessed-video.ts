@@ -5,8 +5,8 @@ import { removeUndefinedValuesKeysFromObject } from '../../../../common/utils';
 class UnprocessedVideo extends UploadedVideo {
     failureReason: string | null;
 
-    constructor(hashId: string, userId: string, uploadTime: string, failureReason: string | undefined) {
-        super(hashId, userId, uploadTime);
+    constructor(hashId: string, userId: string, fileName: string, uploadTime: string, failureReason: string | undefined) {
+        super(hashId, userId, fileName, uploadTime);
 
         this.failureReason = failureReason || null;
     }
@@ -23,6 +23,7 @@ class UnprocessedVideo extends UploadedVideo {
         return new UnprocessedVideo(
             source.hash_id,
             source.user_id,
+            source.file_name,
             source.upload_time,
             source.failure_reason
         )

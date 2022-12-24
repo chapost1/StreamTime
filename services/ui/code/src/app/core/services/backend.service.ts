@@ -69,7 +69,7 @@ export class BackendService {
     }
 
     public uploadVideoFile(file: File): Observable<IUploadResponse> {
-        return this.getVideoUploadInstructions(file.type).pipe(
+        return this.getVideoUploadInstructions(file.type, file.name).pipe(
             // use concatMap to make sure you make the second call after the first one completes
             concatMap((instructions: IUploadSignatures) => {
                 return this.uploadFileUsingInstuctioctions(file, instructions);
@@ -98,11 +98,12 @@ export class BackendService {
         ).pipe(catchError(this.handleError));
     }
 
-    private getVideoUploadInstructions(fileType: string): Observable<IUploadSignatures> {
+    private getVideoUploadInstructions(fileType: string, fileName: string): Observable<IUploadSignatures> {
         const urlToGetUploadInstructions = `${this.hostUrl}/${this.videoEndpointsRoute}/upload/`;
         const options = {
             params: {
-                file_content_type: fileType
+                file_content_type: fileType,
+                file_name: fileName
             }
         };
 
@@ -200,6 +201,10 @@ export class BackendService {
                     case HttpStatusCode.UnprocessableEntity:
                     case HttpStatusCode.PayloadTooLarge: {
                         errorMessage = 'Bad Request';
+                        if (err.error) {
+                            const {error, message} = err.error;
+                            errorMessage = error || message || errorMessage;
+                        }
                         break;
                     }
                     case HttpStatusCode.Unauthorized:

@@ -52,6 +52,11 @@ resource "aws_lambda_function" "new_video_processing" {
   }
 }
 
+resource "aws_lambda_function_event_invoke_config" "example" {
+  function_name                = aws_lambda_function.new_video_processing.function_name
+  maximum_retry_attempts       = 0
+}
+
 // invoke on s3 event
 resource "aws_s3_bucket_notification" "new_video_upload" {
   bucket = var.s3_videos_bucket_id

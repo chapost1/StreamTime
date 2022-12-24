@@ -21,8 +21,6 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
 
     async def search(self) -> List[UnprocessedVideo]:
         conditions, params = super().build_query_conditions_params()
-        print(conditions)
-        print(params)
 
         # default to true to prevent query crash for invalid WHERE syntax where conditions are empty
         where_condition = 'true'
@@ -33,6 +31,7 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
             'SELECT',
             'hash_id,',
             'user_id,',
+            'file_name,',
             'upload_time,',
             'failure_reason',
             f'FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
@@ -63,6 +62,7 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
         return UnprocessedVideo(
             hash_id=unprocessed_video[0],
             user_id=unprocessed_video[1],
-            upload_time=unprocessed_video[2],
-            failure_reason=unprocessed_video[3]
+            file_name=unprocessed_video[2],
+            upload_time=unprocessed_video[3],
+            failure_reason=unprocessed_video[4]
         )

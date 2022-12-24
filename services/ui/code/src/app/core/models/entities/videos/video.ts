@@ -16,6 +16,7 @@ class Video extends UploadedVideo {
     constructor(
         hashId: string,
         userId: string,
+        fileName: string,
         uploadTime: string,
         title: string | undefined,
         description: string | undefined,
@@ -26,7 +27,7 @@ class Video extends UploadedVideo {
         isPrivate: boolean,
         listingTime: string | undefined
     ) {
-        super(hashId, userId, uploadTime);
+        super(hashId, userId, fileName, uploadTime);
 
         this.title = title || null;
         this.description = description || null;
@@ -52,6 +53,7 @@ class Video extends UploadedVideo {
         return new Video(
             source.hash_id,
             source.user_id,
+            source.file_name,
             source.upload_time,
             source.title,
             source.description,

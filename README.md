@@ -129,11 +129,11 @@ foo@bar:~ (deployment) $ ./terraform.sh --command apply \
 
 ## Next Milestones
 
-&nbsp;&nbsp; :rock: &nbsp; UX: Add Original File Name tracking to improve UX on processing term
+&nbsp;&nbsp; :rock: &nbsp; Web Server service simplicity: Add G.C Service, for atomic delete operation (S3, RDS)
 
 &nbsp;&nbsp; :rock: &nbsp; Upload Performance: Enable S3 transfer acceleration
 
-&nbsp;&nbsp; :rock: &nbsp; Performance and services simplicity: Add G.C Service, for atomic delete operation (S3, RDS)
+&nbsp;&nbsp; :rock: &nbsp; Cost: Split New video processing Lambda to smaller compute functions (and big one ONLY for the ffmpeg step, which is the most expensive one) while calling the smaller specific functions in parallel
 
 &nbsp;&nbsp; :rock: &nbsp; Robustness: Add System-Wide test suite for B.B "Result" tests
 

@@ -302,7 +302,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_no_conditions():
     # create mocks
     records = [
         (
-            uuid4(), uuid4(), 'title', 'description',
+            uuid4(), uuid4(), 'f.mp', 'title', 'description',
             random.randint(1, 100), random.randint(1, 100),
             'video_type', 'https://thumbnail_url.com',
             'storage_object_key', 'storage_thumbnail_key',
@@ -310,7 +310,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_no_conditions():
             random.randint(1, 100)
         ),
         (
-            uuid4(), uuid4(), 'title', 'description',
+            uuid4(), uuid4(), 'm1.m2', 'title', 'description',
             random.randint(1, 100), random.randint(1, 100),
             'video_type', 'https://thumbnail_url.com',
             'storage_object_key', 'storage_thumbnail_key',
@@ -340,6 +340,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_no_conditions():
                 'SELECT',
                 'hash_id,',
                 'user_id,',
+                'file_name,',
                 'title,',
                 'description,',
                 'size_in_bytes,',
@@ -367,7 +368,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_conditions():
     # create mocks
     records = [
         (
-            uuid4(), uuid4(), 'title', 'description',
+            uuid4(), uuid4(), 'm1.m2', 'title', 'description',
             random.randint(1, 100), random.randint(1, 100),
             'video_type', 'https://thumbnail_url.com',
             'storage_object_key', 'storage_thumbnail_key',
@@ -375,7 +376,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_conditions():
             random.randint(1, 100)
         ),
         (
-            uuid4(), uuid4(), 'title', 'description',
+            uuid4(), uuid4(), 'avg.mp4', 'title', 'description',
             random.randint(1, 100), random.randint(1, 100),
             'video_type', 'https://thumbnail_url.com',
             'storage_object_key', 'storage_thumbnail_key',
@@ -428,6 +429,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_conditions():
                 'SELECT',
                 'hash_id,',
                 'user_id,',
+                'file_name,',
                 'title,',
                 'description,',
                 'size_in_bytes,',
@@ -609,7 +611,7 @@ def test_limit():
 
 def test__prase_db_records_into_classes():
     record = (
-        uuid4(), uuid4(), 'title', 'description',
+        uuid4(), uuid4(), '1a.p', 'title', 'description',
         random.randint(1, 100), random.randint(1, 100),
         'video_type', 'https://thumbnail_url.com',
         'storage_object_key', 'storage_thumbnail_key',
@@ -626,18 +628,19 @@ def test__prase_db_records_into_classes():
     expected_result = Video(
         hash_id=record[0],
         user_id=record[1],
-        title=record[2],
-        description=record[3],
-        size_in_bytes=record[4],
-        duration_seconds=record[5],
-        video_type=record[6],
-        thumbnail_url=record[7],
-        storage_object_key=record[8],
-        storage_thumbnail_key=record[9],
-        upload_time=record[10],
-        is_private=record[11],
-        listing_time=record[12],
-        pagination_index=record[13]
+        file_name=record[2],
+        title=record[3],
+        description=record[4],
+        size_in_bytes=record[5],
+        duration_seconds=record[6],
+        video_type=record[7],
+        thumbnail_url=record[8],
+        storage_object_key=record[9],
+        storage_thumbnail_key=record[10],
+        upload_time=record[11],
+        is_private=record[12],
+        listing_time=record[13],
+        pagination_index=record[14]
     )
 
     assert result == expected_result

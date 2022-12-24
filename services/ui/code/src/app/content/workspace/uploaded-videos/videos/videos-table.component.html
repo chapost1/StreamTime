@@ -31,9 +31,9 @@
             <th mat-header-cell *matHeaderCellDef> Status </th>
             <td mat-cell *matCellDef="let element">
                 <div>
-                    <span *ngIf="!element.isListed()">
+                    <span *ngIf="!element.isListed()" class="clickable" (click)="onEdit(element)">
                         <fa-icon [icon]="icons.draft" class="text-info"></fa-icon>
-                        Edit is required
+                        Edit Draft
                     </span>
                     <span *ngIf="element.isListed()">
                         <fa-icon [icon]="icons.listed" class="text-success"></fa-icon>
