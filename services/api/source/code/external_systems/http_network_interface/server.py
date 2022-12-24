@@ -39,5 +39,7 @@ class HttpServer:
             host='0.0.0.0',
             port=port,
             workers=1,
+            # allow redirects from https to http
+            # proxy handle it for us
             forwarded_allow_ips='*'
         )

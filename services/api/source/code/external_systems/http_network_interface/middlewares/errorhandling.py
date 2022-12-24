@@ -28,3 +28,8 @@ async def app_errors_handler(request: Request, call_next: Callable):
         return http_error(details=e.details, status_code=status.HTTP_403_FORBIDDEN)
     except app_errors.TooEarlyError as e:
         return http_error(details=e.details, status_code=status.HTTP_425_TOO_EARLY)
+    except Exception as e:
+        # Any other exception is considered an internal server error
+        # We handle it here explicitly because CorsMiddleware won't catch it and fail to attach the CORS headers
+        # Which will cause the browser to throw a CORS error instead of a 500
+        return http_error(details={"body": "Internal Server Error"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

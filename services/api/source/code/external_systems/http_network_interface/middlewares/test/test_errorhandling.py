@@ -17,7 +17,8 @@ from external_systems.http_network_interface.middlewares.errorhandling import (
         (app_errors.InputError, status.HTTP_400_BAD_REQUEST),
         (app_errors.UnauthorizedError, status.HTTP_401_UNAUTHORIZED),
         (app_errors.AccessDeniedError, status.HTTP_403_FORBIDDEN),
-        (app_errors.TooEarlyError, status.HTTP_425_TOO_EARLY)
+        (app_errors.TooEarlyError, status.HTTP_425_TOO_EARLY),
+        (Exception, status.HTTP_500_INTERNAL_SERVER_ERROR)
     ]
 )
 async def test_md_app_errors_to_http_code_mappings(
@@ -30,19 +31,6 @@ async def test_md_app_errors_to_http_code_mappings(
     )
 
     assert response.status_code == http_status_code
-
-
-@pytest.mark.asyncio
-async def test_md_some_unexpected_error_is_being_propagated():
-    try:
-        await app_errors_handler(
-            request=None,
-            call_next=AsyncMock(side_effect=RuntimeError)
-        )
-        # should not reach
-        assert 1 == 2
-    except RuntimeError:
-        assert 1 == 1
 
 
 def test_http_error_returns_JSONResponse_if_error_has_details():
