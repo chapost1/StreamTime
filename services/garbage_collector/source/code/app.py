@@ -1,6 +1,6 @@
-import job_scheduler
+import garbage_collector
 import logging
-import time
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -10,5 +10,4 @@ logging.basicConfig(
 
 
 if __name__ == '__main__':
-    # start the job scheduler
-    job_scheduler.start()
+    garbage_collector.collect_garbage_every_x_minutes(minutes=1)

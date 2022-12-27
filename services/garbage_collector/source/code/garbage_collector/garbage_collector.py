@@ -1,12 +1,15 @@
 import logging
 import garbage_collector.lock as collection_lock
-
+import time
 
 logger = logging.getLogger(__name__)
 
 
 def collect() -> None:
-    """Collect garbage from the database."""
+    """
+    Collect garbage from the database
+    And remove it from the different stores.
+    """
 
     if collection_lock.lock():
         logger.info('Skipping garbage collection...')
@@ -16,6 +19,8 @@ def collect() -> None:
 
 
     # TODO: implement logic
+    time.sleep(5)
+    
 
 
     collection_lock.unlock()
