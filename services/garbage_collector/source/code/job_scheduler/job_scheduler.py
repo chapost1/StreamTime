@@ -34,7 +34,7 @@ def schedule_gc_job(scheduler: schedule.Scheduler, minutes_interval: int) -> boo
 
 
 
-def start(minutes_interval: int = 5) -> None:
+def start(minutes_interval: int = 0) -> None:
     """Start the job scheduler."""
 
     keep_alive: bool = schedule_gc_job(

@@ -321,3 +321,4 @@ dockerfile_md5sum.txt
 /services/local-docker-compose.yaml
 /services/local-up.sh
 /services/~pgdata/
+**/lock.bin
