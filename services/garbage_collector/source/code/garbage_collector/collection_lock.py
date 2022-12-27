@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 # it may be possible that the garbage collector is already running (did not finish the previous trigger) when the task is triggered.
 # to prevent this, we will use a lock file to indicate if the garbage collector is already running.
 # if the garbage collector is already running, we will not run it again.
+# the benefit of using a lock file is that it is thread safe.
+# and it is also easy to implement, a skip mechanism by checking the lock state.
 
 
 # thread safe resource lock

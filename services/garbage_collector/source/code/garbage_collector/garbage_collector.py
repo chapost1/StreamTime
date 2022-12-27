@@ -1,5 +1,5 @@
 import logging
-import garbage_collector.lock as collection_lock
+import garbage_collector.collection_lock as collection_lock
 import time
 
 logger = logging.getLogger(__name__)
@@ -12,6 +12,7 @@ def collect() -> None:
     """
 
     if collection_lock.lock():
+        # the garbage collector is already running
         logger.info('Skipping garbage collection...')
         return
 
