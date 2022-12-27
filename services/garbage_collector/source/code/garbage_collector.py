@@ -1,7 +1,12 @@
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 def collect() -> None:
     """Collect garbage from the database."""
-    print('Collecting garbage...')
+    logger.info('Collecting garbage...')
     # TODO: implement logic
     pass
 
