@@ -84,6 +84,18 @@ module "image_resizer" {
   ]
 }
 
+module "deleted_videos_trigger" {
+  source   = "./modules/deleted_videos_lambda"
+  app_name = local.app_name
+  region = local.aws_region
+
+  rds_cluster_identifier = module.rds.rds_cluster_identifier
+
+  depends_on = [
+    module.rds.rds_cluster_identifier
+  ]
+}
+
 module "videos_rds_update" {
   source   = "./modules/videos_rds_update"
   app_name = local.app_name

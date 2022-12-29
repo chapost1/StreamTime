@@ -47,6 +47,7 @@ resource "aws_secretsmanager_secret_version" "db_pass_val" {
 
 # rds cluster
 resource "aws_rds_cluster" "cluster" {
+  cluster_identifier   = "${var.identifier}-cluster"
   engine               = "aurora-postgresql"
   engine_version       = "11.13"
   engine_mode          = "serverless"
@@ -67,11 +68,24 @@ resource "aws_rds_cluster" "cluster" {
   vpc_security_group_ids = [aws_security_group._.id]
   db_subnet_group_name   = aws_db_subnet_group._.name
 
+  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.default.name
+
   scaling_configuration {
     min_capacity = 2.0
   }
 
   tags = {
     Name = "${var.identifier}"
+  }
+}
+
+resource "aws_rds_cluster_parameter_group" "default" {
+  name        = "rds-cluster-pg"
+  family      = "aurora-postgresql11"
+  description = "RDS default cluster parameter group"
+
+  parameter {
+    name  = "log_statement"
+    value = "mod"
   }
 }

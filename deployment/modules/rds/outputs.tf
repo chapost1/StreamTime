@@ -25,3 +25,7 @@ output "rds_password" {
 output "db_name" {
   value = var.db_name
 }
+
+output "rds_cluster_identifier" {
+  value = aws_rds_cluster.cluster.cluster_identifier
+}
