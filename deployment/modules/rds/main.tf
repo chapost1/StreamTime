@@ -47,6 +47,7 @@ resource "aws_secretsmanager_secret_version" "db_pass_val" {
 
 # rds cluster
 resource "aws_rds_cluster" "cluster" {
+  cluster_identifier   = "${var.identifier}-cluster"
   engine               = "aurora-postgresql"
   engine_version       = "11.13"
   engine_mode          = "serverless"
