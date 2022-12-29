@@ -92,8 +92,23 @@ export class EditVideoFormDialog implements OnInit, OnDestroy {
         return false;
     }
 
-    public onFormSubmit(): void {
+    public get shouldDisableSaveButton(): boolean {
         if (this.editables.invalid) {
+            // if form is invalid, then we don't want to allow the user to save
+            return true;
+        }
+        // if video is not listed
+        if (!this.data.video.isListed()) {
+            // then we just want the input to be valid, not necessarily changed (since it's a new video)
+            return false;
+        }
+        // if video is listed, then we want the input to be valid and changed
+        // valid -> no delta -> disable save button
+        return !this.isDeltaFound;
+    }
+
+    public onFormSubmit(): void {
+        if (this.shouldDisableSaveButton) {
             this.toast.error('Please fix the errors in the form');
             return;
         }

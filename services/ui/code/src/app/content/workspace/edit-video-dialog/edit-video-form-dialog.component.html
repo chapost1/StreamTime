@@ -46,7 +46,7 @@
 
                     <div class="text-center">
                         <button mat-flat-button color="primary" type="submit"
-                            [disabled]="!editables.valid || !isDeltaFound">
+                            [disabled]="shouldDisableSaveButton">
                             {{saveButtonText}}
                         </button>
                     </div>
