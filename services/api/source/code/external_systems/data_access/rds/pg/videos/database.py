@@ -72,6 +72,7 @@ class VideosDatabasePG:
         not_user_id: Optional[UUID] = None,
         include_privates_of_user_id: Optional[UUID] = None,
         filter_unlisted: Optional[bool] = True,
+        unfilter_privates: Optional[bool] = False,
         next: Optional[str] = None,
         page_limit: Optional[int] = None
     ) -> Tuple[List[Video], str]:
@@ -85,6 +86,7 @@ class VideosDatabasePG:
             .with_hash(id=hash_id)
             .include_privates_of(user_id=include_privates_of_user_id)
             .filter_unlisted(flag=filter_unlisted)
+            .unfilter_privates(flag=unfilter_privates)
             .paginate(pagination_index_is_smaller_than=curr_page.minimum_pagination_index)
             .limit(limit=page_limit)
             .search()

@@ -80,7 +80,7 @@ async def test_returns_expected_structure_with_returned_values_in_internals():
         hash_id=hash_id,
         # always
         filter_unlisted=True,
-        include_privates_of_user_id=user_id
+        unfilter_privates=True,
     )
 
     spy_is_access_allowed.assert_called_with(

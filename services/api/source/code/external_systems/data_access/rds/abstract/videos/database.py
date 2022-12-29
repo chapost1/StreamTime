@@ -22,6 +22,7 @@ class VideosDatabase(Protocol):
         not_user_id: Optional[UUID],
         include_privates_of_user_id: Optional[UUID],
         filter_unlisted: Optional[bool],
+        unfilter_privates: Optional[bool],
         next: Optional[str],
         page_limit: Optional[int]
     ) -> Tuple[List[Video], str]:

@@ -32,13 +32,17 @@ async def use_case(
         user_id=user_id,
         hash_id=hash_id,
         filter_unlisted=True,
-        include_privates_of_user_id=authenticated_user_id
+        # we want to be able to raise access denied error if the video is private
+        # therefore, we need to get the video even if it is private
+        # then, we will enforce the access control logically
+        unfilter_privates=True
     )
 
     video: Video = first_item(
         items=videos
     )
 
+    # enforce access control
     is_access_denied = not is_access_allowed_fn(
         authenticated_user_id=authenticated_user_id,
         owner_user_id=user_id,
