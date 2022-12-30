@@ -22,6 +22,10 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
     async def search(self) -> List[UnprocessedVideo]:
         conditions, params = super().build_query_conditions_params()
 
+        # deleted videos are not shown
+        # this should be the last condition and also relevant only to select statement
+        conditions, params = super().build_deleted_conditions_params(conditions=conditions, params=params)
+
         # default to true to prevent query crash for invalid WHERE syntax where conditions are empty
         where_condition = 'true'
         if 0 < len(conditions):
@@ -56,6 +60,10 @@ class UnprocessedVideosDescriberPG(UploadedVideosDescriberPG):
 
     def owned_by(self, user_id: UUID) -> UnprocessedVideosDescriberPG:
         return super().owned_by(user_id=user_id)
+
+
+    def unfilter_deleted(self, flag: bool = True) -> UnprocessedVideosDescriberPG:
+        return super().unfilter_deleted(flag=flag)
 
 
     def _prase_db_records_into_classes(self, unprocessed_video: Tuple) -> UnprocessedVideo:

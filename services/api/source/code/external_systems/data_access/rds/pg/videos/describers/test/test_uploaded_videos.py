@@ -9,6 +9,7 @@ from mock import patch
 from unittest.mock import Mock
 
 mock_table_name = 'mock_table'
+mock_server_time = '2020-01-01T00:00:00+00:00'
 
 def get_connection_mock(return_value: Any = None, side_effect: Exception = None):
     return ConnectionMock(return_value=return_value, side_effect=side_effect)
@@ -216,6 +217,16 @@ def test_owned_by_adds_nothing_if_none():
     assert describer.user_ids == []
 
 
+def test_unfilter_deleted():
+    describer = UploadedVideosDescriberPG(
+        get_connection_fn=Mock(return_value=ConnectionMock())
+    )
+
+    describer.unfilter_deleted(flag=True)
+
+    assert describer.deleted_should_be_hidden is False
+
+
 def test_build_update_statement_does_not_affect_base_params():
     dummy_first_param = random.randint(0, 1000)
 
@@ -246,6 +257,33 @@ def test_build_update_statement_params_should_contain_base_params():
     )
 
     assert params == [dummy_first_param, 'hello-world']
+
+
+def test_build_deleted_conditions_params_default():
+    describer = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    conditions, params = describer.build_deleted_conditions_params()
+    assert conditions == [
+        'deleted_at IS null'
+    ]
+    assert params == []
+
+
+def test_build_deleted_conditions_params_unfilter_is_false():
+    describer = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    describer.unfilter_deleted(flag=False)
+    conditions, params = describer.build_deleted_conditions_params()
+    assert conditions == [
+        'deleted_at IS null'
+    ]
+    assert params == []
+
+
+def test_build_deleted_conditions_params_unfilter_is_true():
+    describer = UploadedVideosDescriberPG(get_connection_fn=get_connection_mock)
+    describer.unfilter_deleted(flag=True)
+    conditions, params = describer.build_deleted_conditions_params()
+    assert conditions == []
+    assert params == []
 
 
 def test_build_update_statement_does_not_affect_returns_expectd_values():
@@ -360,12 +398,24 @@ async def test_delete_calls_with_expected_steps():
     expectd_ts = [
         (
             nl().join([
-                f'DELETE FROM {mock_table_name}',
-                f"WHERE {describer.cast(val_name='user_id', casting_type='text')} IN ({describer.cast(val_name='%s', casting_type='text')})",
-                f"AND {describer.cast(val_name='hash_id', casting_type='text')} IN ({describer.cast(val_name='%s', casting_type='text')})"
+                   f'UPDATE {mock_table_name}',
+                   f"SET deleted_at = %s",
+                   f"WHERE {describer.cast(val_name='user_id', casting_type='text')} IN ({describer.cast(val_name='%s', casting_type='text')})",
+                   f"AND {describer.cast(val_name='hash_id', casting_type='text')} IN ({describer.cast(val_name='%s', casting_type='text')})"
             ]),
-            tuple([user_id, hash_id])
+            tuple([mock_server_time, user_id, hash_id])
         )
     ]
 
-    assert connection_mock.last_recorded_transaction_steps == expectd_ts
+    assert connection_mock.last_recorded_transaction_steps is not None
+    assert len(connection_mock.last_recorded_transaction_steps) == 1
+
+    # override the server time
+    actual = [tuple([
+        connection_mock.last_recorded_transaction_steps[0][0],
+        tuple([
+            expectd_ts[0][1][0], connection_mock.last_recorded_transaction_steps[0][1][1], connection_mock.last_recorded_transaction_steps[0][1][2]
+        ])
+    ])]
+
+    assert actual == expectd_ts

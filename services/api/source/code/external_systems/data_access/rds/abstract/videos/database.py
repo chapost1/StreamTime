@@ -23,6 +23,7 @@ class VideosDatabase(Protocol):
         include_privates_of_user_id: Optional[UUID],
         filter_unlisted: Optional[bool],
         unfilter_privates: Optional[bool],
+        unfilter_deleted: Optional[bool],
         next: Optional[str],
         page_limit: Optional[int]
     ) -> Tuple[List[Video], str]:
@@ -45,7 +46,7 @@ class VideosDatabase(Protocol):
     async def delete_video(
         self,
         user_id: UUID,
-        hash_id: UUID,
+        hash_id: UUID
     ) -> None:
         """
         Deletes a video of specified user if exists
@@ -55,7 +56,8 @@ class VideosDatabase(Protocol):
     async def get_unprocessed_videos(
         self,
         user_id: Optional[UUID],
-        hash_id: Optional[UUID]
+        hash_id: Optional[UUID],
+        unfilter_deleted: Optional[bool]
     ) -> List[UnprocessedVideo]:
         """
         Gets unprocessed videos

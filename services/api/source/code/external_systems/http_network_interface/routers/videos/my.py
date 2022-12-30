@@ -7,7 +7,7 @@ from external_systems.data_access.rds.pg.videos import videos_db_client
 from external_systems.data_access.storage.s3.videos import videos_s3_client
 from use_cases.videos.get_authenticated_user_videos import get_authenticated_user_videos_use_case
 from use_cases.videos.update_video import update_video_use_case
-from use_cases.videos.delete_video import make_delete_video
+from use_cases.videos.delete_video import delete_video_use_case
 
 router = APIRouter()
 
@@ -47,7 +47,7 @@ async def update_video(
 
 
 # delete a video
-delete_video_uc = make_delete_video(database=videos_db_client, storage=videos_s3_client)
+delete_video_uc = partial(delete_video_use_case, database=videos_db_client)
 #
 @router.delete('/{hash_id}', status_code=status.HTTP_204_NO_CONTENT, responses={
     status.HTTP_401_UNAUTHORIZED: {},

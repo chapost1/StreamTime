@@ -7,6 +7,7 @@ CREATE TABLE users (
     first_name varchar(32) NOT NULL,
     last_name varchar(32) NOT NULL,
     password varchar(32) NOT NULL,
+    deleted_at timestamptz DEFAULT NULL,
     PRIMARY KEY (id)
 );
 
@@ -20,6 +21,7 @@ CREATE TABLE unprocessed_videos (
     file_name varchar(255) NOT NULL,
     upload_time timestamptz NOT NULL,
     failure_reason varchar(64),
+    deleted_at timestamptz DEFAULT NULL,
     CONSTRAINT fk_user_video_user_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE (user_id, hash_id)
 );
@@ -44,6 +46,7 @@ CREATE TABLE videos (
     upload_time timestamptz NOT NULL,
     is_private boolean NOT NULL DEFAULT false,
     listing_time timestamptz DEFAULT NULL,
+    deleted_at timestamptz DEFAULT NULL,
     CONSTRAINT fk_user_video_user_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE (user_id, hash_id)
 );

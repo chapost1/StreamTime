@@ -48,7 +48,7 @@ async def test_search_pass_expected_envs_to_conn_query_no_conditions():
                 'upload_time,',
                 'failure_reason',
                 f'FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
-                f'WHERE true',
+                f'WHERE deleted_at IS null',
                 'ORDER BY upload_time DESC'
             ]),
             tuple([])
@@ -88,6 +88,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_user_id_hash_id():
 
     # AsyncMock need to be awaited
     conditions, params = await describer_spy.build_query_conditions_params()
+    conditions, params = await describer_spy.build_deleted_conditions_params(conditions=conditions, params=params)
 
     assert conn_mock.last_recorded_transaction_steps == [
         (
@@ -122,19 +123,9 @@ async def test_delete_calls_parent_delete_with_the_correct_table_using_conn_mock
 
     await describer.delete()
 
-            
-    conditions, params = describer.build_query_conditions_params()
-
     # assert using the right delete table with expected query structure
-    assert conn_mock.last_recorded_transaction_steps == [
-        (
-            nl().join([
-                f'DELETE FROM {tables.UNPROCESSED_VIDEOS_TABLE}',
-                f"WHERE {f'{nl()}AND '.join(conditions)}"
-            ]),
-            tuple(params)
-        )
-    ]
+    assert conn_mock.last_recorded_transaction_steps[0][0].find('UPDATE') == 0
+    assert conn_mock.last_recorded_transaction_steps[0][0].index('deleted_at = %s') != -1
 
 
 def test_with_hash_works():

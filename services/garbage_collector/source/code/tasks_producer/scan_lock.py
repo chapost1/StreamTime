@@ -7,15 +7,9 @@ import atexit
 
 logger = logging.getLogger(__name__)
 
-# the garbage collector is a long running task
-# altough this task is important, it is not critical to occur at a specific time.
-# therefore there will be only one instance of the garbage collector running at a time.
-# Since the collect task is scheduled to run every x minutes, it is possible that multiple instances of the task will be triggered concurrently.
-# it may be possible that the garbage collector is already running (did not finish the previous trigger) when the task is triggered.
-# to prevent this, we will use a lock file to indicate if the garbage collector is already running.
-# if the garbage collector is already running, we will not run it again.
-# the benefit of using a lock file is that it is thread safe.
-# and it is also easy to implement, a skip mechanism by checking the lock state.
+# only one scanner can run at a time
+# and scan jobs are not thread safe
+# so we lock it with a file
 
 
 # thread safe resource lock
@@ -39,28 +33,28 @@ def get_lock_path() -> str:
 
 def lock() -> bool:
     """
-    Lock the garbage collector.
+    Lock the Producer Scan operation.
 
     Returns:
-        is_locked (bool): A flag to indicate if the garbage collector is already locked.
+        is_locked (bool): A flag to indicate if the scanner is already locked.
     """
 
     # acquire the lock
     thread_safe_resource_lock.acquire()
 
-    # check if the garbage collector is already locked
+    # check if the scanner is already locked
     if os.path.exists(get_lock_path()):
         with open(get_lock_path(), 'r+b') as lock_file:
             lock = lock_file.read()
             if lock == binary_lock_status(LockStatus.LOCKED):
-                logger.info('The garbage collector is already locked.')
+                logger.info('The scanner is already locked.')
                 # release the lock
                 thread_safe_resource_lock.release()
 
                 # we are locked
                 return True
     
-    logger.info('Locking the garbage collector...')
+    logger.info('Locking the scanner...')
 
     with open(get_lock_path(), 'wb') as lock_file:
         lock_file.write(binary_lock_status(LockStatus.LOCKED))
@@ -73,8 +67,8 @@ def lock() -> bool:
 
 
 def unlock() -> None:
-    """Unlock the garbage collector."""
-    logger.info('Unlocking the garbage collector...')
+    """Unlock the scanner."""
+    logger.info('Unlocking the scanner...')
 
     # acquire the lock
     thread_safe_resource_lock.acquire()
@@ -87,6 +81,6 @@ def unlock() -> None:
 
 
 # register the unlock function to be called when the program exits
-# safely unlock the garbage collector
+# safely unlock the scanner
 # in case the program exits unexpectedly
 atexit.register(unlock)

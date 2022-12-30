@@ -4,7 +4,8 @@ from external_systems.data_access.rds.pg.videos import tables
 from entities.videos import VideoStages
 from uuid import UUID
 from typing import Tuple, List, Any, Dict
-from common.utils import nl
+from common.utils.nl import nl
+from common.utils.calc_server_time import calc_server_time
 
 
 class UploadedVideosDescriberPG:
@@ -17,12 +18,14 @@ class UploadedVideosDescriberPG:
 
     hash_ids: List[UUID]
     user_ids: List[UUID]
+    deleted_should_be_hidden: bool
 
 
     def __init__(self, get_connection_fn: GetConnectionFunction) -> None:
         self.get_connection_fn = get_connection_fn
         self.hash_ids = []
         self.user_ids = []
+        self.deleted_should_be_hidden = True
 
 
     def with_hash(self, id: UUID) -> UploadedVideosDescriberPG:
@@ -34,6 +37,11 @@ class UploadedVideosDescriberPG:
     def owned_by(self, user_id: UUID) -> UploadedVideosDescriberPG:
         if user_id is not None:
             self.user_ids.append(user_id)
+        return self
+
+
+    def unfilter_deleted(self, flag: bool = True) -> UploadedVideosDescriberPG:
+        self.deleted_should_be_hidden = not flag
         return self
 
 
@@ -53,6 +61,16 @@ class UploadedVideosDescriberPG:
             conditions=conditions,
             params=params
         )
+
+        return conditions, params
+    
+
+    def build_deleted_conditions_params(self, conditions: List[str] = [], params: List[Any] = []) -> Tuple[List[str], List[Any]]:
+        conditions = conditions.copy()
+        params = params.copy()
+
+        if self.deleted_should_be_hidden:
+            conditions.append('deleted_at IS null')
 
         return conditions, params
 
@@ -158,15 +176,18 @@ class UploadedVideosDescriberPG:
 
     async def delete(self, stage: VideoStages) -> None:
         self.assert_required_values_before_specific_video_query_execution()
+
+        params = [calc_server_time()]
+
+        conditions, params = self.build_query_conditions_params(params=params)
         
         table = self.get_table_of_uploaded_video_by_stage(stage=stage)
-        
-        conditions, params = self.build_query_conditions_params()
 
         await self.get_connection_fn().execute([
             (
                 nl().join([
-                   f'DELETE FROM {table}',
+                   f'UPDATE {table}',
+                   f"SET deleted_at = %s",
                    f"WHERE {f'{nl()}AND '.join(conditions)}"
                 ]),
                 tuple(params)

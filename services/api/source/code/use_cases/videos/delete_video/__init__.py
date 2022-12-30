@@ -1,2 +1,7 @@
-# TODO: change delete_video to be simpler with no make func wrapper, when deleter service is ready
-from .use_case import make_delete_video
+from functools import partial
+from .use_case import use_case
+
+
+delete_video_use_case = partial(
+    use_case
+)

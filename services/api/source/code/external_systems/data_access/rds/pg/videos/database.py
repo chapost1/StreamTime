@@ -73,6 +73,7 @@ class VideosDatabasePG:
         include_privates_of_user_id: Optional[UUID] = None,
         filter_unlisted: Optional[bool] = True,
         unfilter_privates: Optional[bool] = False,
+        unfilter_deleted: Optional[bool] = False,
         next: Optional[str] = None,
         page_limit: Optional[int] = None
     ) -> Tuple[List[Video], str]:
@@ -87,6 +88,7 @@ class VideosDatabasePG:
             .include_privates_of(user_id=include_privates_of_user_id)
             .filter_unlisted(flag=filter_unlisted)
             .unfilter_privates(flag=unfilter_privates)
+            .unfilter_deleted(flag=unfilter_deleted)
             .paginate(pagination_index_is_smaller_than=curr_page.minimum_pagination_index)
             .limit(limit=page_limit)
             .search()
@@ -129,12 +131,14 @@ class VideosDatabasePG:
     async def get_unprocessed_videos(
         self,
         user_id: Optional[UUID] = None,
-        hash_id: Optional[UUID] = None
+        hash_id: Optional[UUID] = None,
+        unfilter_deleted: Optional[bool] = False
     ) -> List[UnprocessedVideo]:
         return await (
             self._describe_unprocessd_videos()
             .owned_by(user_id=user_id)
             .with_hash(id=hash_id)
+            .unfilter_deleted(flag=unfilter_deleted)
             .search()
         )
 

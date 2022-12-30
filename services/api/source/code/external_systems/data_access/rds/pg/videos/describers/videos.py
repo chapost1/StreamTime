@@ -126,6 +126,10 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
     async def search(self) -> List[Video]:
         conditions, params = self.build_query_conditions_params()
 
+        # deleted videos are not shown
+        # this should be the last condition and also relevant only to select statement
+        conditions, params = super().build_deleted_conditions_params(conditions=conditions, params=params)
+
         # keep limit as the last param, and use it only on select statement
         # it is the last sql expression and it is also a condition by itself
         params.append(self.requested_limit)
@@ -202,6 +206,10 @@ class VideosDescriberPG(UploadedVideosDescriberPG):
     def unfilter_privates(self, flag: bool = True) -> VideosDescriberPG:
         self.allow_privates_globally = flag
         return self
+    
+
+    def unfilter_deleted(self, flag: bool = True) -> VideosDescriberPG:
+        return super().unfilter_deleted(flag=flag)
 
     
     def paginate(self, pagination_index_is_smaller_than: int) -> VideosDescriberPG:

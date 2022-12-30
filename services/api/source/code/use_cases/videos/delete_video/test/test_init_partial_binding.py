@@ -1,6 +1,7 @@
-# TODO: to be implemented when use case is broken down into smaller pieces
-# which should happen after delete service will be implemented
-# which will change the use case behavior dramatically
-# therefore, no tests are implemented in this area.
+from use_cases.videos.delete_video import delete_video_use_case
 
-# ATM use case uses make func wrapper instead of partial...
+
+def test_partial_binded_kwargs_are_the_expected_ones():
+    actual_keys = list(delete_video_use_case.keywords.keys())
+    expected_keys = []
+    assert actual_keys == expected_keys

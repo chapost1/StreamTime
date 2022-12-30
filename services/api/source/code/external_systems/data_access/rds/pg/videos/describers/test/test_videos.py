@@ -355,6 +355,7 @@ async def test_search_pass_expected_envs_to_conn_query_with_no_conditions():
                 'pagination_index',
                 f'FROM {tables.VIDEOS_TABLE}',
                 f'WHERE is_private IS NOT true',
+                'AND deleted_at IS null',
                 'ORDER BY pagination_index DESC',
                 'LIMIT %s'
             ]),
@@ -421,6 +422,92 @@ async def test_search_pass_expected_envs_to_conn_query_with_conditions():
 
     conditions, params = describer.build_query_conditions_params()
 
+    conditions, params = describer.build_deleted_conditions_params(conditions=conditions, params=params)
+
+    params.append(page_limit)
+
+    assert conn_mock.last_recorded_transaction_steps == [
+        (
+            nl().join([
+                'SELECT',
+                'hash_id,',
+                'user_id,',
+                'file_name,',
+                'title,',
+                'description,',
+                'size_in_bytes,',
+                'duration_seconds,',
+                'video_type,',
+                'thumbnail_url,',
+                'storage_object_key,',
+                'storage_thumbnail_key,',
+                'upload_time,',
+                'is_private,',
+                'listing_time,',
+                'pagination_index',
+                f'FROM {tables.VIDEOS_TABLE}',
+                f"WHERE {f'{nl()}AND '.join(conditions)}",
+                'ORDER BY pagination_index DESC',
+                'LIMIT %s'
+            ]),
+            tuple(params)
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_search_pass_expected_envs_to_conn_query_with_conditions_when_delted_is_unfiltered():
+    # create mocks
+    records = [
+        (
+            uuid4(), uuid4(), 'm1.m2', 'title', 'description',
+            random.randint(1, 100), random.randint(1, 100),
+            'video_type', 'https://thumbnail_url.com',
+            'storage_object_key', 'storage_thumbnail_key',
+            calc_server_time(), True, calc_server_time(),
+            random.randint(1, 100)
+        )
+    ]
+
+    conn_mock = ConnectionMock(return_value=records)
+
+    describer = VideosDescriberPG(
+        get_connection_fn=Mock(return_value=conn_mock)
+    )
+
+    user_id = uuid4()
+    not_user_id = uuid4()
+    hash_id = uuid4()
+    include_privates_of_user_id = uuid4()
+    filter_unlisted = True
+    curr_page = NextPage(minimum_pagination_index=random.randint(1, 10))
+    page_limit = 10
+
+    (
+        describer
+        .owned_by(user_id=user_id)
+        .not_owned_by(user_id=not_user_id)
+        .with_hash(id=hash_id)
+        .include_privates_of(user_id=include_privates_of_user_id)
+        .filter_unlisted(flag=filter_unlisted)
+        .unfilter_deleted(flag=True)
+        .paginate(pagination_index_is_smaller_than=curr_page.minimum_pagination_index)
+        .limit(limit=page_limit)
+    )
+
+    describer_spy: VideosDescriberPG = AsyncMock(wraps=describer)
+
+    result: List[Video] = await describer_spy.search()
+    # AsyncMock need to be awaited
+    expected_result = list(map(describer._prase_db_records_into_classes, records))
+
+    # assert result of records after parse.
+    assert result == expected_result
+
+    conditions, params = describer.build_query_conditions_params()
+
+    conditions, params = describer.build_deleted_conditions_params(conditions=conditions, params=params)
+
     params.append(page_limit)
 
     assert conn_mock.last_recorded_transaction_steps == [
@@ -466,20 +553,10 @@ async def test_delete_calls_parent_delete_with_the_correct_table_using_conn_mock
     describer.with_hash(id=hash_id).owned_by(user_id=user_id)
 
     await describer.delete()
-            
-    conditions, params = describer.build_query_conditions_params()
 
-    # assert using the right delete table with expected query structure
-    assert conn_mock.last_recorded_transaction_steps == [
-        (
-            nl().join([
-                f'DELETE FROM {tables.VIDEOS_TABLE}',
-                f"WHERE {f'{nl()}AND '.join(conditions)}"
-            ]),
-            tuple(params)
-        )
-    ]
-
+    # assert delete statement is actually a update statement
+    assert conn_mock.last_recorded_transaction_steps[0][0].index('UPDATE') == 0
+    assert conn_mock.last_recorded_transaction_steps[0][0].index('deleted_at = %s') != -1
 
 @pytest.mark.asyncio
 async def test_update_calls_parent_update_with_the_correct_table_using_conn_mock():
