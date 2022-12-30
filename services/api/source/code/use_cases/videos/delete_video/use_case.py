@@ -11,16 +11,7 @@ from common.utils import (
 
 async def delete_video_on_ready_stage_hadnler(database: VideosDatabase, user_id: UUID, hash_id: UUID) -> None:
     """Marks a Video as deleted on database"""
-    # validates existence
-    first_item(
-        items=await database.get_videos(
-            user_id=user_id,
-            filter_unlisted=False,
-            hash_id=hash_id,
-            include_privates_of_user_id=user_id
-        )
-    )
-
+    # no need to validate existence as it is already done in find_video_stage
     await database.delete_video(
       user_id=user_id,
       hash_id=hash_id
@@ -30,6 +21,7 @@ async def delete_video_on_ready_stage_hadnler(database: VideosDatabase, user_id:
 async def delete_unprocessed_video_handler(database: VideosDatabase, user_id: UUID, hash_id: UUID) -> None:
     """Marks a UnprocessedVideo as deleted on database"""
 
+    # get the unprocessed_video to check if it is still processing
     unprocessed_video: UnprocessedVideo = first_item(
         items=await database.get_unprocessed_videos(
           user_id=user_id,
