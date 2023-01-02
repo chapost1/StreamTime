@@ -7,12 +7,6 @@ class Garbage:
     """Represents a garbage entity."""
     type: str
 
-
-    def delete(self) -> None:
-        """Deletes the garbage entity."""
-        raise NotImplementedError
-
-
     def to_message(self) -> str:
         """Returns a message representation of the garbage entity."""
         return json.dumps(

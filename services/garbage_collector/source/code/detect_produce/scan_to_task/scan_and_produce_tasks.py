@@ -1,6 +1,6 @@
 import logging
 from typing import List
-from shared.garbage.garbage import Garbage
+from shared.models.garbage.garbage import Garbage
 from shared import queue_integration as queue
 from .models import (
     ScanToTaskStepConfig,

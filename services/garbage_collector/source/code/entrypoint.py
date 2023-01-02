@@ -1,7 +1,7 @@
 from common.environment import INSTANCE_TYPE
 from common.enums import InstanceTypes
-import tasks_producer
-import tasks_worker
+import detect_produce
+import consume_collect
 import logging
 
 
@@ -16,9 +16,9 @@ def main():
     """Main entrypoint for the garbage collector service."""
 
     if INSTANCE_TYPE == InstanceTypes.PRODUCER.value:
-        tasks_producer.scan_garbage_every(minutes=1)
+        detect_produce.scan_garbage_every(seconds=10)
     elif INSTANCE_TYPE == InstanceTypes.WORKER.value:
-        tasks_worker.work()
+        consume_collect.work()
     else:
         raise Exception(f'Unknown instance type {INSTANCE_TYPE}')
 

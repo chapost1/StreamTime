@@ -1,6 +1,4 @@
-from shared.garbage.enums import GarbageTypes
-from functools import partial
-from shared.garbage.factory import GarbageFactory
+from shared.models.garbage.enums import GarbageTypes
 from .models import ScanToTaskStepConfig
 # concrete imports
 from shared.rds.videos import VideosDatabase
@@ -12,16 +10,17 @@ from common.constants import (
 producer_steps = [
     # Video garbage
     ScanToTaskStepConfig(
-        garbage_type=GarbageTypes.VIDEO.value,
-        get_database=partial(VideosDatabase, garbage_factory=GarbageFactory),
+        garbage_type=GarbageTypes.VIDEO_DELETE.value,
+        get_database=VideosDatabase,
         scan_limit=VIDEOS_SCAN_LIMIT
     ),
     # Unprocessed video garbage
     ScanToTaskStepConfig(
-        garbage_type=GarbageTypes.UNPROCESSED_VIDEO.value,
-        get_database=partial(UnprocessedVideosDatabase, garbage_factory=GarbageFactory),
+        garbage_type=GarbageTypes.UNPROCESSED_VIDEO_DELETE.value,
+        get_database=UnprocessedVideosDatabase,
         scan_limit=VIDEOS_SCAN_LIMIT
     )
+    # TODO: add unprocessed_video_internal_server_error garbage flow
     # ...
     # User garbage
     # TBD

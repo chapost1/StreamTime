@@ -1,5 +1,5 @@
 from typing import Protocol, List
-from shared.garbage.garbage import Garbage
+from shared.models.garbage.garbage import Garbage
 from dataclasses import dataclass
 from shared.rds.abstract import Database
 

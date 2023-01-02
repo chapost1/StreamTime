@@ -1,8 +1,8 @@
 from shared.rds.database import Database
-from shared.garbage.enums import GarbageTypes
+from shared.models.garbage.enums import GarbageTypes
 from shared.rds import tables
 from typing import List
-from shared.garbage.video import Video
+from shared.models.garbage.video import Video
 
 
 class VideosDatabase(Database):
@@ -39,7 +39,15 @@ class VideosDatabase(Database):
         if not in_a_transaction:
             self.commit()
 
-        return list(map(self.parse_row, videos))
+        return list(
+            map(
+                lambda row: self.parse_row(
+                    type=GarbageTypes.VIDEO_DELETE,
+                    row=row
+                ),
+                videos
+            )
+        )
 
 
     def delete_garbage(self, video: Video) -> None:
@@ -63,9 +71,9 @@ class VideosDatabase(Database):
             self.commit()
     
 
-    def parse_row(self, row: tuple) -> Video:
-        return self.garbage_factory.create(
-            type=GarbageTypes.VIDEO.value,
+    def parse_row(self, type: GarbageTypes, row: tuple) -> Video:
+        return Video(
+            type=type,
             user_id=row[0],
             hash_id=row[1],
             thumbnail_url=row[2],

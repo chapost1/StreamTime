@@ -1,4 +1,4 @@
-from tasks_producer import scan_lock
+from detect_produce import scan_lock
 import logging
 from .scan_to_task import (
     scan_and_produce_tasks,

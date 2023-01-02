@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional, Protocol
-from shared.garbage.uploaded_video import UploadedVideo
+from shared.models.garbage.uploaded_video import UploadedVideo
 from shared.rds.abstract import Database
 import json
 from dataclasses import dataclass
@@ -13,27 +13,24 @@ class VideosDatabase(Database, Protocol):
 
 @dataclass
 class Video(UploadedVideo):
-    database: VideosDatabase
-
     thumbnail_url: Optional[str] = None
     storage_object_key: Optional[str] = None
     storage_thumbnail_key: Optional[str] = None
 
 
-    def delete(self) -> None:
+    def delete(self, database: VideosDatabase) -> None:
         try:
-            self.database.begin()
+            database.begin()
 
-            self.database.delete_garbage(
-                user_id=self.user_id,
-                hash_id=self.hash_id
+            database.delete_garbage(
+                video=self
             )
 
             # TODO: delete from storage
 
-            self.database.commit()
+            database.commit()
         except Exception:
-            self.database.rollback()
+            database.rollback()
             raise
     
 

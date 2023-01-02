@@ -1,5 +1,5 @@
-from shared.garbage.garbage import Garbage
-from shared.garbage.factory import GarbageFactory
+from shared.models.garbage.garbage import Garbage
+from shared.models.garbage.factory import GarbageFactory
 from typing import Dict
 import json
 import base64

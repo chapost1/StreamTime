@@ -1,4 +1,4 @@
-from shared.garbage.garbage import Garbage
+from shared.models.garbage.garbage import Garbage
 from typing import Optional
 from uuid import UUID
 import json

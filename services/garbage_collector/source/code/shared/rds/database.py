@@ -1,28 +1,20 @@
 import psycopg2
 from shared.rds.config import config
-from shared.garbage.garbage import Garbage
-from typing import Protocol
 
 # The database queries are happening once in a while
 # So we don't need to keep the connection open
 # We can open a connection, execute the query and close the connection
 
-class GarbageFactory(Protocol):
-    def create(self, **kwargs) -> Garbage:
-        ...
-
 
 class Database:
 
     __slots__ = (
-        'garbage_factory',
         'connection',
         'cursor'
     )
 
 
-    def __init__(self, garbage_factory: GarbageFactory):
-        self.garbage_factory = garbage_factory
+    def __init__(self):
         self.reset()
 
 
