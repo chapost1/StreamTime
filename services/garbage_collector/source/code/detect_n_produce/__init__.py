@@ -1,7 +1,8 @@
 import time
 from typing import Optional
 import threading
-from .scan import scan
+from .producer import Producer
+from .config import producer_steps
 
 
 def scan_garbage_every(
@@ -23,7 +24,8 @@ def scan_garbage_every(
     # start the scan job
     while True:
         threading.Thread(
-            target=scan,
+            target=Producer().workflow,
+            args=(producer_steps,),
             name=__name__
         ).start()
 
