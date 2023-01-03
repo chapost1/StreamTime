@@ -7,7 +7,7 @@ from shared.models.garbage.video import Video
 
 class VideosDatabase(Database):
    
-    def get_garbage(self, limit: int = 100) -> List[Video]:
+    def get_marked_for_delete(self, limit: int = 100) -> List[Video]:
         """Gets videos which are marked as deleted."""
 
         if limit <= 0:
@@ -50,7 +50,7 @@ class VideosDatabase(Database):
         )
 
 
-    def delete_garbage(self, video: Video) -> None:
+    def delete(self, video: Video) -> None:
         """Deletes videos which are marked as deleted."""
 
         in_a_transaction = self.connection is not None

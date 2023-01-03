@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 
 class VideosDatabase(Database, Protocol):
-    def delete_garbage(self, video: Video) -> None:
+    def delete(self, video: Video) -> None:
         ...
 
 
@@ -22,7 +22,7 @@ class Video(UploadedVideo):
         try:
             database.begin()
 
-            database.delete_garbage(
+            database.delete(
                 video=self
             )
 

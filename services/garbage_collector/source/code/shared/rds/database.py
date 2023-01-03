@@ -1,5 +1,4 @@
-import psycopg2
-from shared.rds.config import config
+from .pool import Pool
 
 # The database queries are happening once in a while
 # So we don't need to keep the connection open
@@ -15,13 +14,12 @@ class Database:
 
 
     def __init__(self):
-        self.reset()
+        self.connection = None
+        self.cursor = None
 
 
     def begin(self):
-        self.connection = psycopg2.connect(**config)
-        self.connection.autocommit = False
-        self.cursor = self.connection.cursor()
+        self.retain_connection()
     
 
     def execute(self, query: str, params: tuple = None):
@@ -38,16 +36,21 @@ class Database:
 
     def commit(self):
         self.connection.commit()
-        self.connection.close()
-        self.reset()
+        self.release_connection()
 
 
     def rollback(self):
         self.connection.rollback()
-        self.connection.close()
-        self.reset()
+        self.release_connection()
     
 
-    def reset(self):
+    def retain_connection(self):
+        self.connection = Pool().get_connection()
+        self.connection.autocommit = True
+        self.cursor = self.connection.cursor()
+    
+
+    def release_connection(self):
         self.cursor = None
+        Pool().release_connection(self.connection)
         self.connection = None

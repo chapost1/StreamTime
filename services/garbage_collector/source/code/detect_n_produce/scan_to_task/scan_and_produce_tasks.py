@@ -2,10 +2,7 @@ import logging
 from typing import List
 from shared.models.garbage.garbage import Garbage
 from shared import queue_integration as queue
-from .models import (
-    ScanToTaskStepConfig,
-    SearchableDatabase
-)
+from .models import ScanToTaskStepConfig
 
 
 logger = logging.getLogger(__name__)
@@ -21,10 +18,7 @@ def scan_and_produce_tasks(step_config: ScanToTaskStepConfig) -> None:
 
     logger.info(f'[START] {step_message}')
 
-    database: SearchableDatabase  = step_config.get_database()
-    garbages: List[Garbage] = database.get_garbage(
-        limit=step_config.scan_limit
-    )
+    garbages: List[Garbage] = step_config.detect_garbage_fn()
 
     for garbage in garbages:
         queue.publish(garbage=garbage)
