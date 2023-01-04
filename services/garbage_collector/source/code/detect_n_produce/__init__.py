@@ -31,7 +31,8 @@ async def infinite_scan(delay_in_seconds: int):
     while True:
         scan_start_ts = time.time()
         try:
-            await Producer().workflow(configured_steps=producer_steps)
+            producer = Producer()
+            await producer.workflow(configured_steps=producer_steps)
         except Exception as exc:
             # log the exception instead of crashing the service
             logger.error(f'Producer generated an exception: {exc}')

@@ -1,4 +1,3 @@
-from common.singleton import Singleton
 import logging
 from typing import List
 from shared.models.garbage.garbage import Garbage
@@ -10,7 +9,7 @@ import asyncio
 logger = logging.getLogger(__name__)
 
 
-class Producer(metaclass=Singleton):
+class Producer:
     """Detects garbage and produces tasks for the workers"""
 
 

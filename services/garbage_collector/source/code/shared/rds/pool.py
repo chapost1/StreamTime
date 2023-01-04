@@ -22,6 +22,7 @@ class Pool(metaclass=Singleton):
     async def open(self):
         self._lock.acquire()
         if self._pool is not None:
+            self._lock.release()
             return
 
         try:
