@@ -1,13 +1,13 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Awaitable
 
 
 @dataclass
 class GarbageBag:
     """Represents a garbage bag."""
 
-    collect_fn: Callable
+    collect_fn: Awaitable[None]
 
 
-    def collect(self) -> None:
-        self.collect_fn()
+    async def collect(self) -> None:
+        await self.collect_fn()

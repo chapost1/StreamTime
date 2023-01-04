@@ -4,6 +4,7 @@ import detect_n_produce as producer
 import consume_n_collect as consumer
 from init import init as init_service
 import logging
+import asyncio
 
 
 logging.basicConfig(
@@ -13,24 +14,24 @@ logging.basicConfig(
 )
 
 
-def start_worker():
+async def start_worker():
     if INSTANCE_TYPE == InstanceTypes.PRODUCER.value:
-        producer.scan_garbage_every(minutes=1)
+        await producer.scan_garbage_every(minutes=1)
     elif INSTANCE_TYPE == InstanceTypes.WORKER.value:
-        consumer.work()
+        await consumer.collect()
     else:
         raise Exception(f'Unknown instance type {INSTANCE_TYPE}')
 
 
-def main():
+async def main():
     """Main entrypoint for the garbage collector service."""
 
     # Initialize the service
-    init_service()
+    await init_service()
 
     # Start the worker by instance type
-    start_worker()
+    await start_worker()
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

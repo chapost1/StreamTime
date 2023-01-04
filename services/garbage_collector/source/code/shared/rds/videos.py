@@ -1,24 +1,28 @@
 from shared.rds.database import Database
 from shared.models.garbage.enums import GarbageTypes
 from shared.rds import tables
-from typing import List
+import aiopg
+from functools import partial
+from typing import List, Optional
 from shared.models.garbage.video import Video
 
 
 class VideosDatabase(Database):
    
-    def get_marked_for_delete(self, limit: int = 100) -> List[Video]:
+    async def get_marked_for_delete(self, limit: int = 100, connection: Optional[aiopg.Connection] = None) -> List[Video]:
         """Gets videos which are marked as deleted."""
 
         if limit <= 0:
             raise ValueError('Limit must be greater than 0')
         
-        in_a_transaction = self.connection is not None
+        return await self.dml(
+            connection=connection,
+            action=partial(self._get_marked_for_delete, limit=limit)
+        )
 
-        if not in_a_transaction:
-            self.begin()
 
-        self.execute(
+    async def _get_marked_for_delete(self, limit: int, cursor: aiopg.Cursor) -> List[Video]:
+        await cursor.execute(
             '\n'.join([
                 'SELECT',
                 'user_id,',
@@ -34,10 +38,6 @@ class VideosDatabase(Database):
             ]),
             (limit,)
         )
-        videos = self.fetchall()
-
-        if not in_a_transaction:
-            self.commit()
 
         return list(
             map(
@@ -45,20 +45,22 @@ class VideosDatabase(Database):
                     type=GarbageTypes.VIDEO_DELETE,
                     row=row
                 ),
-                videos
+                await cursor.fetchall()
             )
         )
 
 
-    def delete(self, video: Video) -> None:
+    async def delete(self, video: Video, connection: Optional[aiopg.Connection] = None) -> None:
         """Deletes videos which are marked as deleted."""
 
-        in_a_transaction = self.connection is not None
+        await self.dml(
+            connection=connection,
+            action=partial(self._delete, video=video)
+        )
 
-        if not in_a_transaction:
-            self.begin()
 
-        self.execute(
+    async def _delete(self, video: Video, cursor: aiopg.Cursor) -> None:
+        await cursor.execute(
             '\n'.join([
                 'DELETE FROM',
                 f'{tables.VIDEOS_TABLE}',
@@ -67,9 +69,6 @@ class VideosDatabase(Database):
             (video.user_id, video.hash_id)
         )
 
-        if not in_a_transaction:
-            self.commit()
-    
 
     def parse_row(self, type: GarbageTypes, row: tuple) -> Video:
         return Video(

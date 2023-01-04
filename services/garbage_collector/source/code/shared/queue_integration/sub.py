@@ -11,5 +11,5 @@ def event_to_garbage(event: Dict) -> Garbage:
     return GarbageFactory.create(**kwargs)
 
 
-def subscribe():
+async def subscribe():
     ...

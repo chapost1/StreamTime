@@ -1,7 +1,9 @@
 from shared.rds.database import Database
 from shared.models.garbage.enums import GarbageTypes
 from shared.rds import tables
-from typing import List
+import aiopg
+from functools import partial
+from typing import List, Optional
 from shared.models.garbage.unprocessed_video import UnprocessedVideo
 from common.environment import (
     MAX_VIDEO_PROCESSING_TIME_SECONDS,
@@ -10,19 +12,22 @@ from common.environment import (
 
 
 class UnprocessedVideosDatabase(Database):
+    """Unprocessed videos database."""
    
-    def get_marked_for_delete(self, limit: int = 100) -> List[UnprocessedVideo]:
+    async def get_marked_for_delete(self, limit: int = 100, connection: Optional[aiopg.Connection] = None) -> List[UnprocessedVideo]:
         """Gets unprocessed videos which are marked as deleted."""
 
         if limit <= 0:
             raise ValueError('Limit must be greater than 0')
         
-        in_a_transaction = self.connection is not None
+        return await self.dml(
+            connection=connection,
+            action=partial(self._get_marked_for_delete, limit=limit)
+        )
 
-        if not in_a_transaction:
-            self.begin()
-
-        self.execute(
+    
+    async def _get_marked_for_delete(self, limit: int, cursor: aiopg.Cursor) -> List[UnprocessedVideo]:
+        await cursor.execute(
             '\n'.join([
                 'SELECT',
                 'user_id,',
@@ -35,10 +40,6 @@ class UnprocessedVideosDatabase(Database):
             ]),
             (limit,)
         )
-        videos = self.fetchall()
-
-        if not in_a_transaction:
-            self.commit()
 
         return list(
             map(
@@ -46,20 +47,22 @@ class UnprocessedVideosDatabase(Database):
                     type=GarbageTypes.UNPROCESSED_VIDEO_DELETE,
                     row=row
                 ),
-                videos
+                await cursor.fetchall()
             )
         )
 
 
-    def delete(self, video: UnprocessedVideo) -> None:
+    async def delete(self, video: UnprocessedVideo, connection: Optional[aiopg.Connection] = None) -> None:
         """Deletes unprocessed videos which are marked as deleted."""
 
-        in_a_transaction = self.connection is not None
+        await self.dml(
+            connection=connection,
+            action=partial(self._delete, video=video)
+        )
 
-        if not in_a_transaction:
-            self.begin()
 
-        self.execute(
+    async def _delete(self, video: UnprocessedVideo, cursor: aiopg.Cursor) -> None:
+        await cursor.execute(
             '\n'.join([
                 'DELETE FROM',
                 f'{tables.UNPROCESSED_VIDEOS_TABLE}',
@@ -68,25 +71,25 @@ class UnprocessedVideosDatabase(Database):
             (video.user_id, video.hash_id)
         )
 
-        if not in_a_transaction:
-            self.commit()
-    
 
-    def get_failed_to_process(self, limit: int = 100) -> List[UnprocessedVideo]:
+    async def get_failed_to_process(self, limit: int = 100, connection: Optional[aiopg.Connection] = None) -> List[UnprocessedVideo]:
         """Gets unprocessed videos which failed to process during max process time."""
 
         if limit <= 0:
             raise ValueError('Limit must be greater than 0')
         
-        in_a_transaction = self.connection is not None
+        return await self.dml(
+            connection=connection,
+            action=partial(self._get_failed_to_process, limit=limit)
+        )
 
-        if not in_a_transaction:
-            self.begin()
 
+    async def _get_failed_to_process(self, limit: int, cursor: aiopg.Cursor) -> List[UnprocessedVideo]:
+        """Gets unprocessed videos which failed to process during max process time."""
         # add 10% to the max processing time to account for processing time
         safe_window_seconds = MAX_VIDEO_PROCESSING_TIME_SECONDS * 1.1
 
-        self.execute(
+        await cursor.execute(
             '\n'.join([
                 'SELECT',
                 'user_id,',
@@ -101,10 +104,6 @@ class UnprocessedVideosDatabase(Database):
             ]),
             (safe_window_seconds, limit,)
         )
-        videos = self.fetchall()
-
-        if not in_a_transaction:
-            self.commit()
 
         return list(
             map(
@@ -112,20 +111,23 @@ class UnprocessedVideosDatabase(Database):
                     type=GarbageTypes.UNPROCESSED_VIDEO_INTERNAL_SERVER_ERROR,
                     row=row
                 ),
-                videos
+                await cursor.fetchall()
             )
         )
 
-
-    def mark_as_internal_server_error(self, video: UnprocessedVideo) -> None:
+    async def mark_as_internal_server_error(self, video: UnprocessedVideo, connection: Optional[aiopg.Connection] = None) -> None:
         """Marks unprocessed videos as internal server error."""
 
-        in_a_transaction = self.connection is not None
+        await self.dml(
+            connection=connection,
+            action=partial(self._mark_as_internal_server_error, video=video)
+        )
 
-        if not in_a_transaction:
-            self.begin()
+    
+    async def _mark_as_internal_server_error(self, video: UnprocessedVideo, cursor: aiopg.Cursor) -> None:
+        """Marks unprocessed videos as internal server error."""
 
-        self.execute(
+        await cursor.execute(
             '\n'.join([
                 'UPDATE',
                 f'{tables.UNPROCESSED_VIDEOS_TABLE}',
@@ -134,9 +136,6 @@ class UnprocessedVideosDatabase(Database):
             ]),
             (VIDEO_PROCESSING_INTERNAL_SERVER_ERROR_MESSAGE, video.user_id, video.hash_id)
         )
-
-        if not in_a_transaction:
-            self.commit()
 
 
     def parse_row(self, type: GarbageTypes, row: tuple) -> UnprocessedVideo:

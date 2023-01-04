@@ -1,10 +1,10 @@
 from common.singleton import Singleton
-from threading import Lock
 import logging
 from typing import List
 from shared.models.garbage.garbage import Garbage
 from shared import queue_integration as queue
 from .models import ScanToTaskStepConfig
+import asyncio
 
 
 logger = logging.getLogger(__name__)
@@ -13,43 +13,22 @@ logger = logging.getLogger(__name__)
 class Producer(metaclass=Singleton):
     """Detects garbage and produces tasks for the workers"""
 
-    __slots__ = (
-        '_locked',
-        '_lock'
-    )
 
-
-    def __init__(self):
-        self._locked = False
-        self._lock = Lock()
-
-
-    def workflow(self, configured_steps: List[ScanToTaskStepConfig]) -> None:
-        """
-        Scans the database for garbage
-        And produces tasks for the workers
-        """
-
-        if self.lock():
-            # the producer scan job is already running
-            logger.info('Skipping producer garbage scan...')
-            return
+    async def workflow(self, configured_steps: List[ScanToTaskStepConfig]) -> None:
+        """The producer scan job workflow"""
 
         message = 'Producer garbage scan worflow...'
 
         logger.info(f'[START] {message}')
 
-        for step_config in configured_steps:
-            self.scan_and_produce_tasks(
-                step_config=step_config
-            )
-        
+        tasks = [self.execute_step(step_config=step_config) for step_config in configured_steps]
+
+        await asyncio.gather(*tasks)
+
         logger.info(f'[END] {message}')
 
-        self.unlock()
 
-
-    def scan_and_produce_tasks(self, step_config: ScanToTaskStepConfig) -> None:
+    async def execute_step(self, step_config: ScanToTaskStepConfig) -> None:
         """
         Scans the database for garbage
         And produces tasks for the workers
@@ -59,49 +38,30 @@ class Producer(metaclass=Singleton):
 
         logger.info(f'[START] {step_message}')
 
-        garbages: List[Garbage] = step_config.detect_garbage_fn()
+        garbages: List[Garbage] = await step_config.detect_garbage_fn()
 
-        logger.info(f'Found {len(garbages)} {step_config.garbage_type}.')
+        published_count = await self.publish_tasks(garbages=garbages)
 
-        for garbage in garbages:
-            queue.publish(garbage=garbage)
+        logger.info(f'Poducer Published {published_count}/{len(garbages)} tasks.')
 
         logger.info(f'[END] {step_message}')
+    
 
+    async def publish_tasks(self, garbages: List[Garbage]) -> int:
+        """Publishes tasks for the workers"""
 
-    def lock(self) -> bool:
-        """
-        Locks the producer scan process
-        Returns False if the lock was acquired
-        Returns True if the lock was already acquired
-        """
+        published_count: int = 0
+        # publish tasks for each garbage
+        tasks = [queue.publish(garbage) for garbage in garbages]
+        try:
+            # wait for all tasks to complete
+            result: List[bool] = await asyncio.gather(*tasks)
+            # reduce result to count of published tasks
+            # count true values
+            published_count = sum(result)
+        except Exception as exc:
+            # should not happen
+            # but if it does, log the exception
+            logger.error(f'Producer generated an exception: {exc}')
 
-        self._lock.acquire()
-
-        if self._locked:
-            logger.info('The producer scan process is already locked.')
-
-            self._lock.release()
-
-            return True
-
-        logger.info('Locking the producer scan process...')
-
-        self._locked = True
-
-        self._lock.release()
-
-        return False
-
-
-    def unlock(self) -> None:
-        """
-        Unlocks the producer scan process
-        """
-        self._lock.acquire()
-
-        logger.info('Unlocking the producer...')
-
-        self._locked = False
-
-        self._lock.release()
+        return published_count

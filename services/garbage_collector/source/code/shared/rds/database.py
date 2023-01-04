@@ -1,4 +1,6 @@
 from .pool import Pool
+import aiopg
+from typing import Awaitable, Any, Optional
 
 # The database queries are happening once in a while
 # So we don't need to keep the connection open
@@ -7,50 +9,23 @@ from .pool import Pool
 
 class Database:
 
-    __slots__ = (
-        'connection',
-        'cursor'
-    )
+    @property
+    def transaction(self) -> Any:
+        """
+        returns context manager for acquiring connection
+        every action will be executed in the same transaction
+        """
+        return Pool().transaction_ctx()
 
 
-    def __init__(self):
-        self.connection = None
-        self.cursor = None
-
-
-    def begin(self):
-        self.retain_connection()
-    
-
-    def execute(self, query: str, params: tuple = None):
-        self.cursor.execute(query, params)
-    
-
-    def fetchone(self):
-        return self.cursor.fetchone()
-    
-
-    def fetchall(self):
-        return self.cursor.fetchall()
-
-
-    def commit(self):
-        self.connection.commit()
-        self.release_connection()
-
-
-    def rollback(self):
-        self.connection.rollback()
-        self.release_connection()
-    
-
-    def retain_connection(self):
-        self.connection = Pool().get_connection()
-        self.connection.autocommit = True
-        self.cursor = self.connection.cursor()
-    
-
-    def release_connection(self):
-        self.cursor = None
-        Pool().release_connection(self.connection)
-        self.connection = None
+    async def dml(self, action: Awaitable, connection: Optional[aiopg.Connection]) -> Any:
+        """
+        Executes a DML query
+        If connection is None, it will open a new connection
+        Otherwise, it will use the provided connection
+        """
+        if connection is None:
+            async with self.transaction as connection:
+                return await action(cursor=await connection.cursor())
+        else:
+            return await action(cursor=await connection.cursor())

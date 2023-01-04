@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 
 class VideosDatabase(Database, Protocol):
-    def delete(self, video: Video) -> None:
+    async def delete(self, video: Video) -> None:
         ...
 
 
@@ -18,21 +18,16 @@ class Video(UploadedVideo):
     storage_thumbnail_key: Optional[str] = None
 
 
-    def delete(self, database: VideosDatabase) -> None:
-        try:
-            database.begin()
-
-            database.delete(
-                video=self
+    async def delete(self, database: VideosDatabase) -> None:
+        async with database.transaction as connection:
+            # everythin in the same transaction
+            await database.delete(
+                    video=self,
+                    connection=connection
             )
 
             # TODO: delete from storage
 
-            database.commit()
-        except Exception:
-            database.rollback()
-            raise
-    
 
     def to_message(self) -> str:
         return json.dumps(

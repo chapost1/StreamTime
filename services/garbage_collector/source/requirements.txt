@@ -1,3 +1,4 @@
-psycopg==3.1.7
-psycopg-pool==3.1.5
-typing_extensions==4.4.0
+aiopg==1.4.0
+async-timeout==4.0.2
+asyncio-atexit==1.0.1
+psycopg2-binary==2.9.5

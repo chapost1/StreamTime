@@ -2,11 +2,12 @@ from shared.rds import handle_connection
 import logging
 
 
-def init():
-    """Initialize the garbage collector service."""
+async def init():
+    """
+    Initialize the garbage collector service.
+    Initialize the app dependencies.
+    """
     logging.info('Initializing garbage collector service')
 
-    # Initialize app dependencies
-
     # Initialize the RDS pool
-    handle_connection()
+    await handle_connection()

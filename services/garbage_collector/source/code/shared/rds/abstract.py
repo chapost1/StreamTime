@@ -1,28 +1,21 @@
-from typing import Protocol
+from typing import Protocol, Any, Awaitable, Optional
+import aiopg
+
 
 class Database(Protocol):
     """Abstract class for database connections"""
 
-
-    def begin(self):
-        """Opens a connection and creates a cursor"""
-    
-
-    def execute(self, query: str, params: tuple = None):
-        """Executes a query"""
-    
-
-    def fetchone(self):
-        """Fetches one row"""
-    
-
-    def fetchall(self):
-        """Fetches all rows"""
+    @property
+    def transaction(self) -> Any:
+        """
+        returns context manager for acquiring connection
+        every action will be executed in the same transaction
+        """
 
 
-    def commit(self):
-        """Commits the transaction and closes the connection"""
-
-
-    def rollback(self):
-        """Rolls back the transaction and closes the connection"""
+    async def dml(self, action: Awaitable, connection: Optional[aiopg.Connection]) -> Any:
+        """
+        Executes a DML query
+        If connection is None, it will open a new connection
+        Otherwise, it will use the provided connection
+        """

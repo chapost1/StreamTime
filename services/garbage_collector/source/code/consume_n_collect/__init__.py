@@ -1,3 +1,3 @@
-def work():
-    """Starts the worker process."""
+def collect():
+    """Collects garbage from the queue."""
     ...
