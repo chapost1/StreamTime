@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class SQS:
     f"""
-    SQS as a storage service client.
+    SQS as a message queue.
     """
 
     def __init__(self, context: Context):
