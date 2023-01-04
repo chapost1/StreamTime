@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Protocol
+from typing import Optional, Protocol, Any
 from shared.models.garbage.uploaded_video import UploadedVideo
 from shared.rds.abstract import Database
 import json
@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 
 class VideosDatabase(Database, Protocol):
-    async def delete(self, video: Video) -> None:
+    async def delete(self, video: Video, connection: Optional[Any]) -> None:
         ...
 
 
@@ -20,7 +20,7 @@ class Video(UploadedVideo):
 
     async def delete(self, database: VideosDatabase) -> None:
         async with database.transaction as connection:
-            # everythin in the same transaction
+            # everything under the same transaction
             await database.delete(
                     video=self,
                     connection=connection
