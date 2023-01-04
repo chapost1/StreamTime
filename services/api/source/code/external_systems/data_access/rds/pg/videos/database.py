@@ -45,12 +45,14 @@ class VideosDatabasePG:
                     SELECT '{VideoStages.UNPROCESSED.value}' as stage FROM {tables.UNPROCESSED_VIDEOS_TABLE}
                     WHERE user_id = %s
                     AND hash_id = %s
+                    AND deleted_at IS NULL
                 ) as unprocessed
                 UNION ALL
                 SELECT stage FROM (
                     SELECT '{VideoStages.READY.value}' as stage FROM {tables.VIDEOS_TABLE}
                     WHERE user_id = %s
                     AND hash_id = %s
+                    AND deleted_at IS NULL
                 ) as ready;
                 """,
                 tuple([user_id, hash_id, user_id, hash_id])
