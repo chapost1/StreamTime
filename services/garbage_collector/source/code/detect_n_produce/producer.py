@@ -1,7 +1,7 @@
 import logging
 from typing import List
 from shared.models.garbage.garbage import Garbage
-from shared import queue_integration as queue
+from shared.infrastructure.queue import garbage_queue
 from .models import ScanToTaskStepConfig
 import asyncio
 
@@ -51,7 +51,7 @@ class Producer:
 
         published_count: int = 0
         # publish tasks for each garbage
-        tasks = [queue.publish(garbage) for garbage in garbages]
+        tasks = [garbage_queue.publish(garbage) for garbage in garbages]
         try:
             # wait for all tasks to complete
             result: List[bool] = await asyncio.gather(*tasks)

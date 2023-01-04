@@ -1,4 +1,6 @@
-from shared.rds import handle_connection
+from shared.infrastructure.rds import handle_connection as init_rds_connection
+from shared.infrastructure.aws_integration.boto3 import init as init_boto3
+import asyncio
 import logging
 
 
@@ -9,5 +11,9 @@ async def init():
     """
     logging.info('Initializing garbage collector service')
 
-    # Initialize the RDS pool
-    await handle_connection()
+    tasks = [
+        init_boto3(),
+        init_rds_connection()
+    ]
+
+    await asyncio.gather(*tasks)

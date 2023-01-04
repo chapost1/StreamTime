@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Protocol, Optional, Any
 from shared.models.garbage.uploaded_video import UploadedVideo
-from shared.rds.abstract import Database
+from shared.infrastructure.rds.abstract import Database
 from dataclasses import dataclass
 
 

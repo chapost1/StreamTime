@@ -1,7 +1,9 @@
 from __future__ import annotations
 from typing import Optional, Protocol, Any
 from shared.models.garbage.uploaded_video import UploadedVideo
-from shared.rds.abstract import Database
+from shared.infrastructure.rds.abstract import Database
+from shared.infrastructure.storage.abstract import StorageClient
+import asyncio
 import json
 from dataclasses import dataclass
 
@@ -18,15 +20,24 @@ class Video(UploadedVideo):
     storage_thumbnail_key: Optional[str] = None
 
 
-    async def delete(self, database: VideosDatabase) -> None:
+    async def delete(self, database: VideosDatabase, storage: StorageClient) -> None:
         async with database.transaction as connection:
             # everything under the same transaction
             await database.delete(
                     video=self,
                     connection=connection
             )
+            # delete video assets from storage
+            storage_delete_tasks = [
+                storage.delete_file(
+                    item_relative_path=self.storage_object_key
+                ),
+                storage.delete_file(
+                    item_relative_path=self.storage_thumbnail_key
+                )
+            ]
 
-            # TODO: delete from storage
+            await asyncio.gather(*storage_delete_tasks)
 
 
     def to_message(self) -> str:

@@ -1,6 +1,6 @@
-from shared.rds.database import Database
+from shared.infrastructure.rds.database import Database
 from shared.models.garbage.enums import GarbageTypes
-from shared.rds import tables
+from shared.infrastructure.rds import tables
 import aiopg
 from functools import partial
 from typing import List, Optional

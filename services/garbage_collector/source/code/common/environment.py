@@ -20,6 +20,8 @@ AWS_CONTAINER_CREDENTIALS_RELATIVE_URI = os.environ.get('AWS_CONTAINER_CREDENTIA
 VIDEOS_BUCKET = os.environ.get('videos_bucket', None)
 UPLOADDED_VIDEOS_PREFIX = os.environ.get('uploaded_videos_prefix', None)
 
+GARBAGE_QUEUE_URL = os.environ.get('garbage_queue_url', None)
+
 VIDEO_PROCESSING_INTERNAL_SERVER_ERROR_MESSAGE = os.environ.get('video_processing_internal_server_error_message', 'Internal server error')
 
 MAX_VIDEO_PROCESSING_TIME_SECONDS = os.environ.get('max_video_processing_time_seconds', 300) # 5 minutes

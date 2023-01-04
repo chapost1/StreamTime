@@ -2,8 +2,8 @@ from shared.models.garbage.enums import GarbageTypes
 from .models import ScanToTaskStepConfig
 from functools import partial
 # concrete imports
-from shared.rds.videos import VideosDatabase
-from shared.rds.unprocessed_videos import UnprocessedVideosDatabase
+from shared.infrastructure.rds.videos import VideosDatabase
+from shared.infrastructure.rds.unprocessed_videos import UnprocessedVideosDatabase
 from common.constants import (
     VIDEOS_SCAN_LIMIT
 )

@@ -6,9 +6,10 @@ from shared.models.bag.bag import GarbageBag
 from shared.models.garbage.video import Video
 from shared.models.garbage.unprocessed_video import UnprocessedVideo
 
-# fixme to use abstraction for db injection
-from shared.rds.videos import VideosDatabase
-from shared.rds.unprocessed_videos import UnprocessedVideosDatabase
+# FIXME to use abstraction
+from shared.infrastructure.rds.videos import VideosDatabase
+from shared.infrastructure.rds.unprocessed_videos import UnprocessedVideosDatabase
+from shared.infrastructure.storage.videos import videos_s3_client
 
 
 class Bagger:
@@ -25,7 +26,8 @@ class Bagger:
             return GarbageBag(
                 collect_fn=partial(
                     garbage.delete,
-                    database=VideosDatabase()
+                    database=VideosDatabase(),
+                    storage=videos_s3_client
                 )
             )
         elif type == GarbageTypes.UNPROCESSED_VIDEO_INTERNAL_SERVER_ERROR.value:
