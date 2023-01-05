@@ -31,8 +31,3 @@ class UnprocessedVideo(UploadedVideo):
             )
 
             # TODO: send SNS to notify the user
-        
-
-
-    def to_message(self) -> str:
-        return super().to_message()

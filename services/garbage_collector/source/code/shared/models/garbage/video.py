@@ -23,10 +23,7 @@ class Video(UploadedVideo):
     async def delete(self, database: VideosDatabase, storage: StorageClient) -> None:
         async with database.transaction as connection:
             # everything under the same transaction
-            await database.delete(
-                    video=self,
-                    connection=connection
-            )
+
             # delete video assets from storage
             storage_delete_tasks = [
                 storage.delete_file(
@@ -36,8 +33,16 @@ class Video(UploadedVideo):
                     item_relative_path=self.storage_thumbnail_key
                 )
             ]
+            # perform database and storage deletions in parallel
+            tasks = [
+                asyncio.gather(*storage_delete_tasks),
+                database.delete(
+                    video=self,
+                    connection=connection
+                )
+            ]
 
-            await asyncio.gather(*storage_delete_tasks)
+            await asyncio.gather(*tasks)
 
 
     def to_message(self) -> str:
