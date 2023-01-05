@@ -59,10 +59,11 @@ class SQS:
                     WaitTimeSeconds=2,
                     # others cannot see the message for 30 seconds
                     VisibilityTimeout=30,
-                    # get up to 5 messages at a time
-                    # we process them asynchonously
-                    # so we can have more throughput
-                    MaxNumberOfMessages=5
+                    # only get one message at a time
+                    # this is to avoid having to delete the message
+                    # if the callback fails
+                    # (if we delete it for more than one message, we might lose messages)
+                    MaxNumberOfMessages=1
                 )
 
                 # extract the message and call the callback
