@@ -8,11 +8,16 @@ from shared.infrastructure.queue.pipe import (
     garbage_to_message,
     message_to_garbage
 )
-from typing import Callable, Optional
+from typing import Optional, Awaitable
 import asyncio
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class OnMessage:
+    def __call__(self, garbage: Garbage, post_process_message: Awaitable[Optional[Exception]]) -> None:
+        """Callback for when a message is received from the queue"""
 
 
 class SQS:
@@ -46,7 +51,7 @@ class SQS:
             return False
 
 
-    async def subscribe(self, on_message: Callable[[Garbage, Callable], None]) -> None:
+    async def subscribe(self, on_message: OnMessage) -> None:
         """Subscribes to the queue and calls the callback when a message is received"""
 
         while True:
@@ -59,25 +64,29 @@ class SQS:
                     WaitTimeSeconds=2,
                     # others cannot see the message for 30 seconds
                     VisibilityTimeout=30,
-                    # only get one message at a time
-                    # this is to avoid having to delete the message
-                    # if the callback fails
-                    # (if we delete it for more than one message, we might lose messages)
-                    MaxNumberOfMessages=1
+                    # get up to 5 messages at a time
+                    # we process them asynchonously
+                    # so we can have more throughput
+                    # max is 10
+                    MaxNumberOfMessages=5
                 )
 
                 # extract the message and call the callback
                 if 'Messages' in response:
+                    # loop through all messages
                     for message in response['Messages']:
+                        # extract the message body
                         message_body = message['Body']
+                        # convert the message to garbage
                         garbage = message_to_garbage(message=message_body)
                         # call the callback with the garbage and a callback to delete the message
                         asyncio.get_event_loop().create_task(
                             on_message(
-                                # garbage=garbage
-                                garbage,
-                                # done=callback to delete the message (if no error)
-                                partial(self.delete_from_queue, message['ReceiptHandle'])
+                                garbage=garbage,
+                                post_process_message=partial(
+                                    self.delete_from_queue,
+                                    message['ReceiptHandle']
+                                )
                             )
                         )
 
@@ -91,7 +100,10 @@ class SQS:
 
 
     async def delete_from_queue(self, receipt_handle: str, error: Optional[Exception]) -> None:
-        """Deletes a message from the queue"""
+        """
+        Deletes a message from the queue after it has been processed
+        if there was an error, it will not delete the message
+        """
         if error is not None:
             # if there was an error, do not delete the message
             # so that it can be retried
