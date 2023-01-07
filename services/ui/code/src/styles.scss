@@ -27,7 +27,7 @@
 
 .light-theme {
     @include light-header-theme($lightTheme, $light-header-bg, $dark-primary-text, $dark-accent-text);
-    @include light-theme-toggle-theme($lightTheme, $light-header-bg, $dark-header-bg);
+    @include light-theme-toggle-theme($dark-header-bg);
     @include light-logo-theme($lightTheme);
 
     .mat-dialog-background {
@@ -43,7 +43,7 @@
 
 .dark-theme {
     @include dark-header-theme($darkTheme, $dark-header-bg, $light-primary-text, $light-accent-text);
-    @include dark-theme-toggle-theme($darkTheme, $dark-header-bg, $light-header-bg);
+    @include dark-theme-toggle-theme($light-header-bg);
     @include dark-logo-theme($darkTheme);
 
     .mat-dialog-background {
