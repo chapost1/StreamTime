@@ -8,6 +8,12 @@
     }
 
     .responsive__inactive {
+        @media screen and (max-width: 992px) {
+            flex-direction: column-reverse;
+            display: flex;
+            align-items: start;
+        }
+
         @media screen and (min-width: 993px) {
             display: flex !important;
         }

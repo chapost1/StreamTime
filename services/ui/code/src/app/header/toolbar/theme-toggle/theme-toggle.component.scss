@@ -4,6 +4,7 @@
 
     .toggle-icon {
         font-size: 1.2rem;
+        display: none;
     }
 
     @media screen and (max-width: 992px) {
@@ -17,33 +18,21 @@
     }
 }
 
-@mixin light-theme-toggle-theme($oppositeBackground) {
+.light-theme {
     .theme-toggle {
         .toggle-icon {
-            color: $oppositeBackground;
-
-            &.moon {
-                display: none;
-            }
-
             &.sun {
-                display: inline-block;
+                display: inline-block !important;
             }
         }
     }
 }
 
-@mixin dark-theme-toggle-theme($oppositeBackground) {
+.dark-theme {
     .theme-toggle {
         .toggle-icon {
-            color: $oppositeBackground;
-
-            &.sun {
-                display: none;
-            }
-
             &.moon {
-                display: inline-block;
+                display: inline-block !important;
             }
         }
     }
